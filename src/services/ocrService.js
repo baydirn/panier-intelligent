@@ -143,3 +143,67 @@ export async function processFlyer(imageFile, onProgress = () => {}) {
     validCount: validProducts.length
   }
 }
+
+/**
+ * Process a PDF: render pages to canvas and run OCR
+ * @param {File} pdfFile - PDF file
+ * @param {Function} onProgress - callback 0..100
+ */
+export async function processPdf(pdfFile, onProgress = () => {}){
+  // Lazy-load pdfjs to keep bundle light
+  const pdfjsLib = await import('pdfjs-dist/build/pdf')
+  const workerSrc = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+
+  const ab = await pdfFile.arrayBuffer()
+  const doc = await pdfjsLib.getDocument({ data: ab }).promise
+  const pageCount = doc.numPages
+
+  // Create a single tesseract worker for all pages
+  const { createWorker } = await import('tesseract.js')
+  const worker = await createWorker('fra+eng', 1, {
+    logger: (m) => {
+      if (m.status === 'recognizing text') {
+        // per-page progress handled below
+      }
+    }
+  })
+
+  let combinedText = ''
+  let confidenceAcc = 0
+  let count = 0
+  const maxPages = Math.min(pageCount, 5) // cap for performance
+
+  for(let i=1; i<=maxPages; i++){
+    const page = await doc.getPage(i)
+    const viewport = page.getViewport({ scale: 2 })
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    await page.render({ canvasContext: ctx, viewport }).promise
+
+    const { data } = await worker.recognize(canvas)
+    combinedText += '\n' + (data.text || '')
+    confidenceAcc += (data.confidence || 0)
+    count += 1
+    onProgress(Math.round((i / maxPages) * 70)) // map first 70% to rendering+OCR
+  }
+
+  await worker.terminate()
+
+  onProgress(80)
+  const rawProducts = parseProductsFromText(combinedText)
+  onProgress(90)
+  const validProducts = validateProducts(rawProducts)
+  onProgress(100)
+
+  const avgConf = count ? (confidenceAcc / count) : null
+  return {
+    products: validProducts,
+    ocrConfidence: avgConf,
+    rawText: combinedText,
+    totalFound: rawProducts.length,
+    validCount: validProducts.length
+  }
+}

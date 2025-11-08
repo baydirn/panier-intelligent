@@ -9,6 +9,7 @@ import { ingestOcrProducts } from '../services/weeklyPrices'
 export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
+  const [pdfInfo, setPdfInfo] = useState(null) // { pages }
   const [store, setStore] = useState('')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
@@ -22,13 +23,15 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     'Super C', 'Costco', 'Adonis', 'Avril', 'Autre'
   ]
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const selectedFile = e.target.files[0]
     if (!selectedFile) return
 
     // Validate file type
-    if (!selectedFile.type.startsWith('image/')) {
-      addToast('Veuillez sélectionner une image', 'error')
+    const isImage = selectedFile.type.startsWith('image/')
+    const isPdf = selectedFile.type === 'application/pdf'
+    if (!isImage && !isPdf) {
+      addToast('Veuillez sélectionner une image ou un PDF', 'error')
       return
     }
 
@@ -39,13 +42,29 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     }
 
     setFile(selectedFile)
-    
-    // Create preview
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setPreview(reader.result)
+    setPdfInfo(null)
+
+    if(isImage){
+      // Create preview for image
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setPreview(reader.result)
+      }
+      reader.readAsDataURL(selectedFile)
+    } else if(isPdf){
+      setPreview(null)
+      try{
+        // Light parse to get page count
+  const pdfjsLib = await import('pdfjs-dist/build/pdf')
+  const workerSrc = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default
+        pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
+        const ab = await selectedFile.arrayBuffer()
+        const doc = await pdfjsLib.getDocument({ data: ab }).promise
+        setPdfInfo({ pages: doc.numPages })
+      }catch(err){
+        console.warn('PDF parse info failed', err)
+      }
     }
-    reader.readAsDataURL(selectedFile)
   }
 
   const handleProcess = async () => {
@@ -80,10 +99,15 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     setResults(null)
 
     try {
-      // Process OCR client-side
-      const result = await processFlyer(file, (p) => {
-        setProgress(Math.round(p * 100))
-      })
+      // Process OCR client-side (image or PDF)
+      let result
+      if(file.type === 'application/pdf'){
+        const svc = await import('../services/ocrService')
+        result = await svc.processPdf(file, (p) => setProgress(Math.round(p * 100)))
+      } else {
+        const svc = await import('../services/ocrService')
+        result = await svc.processFlyer(file, (p) => setProgress(Math.round(p * 100)))
+      }
 
       setResults(result)
       
@@ -193,11 +217,11 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         {/* File upload */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Image de la circulaire
+            Fichier de la circulaire (image ou PDF)
           </label>
           <input
             type="file"
-            accept="image/*"
+            accept="image/*,application/pdf"
             capture="environment"
             onChange={handleFileChange}
             disabled={processing}
@@ -213,6 +237,11 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
               alt="Aperçu" 
               className="w-full max-h-64 object-contain border rounded-lg"
             />
+          </div>
+        )}
+        {!preview && pdfInfo && (
+          <div className="mb-4 text-sm text-gray-600">
+            PDF chargé • Pages: {pdfInfo.pages}
           </div>
         )}
 
