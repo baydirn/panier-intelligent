@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test - Panier Intelligent</title>
+  </head>
+  <body>
+    <div id="root">
+      <div style="padding: 20px; text-align: center; font-family: sans-serif;">
+        <h1>🧪 Test de chargement</h1>
+        <p>Si vous voyez ce message, le serveur fonctionne.</p>
+        <p>Vérifiez la console (F12) pour les erreurs JavaScript.</p>
+      </div>
+    </div>
+    <script type="module">
+      console.log('✅ Script chargé')
+      console.log('Root element:', document.getElementById('root'))
+      
+      // Test import
+      try {
+        const test = await import('/src/main.jsx')
+        console.log('✅ main.jsx importé:', test)
+      } catch(e) {
+        console.error('❌ Erreur import main.jsx:', e)
+        document.getElementById('root').innerHTML = `
+          <div style="padding: 20px; background: #fee; border: 2px solid red;">
+            <h2>❌ Erreur de chargement</h2>
+            <pre>${e.message}\n\n${e.stack}</pre>
+          </div>
+        `
+      }
+    </script>
+  </body>
+</html>

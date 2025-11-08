@@ -34,7 +34,7 @@ export default function App(){
       }catch(_){/* ignore */}
     })()
     return () => { mounted = false }
-  }, [])
+  }, [addToast])
 
   return (
     <div className="min-h-screen">
