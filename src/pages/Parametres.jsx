@@ -35,10 +35,10 @@ export default function Parametres(){
     ;(async () => {
       const meta = await getWeeklyPricesMeta()
       setWeeklyMeta(meta)
-      const statusCached = await getCachedPriceStatus()
-      setPriceStatus(statusCached.meta)
+  const statusCached = await getCachedPriceStatus()
+  setPriceStatus(statusCached)
       // Fire async refresh (non-blocking)
-      fetchPriceStatus().then(p => setPriceStatus(p.meta)).catch(()=>{})
+  fetchPriceStatus().then(p => setPriceStatus(p)).catch(()=>{})
       const stores = await listNearbyStores()
       setNearbyStores(stores)
       setPriceDataUrl(getPriceDataUrl())
@@ -262,14 +262,30 @@ export default function Parametres(){
             </div>
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2">Statut agrégation distante</h4>
-              {!priceStatus && <div className="text-xs text-gray-500">Chargement du statut...</div>}
-              {priceStatus && (
-                <div className="space-y-1 text-xs text-gray-700">
-                  <div>Généré: {new Date(priceStatus.generatedAt).toLocaleString()}</div>
-                  <div>Total sources: {priceStatus.totalSources}</div>
-                  <div>Total items (après dédup): {priceStatus.totalItems}</div>
-                  {priceStatus.errors && priceStatus.errors.length > 0 && (
-                    <div className="text-red-600">Erreurs: {priceStatus.errors.length}</div>
+              {!priceStatus?.meta && <div className="text-xs text-gray-500">Chargement du statut...</div>}
+              {priceStatus?.meta && (
+                <div className="space-y-2 text-xs text-gray-700">
+                  <div className="space-y-1">
+                    <div>Généré: {new Date(priceStatus.meta.generatedAt).toLocaleString()}</div>
+                    <div>Total sources: {priceStatus.meta.totalSources}</div>
+                    <div>Total items (après dédup): {priceStatus.meta.totalItems}</div>
+                    {priceStatus.meta.errors && priceStatus.meta.errors.length > 0 && (
+                      <div className="text-red-600">Erreurs: {priceStatus.meta.errors.length}</div>
+                    )}
+                  </div>
+                  {priceStatus.resolved && (
+                    <div className="bg-gray-50 border rounded p-2 space-y-1">
+                      <div className="font-medium">Détails source distante:</div>
+                      {priceStatus.resolved.metaUrl && (
+                        <div>Meta URL: <a className="underline text-blue-600" href={priceStatus.resolved.metaUrl} target="_blank" rel="noreferrer">{priceStatus.resolved.metaUrl}</a></div>
+                      )}
+                      {priceStatus.resolved.dataUrl && (
+                        <div>Data URL fallback: <a className="underline text-blue-600" href={priceStatus.resolved.dataUrl} target="_blank" rel="noreferrer">{priceStatus.resolved.dataUrl}</a></div>
+                      )}
+                      {priceStatus.resolved.repo && (
+                        <div>Repo: {priceStatus.resolved.repo} / {priceStatus.resolved.branch} / {priceStatus.resolved.metaPath}</div>
+                      )}
+                    </div>
                   )}
                   <Button
                     variant="secondary"
@@ -278,7 +294,7 @@ export default function Parametres(){
                       setLoadingStatus(true)
                       try {
                         const s = await fetchPriceStatus({ force: true })
-                        setPriceStatus(s.meta)
+                        setPriceStatus(s)
                       } catch(e) {
                         console.error('Erreur status:', e)
                       } finally {

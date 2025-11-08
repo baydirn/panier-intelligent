@@ -257,7 +257,14 @@ export default function Liste(){
     if(sortBy === 'name'){
       result.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''))
     } else if(sortBy === 'price'){
-      result.sort((a, b) => (b.prix || 0) - (a.prix || 0))
+      result.sort((a, b) => {
+        const ap = a.prix
+        const bp = b.prix
+        if(ap == null && bp == null) return 0
+        if(ap == null) return 1
+        if(bp == null) return -1
+        return (bp - ap)
+      })
     }
     // 'date' is default (already in order from store)
 

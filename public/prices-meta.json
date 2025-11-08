@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "generatedAt": "2025-11-08T19:59:28.413Z",
+  "totalItems": 302,
+  "totalSources": 5,
+  "perStore": [
+    {
+      "store": "IGA",
+      "count": 63
+    },
+    {
+      "store": "Walmart",
+      "count": 62
+    },
+    {
+      "store": "Costco",
+      "count": 53
+    },
+    {
+      "store": "Super C",
+      "count": 59
+    },
+    {
+      "store": "Metro",
+      "count": 65
+    }
+  ]
+}

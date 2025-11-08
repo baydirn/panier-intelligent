@@ -52,6 +52,7 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
   }, 0)
 
   const combos = allCombos.map(combo => {
+    let unknownCount = 0
     const assignment = produits.map(p => {
       const nom = p.nom || p.id || 'produit'
       const pr = prix[nom] || {}
@@ -65,20 +66,35 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
       if(bestStore === null){
         Object.entries(pr).forEach(([s, price]) => { if(price < bestPrice){ bestPrice = price; bestStore = s } })
       }
-      if(bestPrice === Infinity) bestPrice = null
-      return { product: nom, store: bestStore, price: bestPrice || 0 }
+      if(bestPrice === Infinity) {
+        bestPrice = null
+        unknownCount += 1
+      }
+      return { product: nom, store: bestStore, price: bestPrice }
     })
-    const total = assignment.reduce((s,it)=> s + it.price, 0)
-    const savings = avgTotal - total
-    const savingsPct = avgTotal > 0 ? (savings / avgTotal) * 100 : 0
+    // Sum only known prices
+    const knownPrices = assignment.filter(a => a.price != null)
+    const total = knownPrices.reduce((s,it)=> s + it.price, 0)
+    const coverage = produits.length > 0 ? ( (produits.length - unknownCount) / produits.length ) : 0
+    // Only compute savings if full coverage, otherwise neutral (null)
+    const savings = (unknownCount === 0) ? (avgTotal - total) : null
+    const savingsPct = (unknownCount === 0 && avgTotal > 0) ? (savings / avgTotal) * 100 : null
     return { 
       stores: combo, 
       assignment, 
       total, 
-      savings: Math.round(savings*100)/100, 
-      savingsPct: Math.round(savingsPct*100)/100 
+      coverage: Math.round(coverage*100)/100, 
+      unknownCount,
+      savings: savings == null ? null : Math.round(savings*100)/100, 
+      savingsPct: savingsPct == null ? null : Math.round(savingsPct*100)/100 
     }
   })
 
-  return combos.sort((a,b)=>a.total - b.total).slice(0, topN)
+  return combos
+    .sort((a,b)=>{
+      // Prefer higher coverage first
+      if(a.coverage !== b.coverage) return b.coverage - a.coverage
+      return a.total - b.total
+    })
+    .slice(0, topN)
 }

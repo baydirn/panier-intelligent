@@ -12,16 +12,17 @@ export default async function handler(req){
       return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: cors() });
     }
 
-    const metaDirect = process.env.PRICE_META_URL || ''
-    const repo = process.env.GITHUB_REPO || ''
-    const branch = process.env.GITHUB_BRANCH || 'main'
-    const metaPath = process.env.GITHUB_META_PATH || 'prices-meta.json'
-    const dataUrl = process.env.PRICE_DATA_URL || process.env.VITE_PRICE_DATA_URL || '/prices.json'
+  const metaDirect = process.env.PRICE_META_URL || ''
+  const repo = process.env.GITHUB_REPO || ''
+  const branch = process.env.GITHUB_BRANCH || 'main'
+  const metaPath = process.env.GITHUB_META_PATH || 'prices-meta.json'
+  // Prefer the same URL the UI uses (VITE_PRICE_DATA_URL) when falling back, otherwise a legacy prices.json
+  const dataUrl = process.env.PRICE_DATA_URL || process.env.VITE_PRICE_DATA_URL || '/prices.json'
 
     // 1) Try explicit meta URL
     if(metaDirect){
       const m = await fetchJson(metaDirect)
-      return new Response(JSON.stringify({ ok: true, source: 'meta-url', meta: m }), { status: 200, headers: cors() })
+      return new Response(JSON.stringify({ ok: true, source: 'meta-url', resolved: { metaUrl: metaDirect }, meta: m }), { status: 200, headers: cors() })
     }
 
     // 2) Try GitHub raw content if repo configured
@@ -29,11 +30,18 @@ export default async function handler(req){
       const rawUrl = `https://raw.githubusercontent.com/${repo}/${branch}/${metaPath}`
       try{
         const m = await fetchJson(rawUrl)
-        return new Response(JSON.stringify({ ok: true, source: 'github-meta', meta: m }), { status: 200, headers: cors() })
+        return new Response(JSON.stringify({ ok: true, source: 'github-meta', resolved: { metaUrl: rawUrl, repo, branch, metaPath }, meta: m }), { status: 200, headers: cors() })
       }catch(_e){ /* fallthrough */ }
     }
 
-    // 3) Fallback: build meta from prices.json
+    // 3) Try local public meta file if present (served from /public/prices-meta.json)
+    try{
+      const localMetaUrl = '/prices-meta.json'
+      const m = await fetchJson(localMetaUrl)
+      return new Response(JSON.stringify({ ok: true, source: 'public-meta', resolved: { metaUrl: localMetaUrl }, meta: m }), { status: 200, headers: cors() })
+    }catch(_e){ /* fallthrough */ }
+
+    // 4) Fallback: build meta from prices.json
     try{
       const data = await fetchJson(dataUrl)
       const items = Array.isArray(data) ? data : (data.items || [])
@@ -46,7 +54,7 @@ export default async function handler(req){
         perSource: data.perSource || [],
         errors: data.errors || []
       }
-      return new Response(JSON.stringify({ ok: true, source: 'prices-fallback', meta }), { status: 200, headers: cors() })
+  return new Response(JSON.stringify({ ok: true, source: 'prices-fallback', resolved: { dataUrl }, meta }), { status: 200, headers: cors() })
     }catch(e){
       return new Response(JSON.stringify({ ok: false, error: 'unavailable', details: String(e.message || e) }), { status: 200, headers: cors() })
     }

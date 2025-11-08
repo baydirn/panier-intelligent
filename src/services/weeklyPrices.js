@@ -30,12 +30,17 @@ export async function refreshWeeklyPrices({ force = false } = {}){
     const data = await res.json()
     const normalized = Array.isArray(data) ? data : (data.items || [])
     // Normalize items: { name, store, price, updatedAt }
-    const items = normalized.map(it => ({
-      name: String(it.name || it.product || '').trim(),
-      store: it.store || it.retailer || 'Unknown',
-      price: Number(it.price),
-      updatedAt: it.updatedAt || new Date().toISOString()
-    })).filter(it => it.name && !Number.isNaN(it.price))
+    const items = normalized.map(it => {
+      const name = String(it.name || it.product || '').trim()
+      const store = it.store || it.retailer || 'Unknown'
+      let price = null
+      if(it.price !== '' && it.price !== null && it.price !== undefined){
+        const n = Number(it.price)
+        if(Number.isFinite(n)) price = n
+      }
+      const updatedAt = it.updatedAt || new Date().toISOString()
+      return { name, store, price, updatedAt }
+    }).filter(it => it.name && it.price != null)
     const generatedAt = (data.generatedAt) || new Date().toISOString()
     const payload = { lastFetched: now, generatedAt, items }
     await localforage.setItem(WEEKLY_PRICES_KEY, payload)

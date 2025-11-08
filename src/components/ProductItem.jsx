@@ -34,7 +34,12 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
       </div>
       <div className="mt-3 flex flex-col gap-2">
         <div className="flex items-center gap-3">
-          <div className="text-sm text-gray-600">{product.prix != null ? `${product.prix.toFixed?.(2) ?? product.prix} $` : '—'}</div>
+          <div className="text-sm text-gray-600">
+            {product.prix != null 
+              ? `${product.prix.toFixed?.(2) ?? product.prix} $`
+              : <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Prix indisponible</span>
+            }
+          </div>
           {/* Hide sparkline on very small screens to avoid overflow */}
           <div className="hidden sm:block">
             <button onClick={() => setShowHistory(true)} className="hover:opacity-80 active:scale-[0.98]">

@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:prices": "node scripts/generate-initial-prices.js",
+    "generate:meta": "node scripts/generate-prices-meta.js",
+    "prebuild": "npm run generate:prices && npm run generate:meta"
   },
   "dependencies": {
     "react": "^18.2.0",
