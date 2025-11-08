@@ -60,7 +60,13 @@ export default async function handler(req){
   }
 
   const sourcesEnv = process.env.PRICE_SOURCE_URLS || ''
-  const sources = sourcesEnv.split(',').map(s => s.trim()).filter(Boolean)
+  let sources = sourcesEnv.split(',').map(s => s.trim()).filter(Boolean)
+  
+  // Auto-include Flipp scraper as internal source (if not in dry mode)
+  const flippUrl = `${url.origin}/api/scrapers/flipp?secret=${secret}&limit=50`
+  if (!url.searchParams.get('skipFlipp')) {
+    sources.unshift(flippUrl) // Add at beginning for priority
+  }
   const collected = []
   const errors = []
   const perSourceStats = []
