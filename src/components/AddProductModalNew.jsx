@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { BrowserMultiFormatReader } from '@zxing/browser'
 import Modal from './Modal'
 import Input from './Input'
 import Button from './Button'
@@ -174,6 +175,26 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
 
+      // Try native BarcodeDetector first; if not available, fallback to ZXing reader
+      let usedZXing = false
+
+      const startZXing = async () => {
+        try {
+          const reader = new BrowserMultiFormatReader()
+          await reader.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+            if (result) {
+              const text = result.getText()
+              handleBarcodeDetected(text)
+              reader.reset()
+              stopScanning()
+            }
+          })
+          usedZXing = true
+        } catch (e) {
+          console.warn('ZXing fallback failed', e)
+        }
+      }
+
       const poll = async () => {
         if (!scanning || !videoRef.current) return
         const video = videoRef.current
@@ -193,6 +214,9 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
             } catch (e) {
               console.debug('Detect error, continuing', e)
             }
+          } else if (!usedZXing) {
+            // Start ZXing once if native detector is unavailable
+            startZXing()
           }
         }
         requestAnimationFrame(poll)
@@ -339,6 +363,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
               ref={videoRef}
               autoPlay
               playsInline
+              muted
               className="w-full rounded-lg border-2 border-blue-500"
             />
             <Button
