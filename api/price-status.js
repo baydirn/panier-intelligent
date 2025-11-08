@@ -6,9 +6,10 @@ export default async function handler(req){
   try{
     const url = new URL(req.url)
     // Optional protection via secret for private deployments
-    const secret = process.env.CRON_SECRET
-    if(secret && url.searchParams.get('secret') !== secret){
-      return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: cors() })
+    const secret = process.env.CRON_SECRET;
+    // Only require secret for non-GET requests
+    if (secret && req.method !== 'GET' && url.searchParams.get('secret') !== secret) {
+      return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403, headers: cors() });
     }
 
     const metaDirect = process.env.PRICE_META_URL || ''
