@@ -243,60 +243,165 @@ const STORE_MAPPING = {
   { name: 'pizza surgelée', price: 12.99, format: '3 unités' },
   { name: 'poulet rôti', price: 7.99, format: 'unité' },
   { name: 'lasagne', price: 14.99, format: '1.5kg' },
-      { name: 'oeufs gros calibre', price: 7.49, format: '2x12 unités' },
-      { name: 'beurre salé', price: 10.99, format: '4x454g' },
-      { name: 'poulet poitrine', price: 10.99, format: 'kg' },
-      { name: 'boeuf haché mi-maigre', price: 6.99, format: 'kg' },
-      { name: 'saumon atlantique', price: 12.99, format: 'kg' },
-      { name: 'fromage cheddar fort', price: 14.99, format: '900g' },
-      { name: 'pain bagels', price: 4.99, format: '6 unités' },
-      { name: 'pommes gala', price: 7.99, format: '3kg' },
-      { name: 'bananes biologiques', price: 2.99, format: '2 lb' },
-      { name: 'huile d\'olive extra vierge', price: 16.99, format: '3L' },
-      { name: 'café grains kirkland', price: 19.99, format: '907g' },
-      { name: 'papier toilette 30 rouleaux', price: 24.99, format: '30 unités' },
-      { name: 'eau embouteillée', price: 3.99, format: '35x500ml' },
-      { name: 'pizza surgelée', price: 12.99, format: '3 unités' },
     ]
   },
   'Maxi': { 
     keywords: ['maxi', 'loblaws', 'provigo'],
     products: [
+      // Produits laitiers & oeufs
       { name: 'lait 2% 2l', price: 4.79, format: '2L' },
-      { name: 'pain tranché blanc', price: 2.29, format: '675g' },
+      { name: 'lait 3.25% 4l', price: 8.79, format: '4L' },
+      { name: 'lait écrémé 1l', price: 2.59, format: '1L' },
       { name: 'oeufs gros calibre', price: 4.49, format: '12 unités' },
+      { name: 'oeufs bio', price: 5.99, format: '12 unités' },
       { name: 'beurre salé', price: 5.79, format: '454g' },
       { name: 'yogourt grec', price: 4.99, format: '750g' },
+      { name: 'yogourt nature', price: 3.79, format: '750g' },
+      { name: 'crème 35%', price: 4.29, format: '473ml' },
+      { name: 'fromage mozzarella', price: 6.99, format: '400g' },
+      { name: 'fromage cheddar', price: 7.49, format: '400g' },
+      
+      // Boulangerie
+      { name: 'pain tranché blanc', price: 2.29, format: '675g' },
+      { name: 'pain multigrains', price: 3.29, format: '675g' },
+      { name: 'bagels sésame', price: 3.79, format: '6 unités' },
+      { name: 'pains hamburger', price: 3.49, format: '8 unités' },
+      
+      // Viandes & poissons
       { name: 'poulet poitrine', price: 12.49, format: 'kg' },
+      { name: 'poulet cuisses', price: 8.49, format: 'kg' },
       { name: 'boeuf haché mi-maigre', price: 8.49, format: 'kg' },
+      { name: 'porc côtelettes', price: 9.49, format: 'kg' },
+      { name: 'saumon frais', price: 15.49, format: 'kg' },
+      { name: 'crevettes', price: 17.99, format: '454g' },
+      
+      // Fruits
       { name: 'pommes gala', price: 3.79, format: 'kg' },
+      { name: 'pommes cortland', price: 3.49, format: 'kg' },
       { name: 'bananes', price: 1.39, format: 'kg' },
+      { name: 'oranges navel', price: 3.29, format: '2 lb' },
+      { name: 'fraises du québec', price: 5.49, format: '454g' },
+      { name: 'bleuets', price: 5.99, format: '340g' },
+      { name: 'raisins', price: 4.79, format: 'kg' },
+      
+      // Légumes
       { name: 'carottes biologiques', price: 3.49, format: '2 lb' },
       { name: 'brocoli', price: 2.99, format: 'unité' },
-      { name: 'fromage mozzarella', price: 6.99, format: '400g' },
+      { name: 'laitue romaine', price: 2.49, format: 'unité' },
+      { name: 'tomates cerises', price: 3.99, format: '454g' },
+      { name: 'concombres', price: 2.29, format: 'unité' },
+      { name: 'poivrons rouges', price: 5.79, format: 'kg' },
+      { name: 'oignons', price: 1.79, format: '3 lb' },
+      { name: 'pommes de terre', price: 4.79, format: '5 lb' },
+      { name: 'champignons', price: 3.99, format: '227g' },
+      
+      // Épicerie sèche
+      { name: 'pâtes penne', price: 2.29, format: '500g' },
+      { name: 'riz basmati', price: 9.49, format: '5kg' },
+      { name: 'farine', price: 5.49, format: '2.5kg' },
+      { name: 'sucre', price: 3.79, format: '2kg' },
+      { name: 'huile d\'olive', price: 11.99, format: '1L' },
+      { name: 'sauce tomate', price: 2.79, format: '680ml' },
+      { name: 'céréales spécial k', price: 5.99, format: '400g' },
+      { name: 'confiture', price: 4.29, format: '500ml' },
+      
+      // Boissons
+      { name: 'jus d\'orange', price: 4.29, format: '1.75L' },
+      { name: 'jus de pomme', price: 3.29, format: '1.89L' },
+      { name: 'eau embouteillée', price: 3.49, format: '12x500ml' },
+      { name: 'café moulu', price: 10.99, format: '925g' },
+      
+      // Produits ménagers
+      { name: 'papier toilette 12 rouleaux', price: 9.49, format: '12 unités' },
+      { name: 'essuie-tout', price: 10.99, format: '6 rouleaux' },
+      { name: 'détergent à lessive', price: 9.99, format: '2.95L' },
+      { name: 'savon à vaisselle', price: 3.79, format: '740ml' },
+      
+      // Collations & surgelés
       { name: 'chips lays', price: 3.99, format: '235g' },
       { name: 'crème glacée', price: 4.99, format: '1.5L' },
-      { name: 'détergent à lessive', price: 9.99, format: '2.95L' },
+      { name: 'pizza surgelée', price: 6.99, format: 'unité' },
     ]
   },
   'Super C': { 
     keywords: ['super c', 'super-c'],
     products: [
+      // Produits laitiers & oeufs
       { name: 'lait 2% 2l', price: 4.29, format: '2L' },
-      { name: 'pain tranché blanc', price: 1.99, format: '675g' },
+      { name: 'lait 3.25% 4l', price: 7.99, format: '4L' },
+      { name: 'lait écrémé 1l', price: 2.29, format: '1L' },
       { name: 'oeufs gros calibre', price: 3.79, format: '12 unités' },
       { name: 'beurre salé', price: 5.29, format: '454g' },
       { name: 'yogourt nature', price: 3.29, format: '750g' },
-      { name: 'poulet poitrine', price: 11.49, format: 'kg' },
-      { name: 'boeuf haché mi-maigre', price: 7.49, format: 'kg' },
-      { name: 'pommes gala', price: 2.99, format: 'kg' },
-      { name: 'bananes', price: 1.19, format: 'kg' },
-      { name: 'concombres', price: 0.99, format: 'unité' },
-      { name: 'poivrons', price: 1.99, format: 'lb' },
+      { name: 'yogourt grec', price: 3.99, format: '750g' },
+      { name: 'crème 15%', price: 2.99, format: '473ml' },
       { name: 'fromage cheddar', price: 5.99, format: '400g' },
+      { name: 'fromage mozzarella', price: 5.49, format: '320g' },
+      
+      // Boulangerie
+      { name: 'pain tranché blanc', price: 1.99, format: '675g' },
+      { name: 'pain multigrains', price: 2.79, format: '675g' },
+      { name: 'bagels', price: 2.99, format: '6 unités' },
+      { name: 'tortillas', price: 3.49, format: '10 unités' },
+      
+      // Viandes & poissons
+      { name: 'poulet poitrine', price: 11.49, format: 'kg' },
+      { name: 'poulet cuisses', price: 6.99, format: 'kg' },
+      { name: 'poulet entier', price: 4.99, format: 'kg' },
+      { name: 'boeuf haché mi-maigre', price: 7.49, format: 'kg' },
+      { name: 'porc côtelettes', price: 8.49, format: 'kg' },
+      { name: 'saucisses', price: 4.99, format: '500g' },
       { name: 'jambon tranché', price: 6.99, format: '500g' },
+      { name: 'tilapia', price: 10.99, format: 'kg' },
+      
+      // Fruits
+      { name: 'pommes gala', price: 2.99, format: 'kg' },
+      { name: 'pommes mcintosh', price: 2.79, format: 'kg' },
+      { name: 'bananes', price: 1.19, format: 'kg' },
+      { name: 'oranges', price: 2.79, format: '2 lb' },
+      { name: 'fraises', price: 3.99, format: '454g' },
+      { name: 'raisins', price: 3.99, format: 'kg' },
+      { name: 'cantaloup', price: 2.99, format: 'unité' },
+      
+      // Légumes
+      { name: 'carottes', price: 2.29, format: '2 lb' },
+      { name: 'brocoli', price: 2.49, format: 'unité' },
+      { name: 'laitue iceberg', price: 1.79, format: 'unité' },
+      { name: 'tomates', price: 3.49, format: 'kg' },
+      { name: 'concombres', price: 0.99, format: 'unité' },
+      { name: 'poivrons verts', price: 1.99, format: 'lb' },
+      { name: 'poivrons rouges', price: 3.99, format: 'lb' },
+      { name: 'oignons', price: 1.29, format: '3 lb' },
+      { name: 'pommes de terre', price: 3.99, format: '5 lb' },
+      { name: 'céleri', price: 2.49, format: 'unité' },
+      
+      // Épicerie sèche
+      { name: 'pâtes', price: 1.79, format: '500g' },
+      { name: 'riz', price: 7.99, format: '5kg' },
+      { name: 'farine', price: 4.49, format: '2.5kg' },
+      { name: 'sucre', price: 3.29, format: '2kg' },
+      { name: 'huile végétale', price: 5.99, format: '1L' },
+      { name: 'sauce tomate', price: 1.99, format: '680ml' },
+      { name: 'céréales', price: 4.49, format: '500g' },
+      { name: 'beurre d\'arachide', price: 4.99, format: '1kg' },
+      
+      // Boissons
       { name: 'jus de pomme', price: 2.99, format: '1.89L' },
+      { name: 'jus d\'orange', price: 3.49, format: '1.75L' },
       { name: 'eau embouteillée', price: 2.49, format: '12x500ml' },
+      { name: 'café moulu', price: 8.99, format: '925g' },
+      { name: 'cola', price: 3.99, format: '2L' },
+      
+      // Produits ménagers
+      { name: 'papier toilette 12 rouleaux', price: 7.49, format: '12 unités' },
+      { name: 'essuie-tout', price: 8.99, format: '6 rouleaux' },
+      { name: 'détergent à lessive', price: 8.99, format: '2.95L' },
+      { name: 'savon à vaisselle', price: 2.79, format: '740ml' },
+      { name: 'sacs poubelle', price: 5.99, format: '40 unités' },
+      
+      // Collations
+      { name: 'chips', price: 2.99, format: '200g' },
+      { name: 'biscuits', price: 2.49, format: '300g' },
     ]
   },
   'Metro': { 
@@ -317,6 +422,73 @@ const STORE_MAPPING = {
       { name: 'fromage brie', price: 8.99, format: '300g' },
       { name: 'croissants', price: 4.99, format: '6 unités' },
       { name: 'vin rouge', price: 12.99, format: '750ml' },
+        // Produits laitiers & oeufs
+        { name: 'lait 3.25% 4l', price: 9.49, format: '4L' },
+        { name: 'lait biologique 2l', price: 6.99, format: '2L' },
+        { name: 'oeufs oméga-3', price: 5.99, format: '12 unités' },
+        { name: 'beurre non salé', price: 6.49, format: '454g' },
+        { name: 'yogourt nature biologique', price: 5.49, format: '650g' },
+        { name: 'crème 35%', price: 3.99, format: '473ml' },
+      
+        // Boulangerie
+        { name: 'pain artisan', price: 4.49, format: '500g' },
+        { name: 'croissants', price: 4.99, format: '4 unités' },
+        { name: 'baguette', price: 2.99, format: 'unité' },
+      
+        // Viandes & poissons
+        { name: 'poulet de grain poitrine', price: 15.99, format: 'kg' },
+        { name: 'poulet de grain cuisses', price: 9.99, format: 'kg' },
+        { name: 'poulet biologique', price: 19.99, format: 'kg' },
+        { name: 'boeuf striploin', price: 24.99, format: 'kg' },
+        { name: 'porc côtelettes', price: 11.99, format: 'kg' },
+        { name: 'saumon atlantique', price: 16.99, format: 'kg' },
+        { name: 'crevettes', price: 19.99, format: 'kg' },
+        { name: 'jambon forêt noire', price: 8.99, format: '500g' },
+        { name: 'prosciutto', price: 12.99, format: '200g' },
+      
+        // Fruits
+        { name: 'pommes biologiques', price: 5.49, format: 'kg' },
+        { name: 'oranges sanguines', price: 3.99, format: 'kg' },
+        { name: 'fraises du québec', price: 5.99, format: '454g' },
+        { name: 'bleuets', price: 5.49, format: '454g' },
+        { name: 'mangue', price: 2.99, format: 'unité' },
+        { name: 'avocat', price: 1.99, format: 'unité' },
+      
+        // Légumes
+        { name: 'asperges', price: 4.99, format: 'lb' },
+        { name: 'brocoli', price: 2.99, format: 'unité' },
+        { name: 'laitue romaine', price: 2.49, format: 'unité' },
+        { name: 'salade mesclun', price: 4.99, format: '142g' },
+        { name: 'tomates italiennes', price: 4.99, format: 'kg' },
+        { name: 'concombres anglais', price: 1.99, format: 'unité' },
+        { name: 'poivrons rouges', price: 4.99, format: 'lb' },
+        { name: 'champignons portobello', price: 5.99, format: '227g' },
+        { name: 'pommes de terre grelots', price: 4.99, format: '680g' },
+        { name: 'courge butternut', price: 2.99, format: 'kg' },
+      
+        // Épicerie sèche
+        { name: 'pâtes italiennes', price: 3.49, format: '500g' },
+        { name: 'riz basmati', price: 6.99, format: '2kg' },
+        { name: 'quinoa', price: 9.99, format: '1kg' },
+        { name: 'huile d\'olive extra vierge', price: 12.99, format: '750ml' },
+        { name: 'sauce tomate italienne', price: 3.99, format: '680ml' },
+        { name: 'céréales granola', price: 5.99, format: '500g' },
+      
+        // Boissons
+        { name: 'jus de canneberge', price: 4.49, format: '1.89L' },
+        { name: 'café en grains', price: 12.99, format: '907g' },
+        { name: 'thé vert', price: 5.49, format: '20 sachets' },
+      
+        // Produits ménagers
+        { name: 'papier toilette écologique', price: 11.99, format: '12 unités' },
+        { name: 'essuie-tout', price: 10.99, format: '6 rouleaux' },
+        { name: 'détergent écologique', price: 11.99, format: '2L' },
+        { name: 'savon à vaisselle bio', price: 4.49, format: '740ml' },
+      
+        // Collations & surgelés
+        { name: 'craquelins', price: 3.99, format: '250g' },
+        { name: 'chocolat noir', price: 4.99, format: '100g' },
+        { name: 'crème glacée premium', price: 6.99, format: '1L' },
     ]
   }
 }
