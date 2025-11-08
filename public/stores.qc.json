@@ -1,0 +1,12 @@
+[
+  { "id": "iga_st_denys", "name": "IGA Saint-Denis", "lat": 45.5234, "lon": -73.585 },
+  { "id": "metro_mont_royal", "name": "Metro Mont-Royal", "lat": 45.5262, "lon": -73.574 },
+  { "id": "walmart_anjou", "name": "Walmart Anjou", "lat": 45.607, "lon": -73.560 },
+  { "id": "maxi_papineau", "name": "Maxi Papineau", "lat": 45.537, "lon": -73.611 },
+  { "id": "costco_brossard", "name": "Costco Brossard", "lat": 45.455, "lon": -73.454 },
+  { "id": "provigo_berri", "name": "Provigo Berri", "lat": 45.5176, "lon": -73.561 },
+  { "id": "super_c_plateau", "name": "Super C Plateau", "lat": 45.5283, "lon": -73.573 },
+  { "id": "maxi_rosement", "name": "Maxi Rosemont", "lat": 45.5598, "lon": -73.568 },
+  { "id": "iga_atwater", "name": "IGA Atwater", "lat": 45.4881, "lon": -73.5796 },
+  { "id": "metro_villeray", "name": "Metro Villeray", "lat": 45.5456, "lon": -73.619 }
+]

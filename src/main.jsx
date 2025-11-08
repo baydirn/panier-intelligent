@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
+import { refreshWeeklyPrices } from './services/weeklyPrices'
 import { ToastProvider } from './components/ToastProvider'
 import './index.css'
 
@@ -22,3 +23,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register(swUrl).catch(() => {/* ignore */})
   })
 }
+
+// Warm weekly prices cache early but non-blocking
+refreshWeeklyPrices().catch(()=>{})

@@ -84,10 +84,11 @@ function AlternativesRow({ productName, onReplace }){
   if(!suggestions || suggestions.length === 0) return null
   return (
     <div className="mt-3">
-      <div className="text-xs text-gray-500 mb-2">Alternatives</div>
+      <div className="text-xs text-gray-500 mb-2">Alternatives (basées sur le prix et le prix unitaire)</div>
       <div className="flex flex-wrap gap-2">
         {suggestions.map((s, idx) => {
           const savingText = s.saving != null && s.saving > 0 ? ` (-${s.saving.toFixed(2)}$)` : ''
+          const unitSavingText = s.unitSaving != null && s.unitSaving > 0 ? ` (↓/u)` : ''
           return (
             <button
               key={idx}
@@ -95,7 +96,7 @@ function AlternativesRow({ productName, onReplace }){
               className="px-2.5 py-1 rounded-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
               title={s.type === 'brand' ? 'Marque alternative' : 'Même catégorie'}
             >
-              ↻ {s.name}{savingText}
+              ↻ {s.name}{savingText}{unitSavingText}
             </button>
           )
         })}

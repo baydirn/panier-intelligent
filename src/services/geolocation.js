@@ -2,15 +2,8 @@ import localforage from 'localforage'
 
 const GEO_KEY = 'user_geo_v1'
 const RADIUS_KEY = 'user_radius_km_v1'
-
-// Static store list (sample coordinates around Montreal/QC) - extend as needed
-export const STORES = [
-  { id: 'iga_st_denys', name: 'IGA Saint-Denis', lat: 45.5234, lon: -73.585 },
-  { id: 'metro_mont_royal', name: 'Metro Mont-Royal', lat: 45.5262, lon: -73.574 },
-  { id: 'walmart_anjou', name: 'Walmart Anjou', lat: 45.607, lon: -73.560 },
-  { id: 'maxi_papineau', name: 'Maxi Papineau', lat: 45.537, lon: -73.611 },
-  { id: 'costco_brossard', name: 'Costco Brossard', lat: 45.455, lon: -73.454 }
-]
+const STORES_CACHE_KEY = 'stores_list_cache_v1'
+const DEFAULT_STORES_URL = '/stores.qc.json'
 
 function toRad(d){ return d * Math.PI / 180 }
 function haversine(lat1, lon1, lat2, lon2){
@@ -47,11 +40,31 @@ export async function getRadiusKm(){
   return (await localforage.getItem(RADIUS_KEY)) || 5
 }
 
+async function loadStores(){
+  // cache stores list
+  const cached = await localforage.getItem(STORES_CACHE_KEY)
+  if(cached && Array.isArray(cached) && cached.length){
+    return cached
+  }
+  try{
+    const res = await fetch(DEFAULT_STORES_URL, { cache: 'default' })
+    if(res.ok){
+      const data = await res.json()
+      if(Array.isArray(data)){
+        await localforage.setItem(STORES_CACHE_KEY, data)
+        return data
+      }
+    }
+  }catch(_){/* ignore */}
+  return []
+}
+
 export async function listNearbyStores(){
   const loc = await getStoredLocation()
   if(!loc) return []
   const radius = await getRadiusKm()
-  return STORES.map(s => ({
+  const stores = await loadStores()
+  return stores.map(s => ({
     ...s,
     distanceKm: haversine(loc.lat, loc.lon, s.lat, s.lon)
   })).filter(s => s.distanceKm <= radius).sort((a,b) => a.distanceKm - b.distanceKm)
