@@ -75,22 +75,30 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
 }
 
 function AlternativesRow({ productName, onReplace }){
-  const suggestions = useMemo(() => suggestSimilarProducts(productName, 6), [productName])
+  const [suggestions, setSuggestions] = useState([])
+  React.useEffect(() => {
+    let active = true
+    suggestSimilarProducts(productName, 6).then(res => { if(active) setSuggestions(res) })
+    return () => { active = false }
+  }, [productName])
   if(!suggestions || suggestions.length === 0) return null
   return (
     <div className="mt-3">
       <div className="text-xs text-gray-500 mb-2">Alternatives</div>
       <div className="flex flex-wrap gap-2">
-        {suggestions.map((s, idx) => (
-          <button
-            key={idx}
-            onClick={() => onReplace && onReplace(s.name)}
-            className="px-2.5 py-1 rounded-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
-            title={s.type === 'brand' ? 'Remplacer par autre marque' : 'Remplacer par même catégorie'}
-          >
-            ↻ {s.name}
-          </button>
-        ))}
+        {suggestions.map((s, idx) => {
+          const savingText = s.saving != null && s.saving > 0 ? ` (-${s.saving.toFixed(2)}$)` : ''
+          return (
+            <button
+              key={idx}
+              onClick={() => onReplace && onReplace(s.name)}
+              className="px-2.5 py-1 rounded-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
+              title={s.type === 'brand' ? 'Marque alternative' : 'Même catégorie'}
+            >
+              ↻ {s.name}{savingText}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

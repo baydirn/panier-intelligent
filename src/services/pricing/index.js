@@ -1,9 +1,13 @@
 // Agrégateur de fournisseurs de prix
 import { fetchOffers as mockFetch } from './providers/mockProvider'
+import { getBestWeeklyOffers } from '../weeklyPrices'
 
 const providers = [
+  { id: 'weekly', fetch: async ({ name }) => {
+    const offers = await getBestWeeklyOffers(name)
+    return offers.map(o => ({ store: o.store, price: o.price, availability: 'Semaine', updatedAt: o.updatedAt }))
+  }},
   { id: 'mock', fetch: mockFetch }
-  // À l'avenir: { id: 'iga', fetch: igaFetch }, etc.
 ]
 
 export async function fetchBestOffers({ name, barcode }){

@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "generatedAt": "2025-11-08T00:00:00Z",
+  "items": [
+    { "name": "lait quebon 2l", "store": "IGA", "price": 4.79, "updatedAt": "2025-11-07" },
+    { "name": "lait quebon 2l", "store": "Walmart", "price": 4.59, "updatedAt": "2025-11-07" },
+    { "name": "pain gadoua", "store": "Walmart", "price": 3.19, "updatedAt": "2025-11-07" },
+    { "name": "pain gadoua", "store": "Metro", "price": 3.49, "updatedAt": "2025-11-07" }
+  ]
+}

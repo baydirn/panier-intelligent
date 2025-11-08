@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import useAppStore from '../store/useAppStore'
 import { getAllProducts } from '../services/db'
 import Button from '../components/Button'
+import { requestUserLocation, listNearbyStores, setRadiusKm, getRadiusKm } from '../services/geolocation'
+import { refreshWeeklyPrices, getWeeklyPricesMeta } from '../services/weeklyPrices'
 import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
 import Badge from '../components/Badge'
@@ -18,6 +20,20 @@ export default function Parametres(){
   const [favoriteStores, setFavoriteStores] = useState((settings.favoriteStores || []).join(', '))
   const [saved, setSaved] = useState(false)
   const fileInputRef = useRef(null)
+  const [geoStatus, setGeoStatus] = useState('idle')
+  const [nearbyStores, setNearbyStores] = useState([])
+  const [weeklyMeta, setWeeklyMeta] = useState(null)
+
+  useEffect(() => {
+    // Load stored radius override
+    getRadiusKm().then(r => { if(!settings.searchRadiusKm) setSearchRadius(r) })
+    ;(async () => {
+      const meta = await getWeeklyPricesMeta()
+      setWeeklyMeta(meta)
+      const stores = await listNearbyStores()
+      setNearbyStores(stores)
+    })()
+  }, [])
 
   function save(){
     const stores = favoriteStores.split(',').map(s => s.trim()).filter(Boolean)
@@ -26,6 +42,7 @@ export default function Parametres(){
       searchRadiusKm: Number(searchRadius),
       favoriteStores: stores
     })
+    setRadiusKm(Number(searchRadius)).catch(()=>{})
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -147,6 +164,69 @@ export default function Parametres(){
               </Button>
               {saved && <Badge variant="success">✓ Sauvegardé</Badge>}
             </div>
+          </CardBody>
+        </Card>
+
+        {/* Geolocalisation */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Localisation & Magasins proches</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <div className="flex gap-3 flex-wrap items-center">
+              <Button
+                onClick={async () => {
+                  setGeoStatus('demande...')
+                  try {
+                    await requestUserLocation()
+                    setGeoStatus('ok')
+                    const stores = await listNearbyStores()
+                    setNearbyStores(stores)
+                  } catch(e){
+                    setGeoStatus('erreur: ' + e.message)
+                  }
+                }}
+                variant="secondary"
+              >🔍 Actualiser ma position</Button>
+              <div className="text-xs text-gray-500">Statut: {geoStatus}</div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">Magasins dans {searchRadius} km</h4>
+              {nearbyStores.length === 0 && (
+                <div className="text-sm text-gray-500">Aucun magasin trouvé (autorise la géolocalisation).</div>
+              )}
+              <ul className="space-y-1">
+                {nearbyStores.map(s => (
+                  <li key={s.id} className="text-sm flex justify-between border rounded px-2 py-1 bg-gray-50">
+                    <span>{s.name}</span>
+                    <span className="text-gray-600">{s.distanceKm.toFixed(1)} km</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </CardBody>
+        </Card>
+
+        {/* Weekly Prices */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Base de prix hebdomadaire</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-4">
+            <p className="text-sm text-gray-600">Données locales mises à jour une fois par semaine à partir de votre fichier ou source distante.</p>
+            <div className="flex items-center gap-3 text-sm">
+              <span>Dernière mise à jour: {weeklyMeta?.lastFetched ? new Date(weeklyMeta.lastFetched).toLocaleDateString() : 'jamais'}</span>
+              <Button
+                variant="secondary"
+                onClick={async () => {
+                  await refreshWeeklyPrices({ force: true })
+                  const meta = await getWeeklyPricesMeta()
+                  setWeeklyMeta(meta)
+                }}
+              >🔁 Forcer la mise à jour</Button>
+            </div>
+            <div className="text-xs text-gray-500">Items chargés: {weeklyMeta?.items?.length || 0}</div>
+            <p className="text-xs text-gray-500">Pour utiliser une source réelle, déploie un JSON à l'URL configurée VITE_PRICE_DATA_URL (ex: sur GitHub raw ou petite API).</p>
           </CardBody>
         </Card>
 
