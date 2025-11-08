@@ -172,7 +172,7 @@ export async function processPdf(pdfFile, onProgress = () => {}){
   let combinedText = ''
   let confidenceAcc = 0
   let count = 0
-  const maxPages = Math.min(pageCount, 5) // cap for performance
+  const maxPages = Math.min(pageCount, 15) // cap for performance
 
   for(let i=1; i<=maxPages; i++){
     const page = await doc.getPage(i)
