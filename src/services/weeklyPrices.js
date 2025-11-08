@@ -1,7 +1,9 @@
 import localforage from 'localforage'
 
 const WEEKLY_PRICES_KEY = 'weekly_prices_v1'
+const WEEKLY_PRICES_HISTORY_KEY = 'weekly_prices_history_v1'
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
+const MAX_WEEKS = 8
 
 // Config: set VITE_PRICE_DATA_URL in Vercel to point to your JSON feed
 const PRICE_DATA_URL = import.meta?.env?.VITE_PRICE_DATA_URL || '/prices.json'
@@ -28,8 +30,23 @@ export async function refreshWeeklyPrices({ force = false } = {}){
       price: Number(it.price),
       updatedAt: it.updatedAt || new Date().toISOString()
     })).filter(it => it.name && !Number.isNaN(it.price))
-    const payload = { lastFetched: now, items }
+    const generatedAt = (data.generatedAt) || new Date().toISOString()
+    const payload = { lastFetched: now, generatedAt, items }
     await localforage.setItem(WEEKLY_PRICES_KEY, payload)
+
+    // Maintain a small rolling history by ISO week id
+    try {
+      const weekId = isoWeekId(new Date(generatedAt))
+      const history = (await localforage.getItem(WEEKLY_PRICES_HISTORY_KEY)) || {}
+      history[weekId] = { generatedAt, count: items.length }
+      // Trim to last MAX_WEEKS weeks
+      const sortedWeeks = Object.keys(history).sort()
+      const toTrim = Math.max(0, sortedWeeks.length - MAX_WEEKS)
+      for(let i=0;i<toTrim;i++){
+        delete history[sortedWeeks[i]]
+      }
+      await localforage.setItem(WEEKLY_PRICES_HISTORY_KEY, history)
+    } catch(e){ /* non-fatal */ }
     return payload
   }catch(err){
     console.warn('refreshWeeklyPrices failed:', err)
@@ -46,4 +63,16 @@ export async function getBestWeeklyOffers(name){
   // sort by price
   offers.sort((a,b) => a.price - b.price)
   return offers
+}
+
+export async function getWeeklyHistory(){
+  return (await localforage.getItem(WEEKLY_PRICES_HISTORY_KEY)) || {}
+}
+
+function isoWeekId(date){
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7))
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1))
+  const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7)
+  return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`
 }

@@ -201,6 +201,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
       }
 
       let lastZXAttempt = 0
+      // rAF loop for smoother iOS performance & throttled detection
       const poll = async () => {
         if (!scanning || !videoRef.current) return
         const video = videoRef.current
@@ -231,7 +232,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
             }
           }
         }
-        requestAnimationFrame(poll)
+        if (scanning) requestAnimationFrame(poll)
       }
       poll()
     } catch (error) {

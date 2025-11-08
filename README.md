@@ -125,3 +125,22 @@ MIT
 ---
 
 Développé avec ❤️ pour simplifier tes courses
+
+## ⚙️ Variables d'environnement (Autonomie)
+
+Configure ces variables pour activer la mise à jour automatique hebdomadaire des prix et l'affichage du statut dans l'app.
+
+- VITE_PRICE_DATA_URL: URL publique vers le fichier JSON agrégé (ex: https://raw.githubusercontent.com/<owner>/<repo>/main/prices.json). Utilisée par le frontend.
+- PRICE_META_URL: URL publique vers le fichier meta (ex: https://raw.githubusercontent.com/<owner>/<repo>/main/prices-meta.json). Optionnel, sinon fallback via /api/price-status.
+- PRICE_DATA_URL: (serveur) URL pour que l'API /api/price-status récupère les prix s'il n'y a pas de meta.
+- PRICE_SOURCE_URLS: Liste d'URLs sources (séparées par virgule) à agréger par /api/update-prices (ex: https://example.com/storeA.json,https://example.com/storeB.json).
+- CRON_SECRET: Jeton secret pour protéger /api/update-prices et /api/price-status en production (requiert ?secret=... pour y accéder).
+- GITHUB_REPO: owner/repo pour publier automatiquement prices.json sur GitHub.
+- GITHUB_TOKEN: PAT avec droits repo (contenus) pour publier les fichiers.
+- GITHUB_BRANCH: Branche cible (par défaut: main).
+- GITHUB_PATH: Chemin du fichier agrégé (par défaut: prices.json).
+- GITHUB_META_PATH: Chemin du fichier méta (par défaut: prices-meta.json).
+- GITHUB_HISTORY_DIR: Dossier pour les snapshots hebdo (ex: prices-history). Optionnel.
+
+CI (facultatif): `.github/workflows/scrape-prices.yml` peut récupérer les sources hebdo (PRICE_SOURCE_URLS via Repository variables) et pousser `raw-prices.json`.
+

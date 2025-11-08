@@ -4,6 +4,7 @@ import { getAllProducts } from '../services/db'
 import Button from '../components/Button'
 import { requestUserLocation, listNearbyStores, setRadiusKm, getRadiusKm } from '../services/geolocation'
 import { refreshWeeklyPrices, getWeeklyPricesMeta } from '../services/weeklyPrices'
+import { fetchPriceStatus, getCachedPriceStatus } from '../services/priceMeta'
 import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
 import Badge from '../components/Badge'
@@ -23,6 +24,7 @@ export default function Parametres(){
   const [geoStatus, setGeoStatus] = useState('idle')
   const [nearbyStores, setNearbyStores] = useState([])
   const [weeklyMeta, setWeeklyMeta] = useState(null)
+  const [priceStatus, setPriceStatus] = useState(null)
 
   useEffect(() => {
     // Load stored radius override
@@ -30,6 +32,10 @@ export default function Parametres(){
     ;(async () => {
       const meta = await getWeeklyPricesMeta()
       setWeeklyMeta(meta)
+      const statusCached = await getCachedPriceStatus()
+      setPriceStatus(statusCached.meta)
+      // Fire async refresh (non-blocking)
+      fetchPriceStatus().then(p => setPriceStatus(p.meta)).catch(()=>{})
       const stores = await listNearbyStores()
       setNearbyStores(stores)
     })()
@@ -227,6 +233,27 @@ export default function Parametres(){
             </div>
             <div className="text-xs text-gray-500">Items chargés: {weeklyMeta?.items?.length || 0}</div>
             <p className="text-xs text-gray-500">Pour utiliser une source réelle, déploie un JSON à l'URL configurée VITE_PRICE_DATA_URL (ex: sur GitHub raw ou petite API).</p>
+            <div className="pt-4 border-t">
+              <h4 className="font-medium mb-2">Statut agrégation distante</h4>
+              {!priceStatus && <div className="text-xs text-gray-500">Chargement du statut...</div>}
+              {priceStatus && (
+                <div className="space-y-1 text-xs text-gray-700">
+                  <div>Généré: {new Date(priceStatus.generatedAt).toLocaleString()}</div>
+                  <div>Total sources: {priceStatus.totalSources}</div>
+                  <div>Total items (après dédup): {priceStatus.totalItems}</div>
+                  {priceStatus.errors && priceStatus.errors.length > 0 && (
+                    <div className="text-red-600">Erreurs: {priceStatus.errors.length}</div>
+                  )}
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      const s = await fetchPriceStatus({ force: true })
+                      setPriceStatus(s.meta)
+                    }}
+                  >🔁 Rafraîchir statut</Button>
+                </div>
+              )}
+            </div>
           </CardBody>
         </Card>
 

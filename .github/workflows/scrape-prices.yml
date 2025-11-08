@@ -1,0 +1,65 @@
+name: Scrape Weekly Prices
+
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Lundi 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps (if any)
+        run: |
+          npm init -y
+          npm install axios@1.6.0
+
+      - name: Fetch sources
+        run: |
+          node <<'EOF'
+          const fs = require('fs')
+          const axios = require('axios')
+          const sources = (process.env.PRICE_SOURCE_URLS || '').split(',').map(s => s.trim()).filter(Boolean)
+          let collected = []
+          async function fetchSrc(url){
+            try{ const r = await axios.get(url, { timeout: 15000 });
+              const data = Array.isArray(r.data) ? r.data : (r.data.items || [])
+              collected = collected.concat(data)
+              console.log('Fetched', url, data.length)
+            }catch(e){ console.error('Fail', url, e.message) }
+          }
+          (async () => {
+            for(const s of sources){ await fetchSrc(s) }
+            fs.writeFileSync('raw-prices.json', JSON.stringify({ generatedAt: new Date().toISOString(), items: collected }, null, 2))
+          })()
+          EOF
+
+      - name: Commit raw data
+        run: |
+          git config user.name 'github-actions'
+          git config user.email 'actions@github.com'
+          if [ -f raw-prices.json ]; then
+            git add raw-prices.json
+            git commit -m 'chore(prices): add raw weekly scrape' || echo 'Nothing to commit'
+            git push
+          fi
+
+      - name: Trigger Vercel rebuild (optional)
+        if: ${{ env.VERCEL_TOKEN != '' && env.VERCEL_PROJECT_ID != '' }}
+        run: |
+          curl -X POST -H "Authorization: Bearer $VERCEL_TOKEN" -H "Content-Type: application/json" \
+            -d '{"name":"rebuild","projectId":"'$VERCEL_PROJECT_ID'"}' https://api.vercel.com/v1/deployments
+
+env:
+  PRICE_SOURCE_URLS: ${{ vars.PRICE_SOURCE_URLS }} # Configure in repo/environment
