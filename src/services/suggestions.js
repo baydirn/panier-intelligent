@@ -46,9 +46,22 @@ export async function suggestSimilarProducts(productName, max = 5){
     if(list.length >= max) return rank(list).slice(0, max)
   }
 
+  // Filter by same category AND semantic similarity (keywords overlap)
   for(const [key, p] of Object.entries(PRODUCTS_DB)){
     if(key === base.key) continue
     if(p.category === base.category){
+      // Compute semantic similarity via keyword overlap
+      const baseKeywords = new Set((base.keywords || []).map(k => k.toLowerCase()))
+      const altKeywords = new Set((p.keywords || []).map(k => k.toLowerCase()))
+      const intersection = [...baseKeywords].filter(k => altKeywords.has(k)).length
+      const union = new Set([...baseKeywords, ...altKeywords]).size
+      const similarity = union > 0 ? intersection / union : 0
+      
+      // Only suggest if some keyword overlap or very similar product name
+      if(similarity < 0.1 && !key.toLowerCase().includes(base.key.toLowerCase()) && !base.key.toLowerCase().includes(key.toLowerCase())){
+        continue
+      }
+      
       let altPrice = null
       try {
         const weeklyAlt = await getBestWeeklyOffers(key)
@@ -62,7 +75,7 @@ export async function suggestSimilarProducts(productName, max = 5){
       if(baseUnitPrice?.per != null && altUnitPrice?.per != null){
         unitSaving = baseUnitPrice.per - altUnitPrice.per
       }
-      list.push({ name: key, type: 'category', basePrice, altPrice, saving, baseUnitPrice, altUnitPrice, unitSaving })
+      list.push({ name: key, type: 'category', basePrice, altPrice, saving, baseUnitPrice, altUnitPrice, unitSaving, similarity })
       if(list.length >= max) break
     }
   }
@@ -71,6 +84,11 @@ export async function suggestSimilarProducts(productName, max = 5){
 
 function rank(arr){
   return arr.sort((a,b) => {
+    // Prefer higher similarity (for category suggestions)
+    const simA = a.similarity ?? 1
+    const simB = b.similarity ?? 1
+    if(simA !== simB) return simB - simA
+    
     // Prefer unitSaving if available
     if(a.unitSaving != null && b.unitSaving != null){
       if(b.unitSaving !== a.unitSaving) return b.unitSaving - a.unitSaving

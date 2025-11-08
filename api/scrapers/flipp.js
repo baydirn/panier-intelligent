@@ -2,6 +2,13 @@ export const config = {
   runtime: 'edge'
 }
 
+// TODO (prochaines étapes):
+// - Migrer vers architecture scraper modulaire (voir SCRAPING_STRATEGY.md)
+// - Implémenter scrapers API pour IGA, Metro, Walmart, Adonis
+// - Implémenter scrapers HTML pour Maxi, Provigo, Super C, Costco, Avril
+// - Ajouter endpoint upload OCR pour circulaires communautaires (Google Vision API)
+// - Fusionner produits similaires avec IA (normalisation noms)
+
 // Mapping des bannières québécoises avec produits typiques et prix réalistes
 // Dataset enrichi: ~40-70 produits par bannière couvrant toutes catégories
 const STORE_MAPPING = {
