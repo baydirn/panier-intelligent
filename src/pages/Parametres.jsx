@@ -3,7 +3,7 @@ import useAppStore from '../store/useAppStore'
 import { getAllProducts } from '../services/db'
 import Button from '../components/Button'
 import { requestUserLocation, listNearbyStores, setRadiusKm, getRadiusKm } from '../services/geolocation'
-import { refreshWeeklyPrices, getWeeklyPricesMeta } from '../services/weeklyPrices'
+import { refreshWeeklyPrices, getWeeklyPricesMeta, getPriceDataUrl } from '../services/weeklyPrices'
 import { fetchPriceStatus, getCachedPriceStatus } from '../services/priceMeta'
 import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
@@ -27,6 +27,7 @@ export default function Parametres(){
   const [priceStatus, setPriceStatus] = useState(null)
   const [loadingWeekly, setLoadingWeekly] = useState(false)
   const [loadingStatus, setLoadingStatus] = useState(false)
+  const [priceDataUrl, setPriceDataUrl] = useState('')
 
   useEffect(() => {
     // Load stored radius override
@@ -40,6 +41,7 @@ export default function Parametres(){
       fetchPriceStatus().then(p => setPriceStatus(p.meta)).catch(()=>{})
       const stores = await listNearbyStores()
       setNearbyStores(stores)
+      setPriceDataUrl(getPriceDataUrl())
     })()
   }, [])
 
@@ -243,6 +245,21 @@ export default function Parametres(){
             </div>
             <div className="text-xs text-gray-500">Items chargés: {weeklyMeta?.items?.length || 0}</div>
             <p className="text-xs text-gray-500">Pour utiliser une source réelle, déploie un JSON à l'URL configurée VITE_PRICE_DATA_URL (ex: sur GitHub raw ou petite API).</p>
+            <div className="text-xs text-gray-600 bg-gray-50 border rounded p-2">
+              <div><span className="font-medium">Source active:</span> <a className="text-blue-600 underline" href={priceDataUrl} target="_blank" rel="noreferrer">{priceDataUrl || 'non définie'}</a></div>
+              <div className="mt-2 flex gap-2">
+                <Button variant="secondary" onClick={async ()=>{
+                  try{
+                    const r = await fetch(priceDataUrl, { cache: 'no-cache' })
+                    const j = await r.json()
+                    const n = Array.isArray(j) ? j.length : (j.items?.length || 0)
+                    alert(`Test OK: ${n} items depuis\n${priceDataUrl}`)
+                  }catch(e){
+                    alert('Echec du test: ' + (e?.message || e))
+                  }
+                }}>🧪 Tester la source</Button>
+              </div>
+            </div>
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2">Statut agrégation distante</h4>
               {!priceStatus && <div className="text-xs text-gray-500">Chargement du statut...</div>}
