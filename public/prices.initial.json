@@ -1,101 +1,2422 @@
 {
-  "version": 1,
-  "generatedAt": "2025-11-08T00:00:00.000Z",
+  "version": 2,
+  "generatedAt": "2025-11-08T19:19:35.978Z",
   "items": [
-    {"name":"lait 2% 2l","store":"IGA","price":4.99,"format":"2L","updatedAt":"2025-11-08"},
-    {"name":"pain tranché blanc","store":"IGA","price":2.49,"format":"675g","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"IGA","price":4.29,"format":"12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"IGA","price":5.99,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"yogourt nature","store":"IGA","price":3.99,"format":"750g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"IGA","price":12.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"IGA","price":8.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"saumon atlantique","store":"IGA","price":14.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"IGA","price":3.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"bananes","store":"IGA","price":1.49,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"carottes","store":"IGA","price":2.99,"format":"2 lb","updatedAt":"2025-11-08"},
-    {"name":"laitue romaine","store":"IGA","price":2.49,"format":"unité","updatedAt":"2025-11-08"},
-    {"name":"tomates cerises","store":"IGA","price":3.99,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"fromage cheddar fort","store":"IGA","price":7.99,"format":"400g","updatedAt":"2025-11-08"},
-    {"name":"jus d'orange tropicana","store":"IGA","price":4.49,"format":"1.75L","updatedAt":"2025-11-08"},
-
-    {"name":"lait 2% 2l","store":"Walmart","price":4.47,"format":"2L","updatedAt":"2025-11-08"},
-    {"name":"pain tranché blanc","store":"Walmart","price":1.97,"format":"675g","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"Walmart","price":3.97,"format":"12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"Walmart","price":5.47,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"yogourt nature","store":"Walmart","price":3.47,"format":"750g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"Walmart","price":11.97,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"Walmart","price":7.97,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"Walmart","price":3.47,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"bananes","store":"Walmart","price":1.27,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"céréales cheerios","store":"Walmart","price":4.97,"format":"430g","updatedAt":"2025-11-08"},
-    {"name":"pâtes barilla","store":"Walmart","price":1.97,"format":"500g","updatedAt":"2025-11-08"},
-    {"name":"sauce tomate","store":"Walmart","price":2.47,"format":"680ml","updatedAt":"2025-11-08"},
-    {"name":"riz basmati","store":"Walmart","price":8.97,"format":"5kg","updatedAt":"2025-11-08"},
-    {"name":"café moulu","store":"Walmart","price":9.97,"format":"925g","updatedAt":"2025-11-08"},
-    {"name":"papier toilette 12 rouleaux","store":"Walmart","price":7.97,"format":"12 unités","updatedAt":"2025-11-08"},
-
-    {"name":"lait 2% 4l","store":"Costco","price":7.99,"format":"4L","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"Costco","price":7.49,"format":"2x12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"Costco","price":10.99,"format":"4x454g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"Costco","price":10.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"Costco","price":6.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"saumon atlantique","store":"Costco","price":12.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"fromage cheddar fort","store":"Costco","price":14.99,"format":"900g","updatedAt":"2025-11-08"},
-    {"name":"pain bagels","store":"Costco","price":4.99,"format":"6 unités","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"Costco","price":7.99,"format":"3kg","updatedAt":"2025-11-08"},
-    {"name":"bananes biologiques","store":"Costco","price":2.99,"format":"2 lb","updatedAt":"2025-11-08"},
-    {"name":"huile d'olive extra vierge","store":"Costco","price":16.99,"format":"3L","updatedAt":"2025-11-08"},
-    {"name":"café grains kirkland","store":"Costco","price":19.99,"format":"907g","updatedAt":"2025-11-08"},
-    {"name":"papier toilette 30 rouleaux","store":"Costco","price":24.99,"format":"30 unités","updatedAt":"2025-11-08"},
-    {"name":"eau embouteillée","store":"Costco","price":3.99,"format":"35x500ml","updatedAt":"2025-11-08"},
-    {"name":"pizza surgelée","store":"Costco","price":12.99,"format":"3 unités","updatedAt":"2025-11-08"},
-
-    {"name":"lait 2% 2l","store":"Maxi","price":4.79,"format":"2L","updatedAt":"2025-11-08"},
-    {"name":"pain tranché blanc","store":"Maxi","price":2.29,"format":"675g","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"Maxi","price":4.49,"format":"12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"Maxi","price":5.79,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"yogourt grec","store":"Maxi","price":4.99,"format":"750g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"Maxi","price":12.49,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"Maxi","price":8.49,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"Maxi","price":3.79,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"bananes","store":"Maxi","price":1.39,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"carottes biologiques","store":"Maxi","price":3.49,"format":"2 lb","updatedAt":"2025-11-08"},
-    {"name":"brocoli","store":"Maxi","price":2.99,"format":"unité","updatedAt":"2025-11-08"},
-    {"name":"fromage mozzarella","store":"Maxi","price":6.99,"format":"400g","updatedAt":"2025-11-08"},
-    {"name":"chips lays","store":"Maxi","price":3.99,"format":"235g","updatedAt":"2025-11-08"},
-    {"name":"crème glacée","store":"Maxi","price":4.99,"format":"1.5L","updatedAt":"2025-11-08"},
-    {"name":"détergent à lessive","store":"Maxi","price":9.99,"format":"2.95L","updatedAt":"2025-11-08"},
-
-    {"name":"lait 2% 2l","store":"Super C","price":4.29,"format":"2L","updatedAt":"2025-11-08"},
-    {"name":"pain tranché blanc","store":"Super C","price":1.99,"format":"675g","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"Super C","price":3.79,"format":"12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"Super C","price":5.29,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"yogourt nature","store":"Super C","price":3.29,"format":"750g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"Super C","price":11.49,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"Super C","price":7.49,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"Super C","price":2.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"bananes","store":"Super C","price":1.19,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"concombres","store":"Super C","price":0.99,"format":"unité","updatedAt":"2025-11-08"},
-    {"name":"poivrons","store":"Super C","price":1.99,"format":"lb","updatedAt":"2025-11-08"},
-    {"name":"fromage cheddar","store":"Super C","price":5.99,"format":"400g","updatedAt":"2025-11-08"},
-    {"name":"jambon tranché","store":"Super C","price":6.99,"format":"500g","updatedAt":"2025-11-08"},
-    {"name":"jus de pomme","store":"Super C","price":2.99,"format":"1.89L","updatedAt":"2025-11-08"},
-    {"name":"eau embouteillée","store":"Super C","price":2.49,"format":"12x500ml","updatedAt":"2025-11-08"},
-
-    {"name":"lait 2% 2l","store":"Metro","price":4.99,"format":"2L","updatedAt":"2025-11-08"},
-    {"name":"pain tranché multigrains","store":"Metro","price":2.79,"format":"675g","updatedAt":"2025-11-08"},
-    {"name":"oeufs gros calibre","store":"Metro","price":4.49,"format":"12 unités","updatedAt":"2025-11-08"},
-    {"name":"beurre salé","store":"Metro","price":5.99,"format":"454g","updatedAt":"2025-11-08"},
-    {"name":"yogourt grec","store":"Metro","price":4.49,"format":"750g","updatedAt":"2025-11-08"},
-    {"name":"poulet poitrine","store":"Metro","price":12.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"boeuf haché mi-maigre","store":"Metro","price":8.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"saumon atlantique","store":"Metro","price":15.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"pommes gala","store":"Metro","price":3.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"bananes biologiques","store":"Metro","price":1.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"laitue boston","store":"Metro","price":2.99,"format":"unité","updatedAt":"2025-11-08"},
-    {"name":"tomates italiennes","store":"Metro","price":4.99,"format":"kg","updatedAt":"2025-11-08"},
-    {"name":"fromage brie","store":"Metro","price":8.99,"format":"300g","updatedAt":"2025-11-08"},
-    {"name":"croissants","store":"Metro","price":4.99,"format":"6 unités","updatedAt":"2025-11-08"},
-    {"name":"vin rouge","store":"Metro","price":12.99,"format":"750ml","updatedAt":"2025-11-08"}
+    {
+      "name": "lait 2% 2l",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 3.25% 4l",
+      "store": "IGA",
+      "price": 8.99,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait écrémé 1l",
+      "store": "IGA",
+      "price": 2.79,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "IGA",
+      "price": 4.29,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs blancs extra-gros",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre salé",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre non salé",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt grec vanille",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 15%",
+      "store": "IGA",
+      "price": 3.49,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 35%",
+      "store": "IGA",
+      "price": 4.49,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage cheddar fort",
+      "store": "IGA",
+      "price": 7.99,
+      "format": "400g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage mozzarella râpé",
+      "store": "IGA",
+      "price": 6.99,
+      "format": "320g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage brie",
+      "store": "IGA",
+      "price": 8.99,
+      "format": "300g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain multigrains",
+      "store": "IGA",
+      "price": 3.49,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bagels nature",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "croissants",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "IGA",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet cuisses",
+      "store": "IGA",
+      "price": 7.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet entier",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "IGA",
+      "price": 8.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché maigre",
+      "store": "IGA",
+      "price": 10.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc côtelettes",
+      "store": "IGA",
+      "price": 9.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc rôti épaule",
+      "store": "IGA",
+      "price": 7.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "IGA",
+      "price": 14.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tilapia filets",
+      "store": "IGA",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crevettes décortiquées",
+      "store": "IGA",
+      "price": 18.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes gala",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes honeycrisp",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bananes",
+      "store": "IGA",
+      "price": 1.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oranges",
+      "store": "IGA",
+      "price": 3.49,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fraises",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bleuets",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "340g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "raisins rouges",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "mangues",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "carottes",
+      "store": "IGA",
+      "price": 2.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "brocoli",
+      "store": "IGA",
+      "price": 3.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue romaine",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue iceberg",
+      "store": "IGA",
+      "price": 2.29,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates cerises",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates en grappe",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "concombres anglais",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons rouges",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oignons jaunes",
+      "store": "IGA",
+      "price": 1.99,
+      "format": "3 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes de terre",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pâtes penne",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "riz basmati",
+      "store": "IGA",
+      "price": 9.99,
+      "format": "5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "farine tout usage",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "2.5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sucre blanc",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "huile d'olive",
+      "store": "IGA",
+      "price": 12.99,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sauce tomate",
+      "store": "IGA",
+      "price": 2.99,
+      "format": "680ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales corn flakes",
+      "store": "IGA",
+      "price": 5.49,
+      "format": "525g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "confiture fraises",
+      "store": "IGA",
+      "price": 4.49,
+      "format": "500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus d'orange tropicana",
+      "store": "IGA",
+      "price": 4.49,
+      "format": "1.75L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus de pomme",
+      "store": "IGA",
+      "price": 3.49,
+      "format": "1.89L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "12x500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "café moulu",
+      "store": "IGA",
+      "price": 11.99,
+      "format": "925g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "thé vert",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "20 sachets",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "papier toilette 12 rouleaux",
+      "store": "IGA",
+      "price": 9.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "essuie-tout 6 rouleaux",
+      "store": "IGA",
+      "price": 11.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "détergent à lessive",
+      "store": "IGA",
+      "price": 12.99,
+      "format": "2.95L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "savon à vaisselle",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "740ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 3.25% 4l",
+      "store": "Walmart",
+      "price": 8.47,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait écrémé 1l",
+      "store": "Walmart",
+      "price": 2.47,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs blancs extra-gros",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Walmart",
+      "price": 5.47,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre non salé",
+      "store": "Walmart",
+      "price": 5.47,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt grec vanille",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 15%",
+      "store": "Walmart",
+      "price": 3.17,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 35%",
+      "store": "Walmart",
+      "price": 4.17,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage cheddar fort",
+      "store": "Walmart",
+      "price": 7.47,
+      "format": "400g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage mozzarella râpé",
+      "store": "Walmart",
+      "price": 6.47,
+      "format": "320g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain multigrains",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bagels nature",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tortillas",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "10 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Walmart",
+      "price": 11.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet cuisses",
+      "store": "Walmart",
+      "price": 7.47,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet entier",
+      "store": "Walmart",
+      "price": 5.47,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Walmart",
+      "price": 7.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché maigre",
+      "store": "Walmart",
+      "price": 9.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc côtelettes",
+      "store": "Walmart",
+      "price": 8.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saucisses italiennes",
+      "store": "Walmart",
+      "price": 6.97,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tilapia filets",
+      "store": "Walmart",
+      "price": 11.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes red delicious",
+      "store": "Walmart",
+      "price": 3.27,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bananes",
+      "store": "Walmart",
+      "price": 1.27,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oranges",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fraises",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "raisins verts",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "melon d'eau",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "carottes",
+      "store": "Walmart",
+      "price": 2.47,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "brocoli",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue romaine",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue iceberg",
+      "store": "Walmart",
+      "price": 1.77,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates cerises",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "concombres",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons verts",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oignons jaunes",
+      "store": "Walmart",
+      "price": 1.47,
+      "format": "3 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes de terre",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pâtes barilla",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales cheerios",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "430g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales special k",
+      "store": "Walmart",
+      "price": 5.47,
+      "format": "400g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "riz basmati",
+      "store": "Walmart",
+      "price": 8.97,
+      "format": "5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "farine tout usage",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "2.5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sucre blanc",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "huile végétale",
+      "store": "Walmart",
+      "price": 6.97,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sauce tomate",
+      "store": "Walmart",
+      "price": 2.47,
+      "format": "680ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre d'arachide",
+      "store": "Walmart",
+      "price": 5.97,
+      "format": "1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "confiture fraises",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus d'orange",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "1.75L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus de pomme",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "1.89L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "24x500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "café moulu",
+      "store": "Walmart",
+      "price": 9.97,
+      "format": "925g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "thé noir",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "20 sachets",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "cola",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "papier toilette 12 rouleaux",
+      "store": "Walmart",
+      "price": 7.97,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "essuie-tout 6 rouleaux",
+      "store": "Walmart",
+      "price": 9.97,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "détergent à lessive",
+      "store": "Walmart",
+      "price": 11.97,
+      "format": "2.95L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "savon à vaisselle",
+      "store": "Walmart",
+      "price": 2.97,
+      "format": "740ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "nettoyant multi-surfaces",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 2% 4l",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 3.25% 4l",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Costco",
+      "price": 7.49,
+      "format": "2x12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Costco",
+      "price": 10.99,
+      "format": "4x454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt grec",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "2x750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage cheddar fort",
+      "store": "Costco",
+      "price": 14.99,
+      "format": "900g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage mozzarella",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "900g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain bagels",
+      "store": "Costco",
+      "price": 4.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain hot dog",
+      "store": "Costco",
+      "price": 5.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tortillas",
+      "store": "Costco",
+      "price": 6.99,
+      "format": "20 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "muffins",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Costco",
+      "price": 10.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet cuisses",
+      "store": "Costco",
+      "price": 6.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Costco",
+      "price": 6.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc côtelettes",
+      "store": "Costco",
+      "price": 8.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crevettes",
+      "store": "Costco",
+      "price": 24.99,
+      "format": "1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bacon",
+      "store": "Costco",
+      "price": 16.99,
+      "format": "1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "3kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bananes biologiques",
+      "store": "Costco",
+      "price": 2.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oranges",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fraises",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bleuets",
+      "store": "Costco",
+      "price": 9.99,
+      "format": "1 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "raisins",
+      "store": "Costco",
+      "price": 9.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "carottes",
+      "store": "Costco",
+      "price": 4.99,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "brocoli",
+      "store": "Costco",
+      "price": 6.99,
+      "format": "4 têtes",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue romaine",
+      "store": "Costco",
+      "price": 5.99,
+      "format": "3 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oignons",
+      "store": "Costco",
+      "price": 5.99,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes de terre",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "10 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pâtes",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "riz basmati",
+      "store": "Costco",
+      "price": 16.99,
+      "format": "10kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "farine",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "10kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sucre",
+      "store": "Costco",
+      "price": 9.99,
+      "format": "4kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "huile d'olive extra vierge",
+      "store": "Costco",
+      "price": 16.99,
+      "format": "3L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sauce tomate",
+      "store": "Costco",
+      "price": 9.99,
+      "format": "6x680ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales cheerios",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "2x1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre d'arachide",
+      "store": "Costco",
+      "price": 11.99,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "confiture",
+      "store": "Costco",
+      "price": 8.99,
+      "format": "2x500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus d'orange",
+      "store": "Costco",
+      "price": 9.99,
+      "format": "2.5L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "Costco",
+      "price": 3.99,
+      "format": "35x500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "café grains kirkland",
+      "store": "Costco",
+      "price": 19.99,
+      "format": "907g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "thé vert",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "100 sachets",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "cola",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "12x355ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "papier toilette 30 rouleaux",
+      "store": "Costco",
+      "price": 24.99,
+      "format": "30 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "essuie-tout 12 rouleaux",
+      "store": "Costco",
+      "price": 19.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "détergent à lessive kirkland",
+      "store": "Costco",
+      "price": 24.99,
+      "format": "5.73L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "savon à vaisselle",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "3x740ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sacs poubelle",
+      "store": "Costco",
+      "price": 18.99,
+      "format": "200 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pizza surgelée",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "3 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet rôti",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lasagne",
+      "store": "Costco",
+      "price": 14.99,
+      "format": "1.5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Super C",
+      "price": 4.29,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 3.25% 4l",
+      "store": "Super C",
+      "price": 7.99,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait écrémé 1l",
+      "store": "Super C",
+      "price": 2.29,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Super C",
+      "price": 3.79,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Super C",
+      "price": 5.29,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "Super C",
+      "price": 3.29,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt grec",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 15%",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage cheddar",
+      "store": "Super C",
+      "price": 5.99,
+      "format": "400g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage mozzarella",
+      "store": "Super C",
+      "price": 5.49,
+      "format": "320g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "Super C",
+      "price": 1.99,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain multigrains",
+      "store": "Super C",
+      "price": 2.79,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bagels",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tortillas",
+      "store": "Super C",
+      "price": 3.49,
+      "format": "10 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Super C",
+      "price": 11.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet cuisses",
+      "store": "Super C",
+      "price": 6.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet entier",
+      "store": "Super C",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Super C",
+      "price": 7.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc côtelettes",
+      "store": "Super C",
+      "price": 8.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saucisses",
+      "store": "Super C",
+      "price": 4.99,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jambon tranché",
+      "store": "Super C",
+      "price": 6.99,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tilapia",
+      "store": "Super C",
+      "price": 10.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes mcintosh",
+      "store": "Super C",
+      "price": 2.79,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bananes",
+      "store": "Super C",
+      "price": 1.19,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oranges",
+      "store": "Super C",
+      "price": 2.79,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fraises",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "raisins",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "cantaloup",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "carottes",
+      "store": "Super C",
+      "price": 2.29,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "brocoli",
+      "store": "Super C",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue iceberg",
+      "store": "Super C",
+      "price": 1.79,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates",
+      "store": "Super C",
+      "price": 3.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "concombres",
+      "store": "Super C",
+      "price": 0.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons verts",
+      "store": "Super C",
+      "price": 1.99,
+      "format": "lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons rouges",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oignons",
+      "store": "Super C",
+      "price": 1.29,
+      "format": "3 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes de terre",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "5 lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céleri",
+      "store": "Super C",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pâtes",
+      "store": "Super C",
+      "price": 1.79,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "riz",
+      "store": "Super C",
+      "price": 7.99,
+      "format": "5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "farine",
+      "store": "Super C",
+      "price": 4.49,
+      "format": "2.5kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sucre",
+      "store": "Super C",
+      "price": 3.29,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "huile végétale",
+      "store": "Super C",
+      "price": 5.99,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sauce tomate",
+      "store": "Super C",
+      "price": 1.99,
+      "format": "680ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales",
+      "store": "Super C",
+      "price": 4.49,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre d'arachide",
+      "store": "Super C",
+      "price": 4.99,
+      "format": "1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus de pomme",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "1.89L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus d'orange",
+      "store": "Super C",
+      "price": 3.49,
+      "format": "1.75L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "Super C",
+      "price": 2.49,
+      "format": "12x500ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "café moulu",
+      "store": "Super C",
+      "price": 8.99,
+      "format": "925g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "cola",
+      "store": "Super C",
+      "price": 3.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "papier toilette 12 rouleaux",
+      "store": "Super C",
+      "price": 7.49,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "essuie-tout",
+      "store": "Super C",
+      "price": 8.99,
+      "format": "6 rouleaux",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "détergent à lessive",
+      "store": "Super C",
+      "price": 8.99,
+      "format": "2.95L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "savon à vaisselle",
+      "store": "Super C",
+      "price": 2.79,
+      "format": "740ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sacs poubelle",
+      "store": "Super C",
+      "price": 5.99,
+      "format": "40 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "chips",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "200g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "biscuits",
+      "store": "Super C",
+      "price": 2.49,
+      "format": "300g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain tranché multigrains",
+      "store": "Metro",
+      "price": 2.79,
+      "format": "675g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt grec",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "750g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Metro",
+      "price": 8.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "Metro",
+      "price": 15.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bananes biologiques",
+      "store": "Metro",
+      "price": 1.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue boston",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates italiennes",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fromage brie",
+      "store": "Metro",
+      "price": 8.99,
+      "format": "300g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "croissants",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "vin rouge",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "750ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait 3.25% 4l",
+      "store": "Metro",
+      "price": 9.49,
+      "format": "4L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "lait biologique 2l",
+      "store": "Metro",
+      "price": 6.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oeufs oméga-3",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "beurre non salé",
+      "store": "Metro",
+      "price": 6.49,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "yogourt nature biologique",
+      "store": "Metro",
+      "price": 5.49,
+      "format": "650g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème 35%",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "473ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pain artisan",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "croissants",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "4 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "baguette",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet de grain poitrine",
+      "store": "Metro",
+      "price": 15.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet de grain cuisses",
+      "store": "Metro",
+      "price": 9.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poulet biologique",
+      "store": "Metro",
+      "price": 19.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "boeuf striploin",
+      "store": "Metro",
+      "price": 24.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "porc côtelettes",
+      "store": "Metro",
+      "price": 11.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "Metro",
+      "price": 16.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crevettes",
+      "store": "Metro",
+      "price": 19.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jambon forêt noire",
+      "store": "Metro",
+      "price": 8.99,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "prosciutto",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "200g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes biologiques",
+      "store": "Metro",
+      "price": 5.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "oranges sanguines",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "fraises du québec",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "bleuets",
+      "store": "Metro",
+      "price": 5.49,
+      "format": "454g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "mangue",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "avocat",
+      "store": "Metro",
+      "price": 1.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "asperges",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "brocoli",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "laitue romaine",
+      "store": "Metro",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "salade mesclun",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "142g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "tomates italiennes",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "concombres anglais",
+      "store": "Metro",
+      "price": 1.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "poivrons rouges",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "lb",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "champignons portobello",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "227g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pommes de terre grelots",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "680g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "courge butternut",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "pâtes italiennes",
+      "store": "Metro",
+      "price": 3.49,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "riz basmati",
+      "store": "Metro",
+      "price": 6.99,
+      "format": "2kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "quinoa",
+      "store": "Metro",
+      "price": 9.99,
+      "format": "1kg",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "huile d'olive extra vierge",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "750ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "sauce tomate italienne",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "680ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "céréales granola",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "500g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "jus de canneberge",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "1.89L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "café en grains",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "907g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "thé vert",
+      "store": "Metro",
+      "price": 5.49,
+      "format": "20 sachets",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "papier toilette écologique",
+      "store": "Metro",
+      "price": 11.99,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "essuie-tout",
+      "store": "Metro",
+      "price": 10.99,
+      "format": "6 rouleaux",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "détergent écologique",
+      "store": "Metro",
+      "price": 11.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "savon à vaisselle bio",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "740ml",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "craquelins",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "250g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "chocolat noir",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "100g",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    },
+    {
+      "name": "crème glacée premium",
+      "store": "Metro",
+      "price": 6.99,
+      "format": "1L",
+      "updatedAt": "2025-11-08",
+      "_source": "curated-qc-prices"
+    }
   ]
 }
