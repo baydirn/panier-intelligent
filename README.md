@@ -142,9 +142,24 @@ Configure ces variables pour activer la mise à jour automatique hebdomadaire de
 - GITHUB_META_PATH: Chemin du fichier méta (par défaut: prices-meta.json).
 - GITHUB_HISTORY_DIR: Dossier pour les snapshots hebdo (ex: prices-history). Optionnel.
 
-### 🛒 Scraper Flipp
+### 🛒 Données de démarrage (Québec)
 
-L'endpoint `/api/scrapers/flipp` récupère automatiquement les circulaires de **IGA, Walmart, Costco, Maxi, Super C, Metro** via l'API publique de Flipp.com. Il est appelé automatiquement par `/api/update-prices` (sauf si `?skipFlipp=1`). Cron configuré pour s'exécuter chaque lundi à 03:00 UTC.
+L'endpoint `/api/scrapers/flipp` (nom historique) génère maintenant un **jeu de données réaliste pré-curé** pour 6 bannières alimentaires du Québec: **IGA, Walmart, Costco, Maxi, Super C, Metro**.
+
+Raison: l'ancienne API Flipp ne retourne plus de données publiques. Pour offrir une base exploitable immédiatement, un dataset statique est fourni et régénéré avec `updatedAt` du jour.
+
+Caractéristiques:
+- 15 produits typiques par magasin (90 items total)
+- Formats standardisés (kg, L, unités, g, ml)
+- Prix plausibles de détail (novembre 2025) — à adapter si inflation
+- Source marquée `_source: curated-qc-prices`
+
+Usage:
+- Appel direct: `/api/scrapers/flipp?secret=CRON_SECRET&limit=15`
+- Inclus automatiquement par `/api/update-prices` (retirer avec `?skipFlipp=1`)
+- Fichier local bootstrap: `public/prices.initial.json`
+
+Remplacement futur possible par scraping légal des circulaires ou contribution communautaire.
 
 CI (facultatif): `.github/workflows/scrape-prices.yml` peut récupérer les sources hebdo (PRICE_SOURCE_URLS via Repository variables) et pousser `raw-prices.json`.
 
