@@ -1,0 +1,72 @@
+# Tests des API de circulaires Québec/Canada
+# Utiliser l'extension VS Code "REST Client" pour exécuter ces requêtes
+# https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+### Metro API
+GET https://api.metro.ca/flyers?postal_code=H3A1A1
+Accept: application/json
+User-Agent: Mozilla/5.0
+
+###
+
+### Metro API - Autre code postal
+GET https://api.metro.ca/flyers?postal_code=H2X1Y9
+Accept: application/json
+
+###
+
+### IGA/Sobeys API
+GET https://webapi.sobeys.com/flyer/v2/flyers
+Accept: application/json
+User-Agent: Mozilla/5.0
+
+###
+
+### IGA/Sobeys - Avec store ID (si requis)
+GET https://webapi.sobeys.com/flyer/v2/flyers?store_id=1234
+Accept: application/json
+
+###
+
+### Walmart Canada API
+GET https://www.walmart.ca/api/v2/flyers
+Accept: application/json
+User-Agent: Mozilla/5.0
+
+###
+
+### Walmart - Avec store ID
+GET https://www.walmart.ca/api/v2/flyers?store_id=3124
+Accept: application/json
+
+###
+
+### Adonis via Flyerify
+GET https://www.flyerify.com/api/flyers?store=adonis
+Accept: application/json
+
+###
+
+### Provigo (test HTML - pas d'API)
+GET https://www.provigo.ca/food/flyers
+Accept: text/html
+
+###
+
+### Maxi (test HTML - pas d'API)
+GET https://www.maxi.ca/food/flyers
+Accept: text/html
+
+###
+
+### Super C (test HTML)
+GET https://www.superc.ca/flyers
+Accept: text/html
+
+###
+
+### Costco (test HTML)
+GET https://www.costco.ca/flyers
+Accept: text/html
+
+###
