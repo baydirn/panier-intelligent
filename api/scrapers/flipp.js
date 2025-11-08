@@ -224,11 +224,34 @@ export default async function handler(request) {
   }
 
   try {
+    // Optional test mode that returns a tiny static payload so you can verify the endpoint quickly
+    if (searchParams.get('dry') === '1') {
+      const sample = {
+        items: [
+          { name: 'lait 2% 2l', store: 'IGA', price: 3.99, format: '2L', updatedAt: new Date().toISOString().split('T')[0], _source: 'flipp-dry' },
+          { name: 'bananes', store: 'Walmart', price: 0.79, format: 'lb', updatedAt: new Date().toISOString().split('T')[0], _source: 'flipp-dry' }
+        ],
+        stats: { IGA: { flyers: 1, items: 1 }, Walmart: { flyers: 1, items: 1 } },
+        errors: [],
+        totalItems: 2,
+        generatedAt: new Date().toISOString(),
+        debug: { mode: 'dry' }
+      }
+      return new Response(JSON.stringify(sample, null, 2), { status: 200, headers: { 'Content-Type': 'application/json' } })
+    }
+
     const storesParam = searchParams.get('stores')
     const stores = storesParam ? storesParam.split(',') : undefined
     const limit = parseInt(searchParams.get('limit') || '50')
 
     const result = await fetchFlippPrices({ stores, limit })
+    if (searchParams.get('debug') === '1') {
+      result.debug = {
+        requestUrl: request.url,
+        stores,
+        limit
+      }
+    }
 
     return new Response(JSON.stringify(result, null, 2), {
       status: 200,
