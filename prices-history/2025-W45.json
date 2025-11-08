@@ -1,7 +1,637 @@
 {
   "version": 1,
-  "generatedAt": "2025-11-08T15:55:42.280Z",
+  "generatedAt": "2025-11-08T16:36:14.035Z",
   "items": [
+    {
+      "name": "lait 2% 2l",
+      "store": "IGA",
+      "price": 4.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "675g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "IGA",
+      "price": 4.29,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "IGA",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "750g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "IGA",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "IGA",
+      "price": 8.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "IGA",
+      "price": 14.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes",
+      "store": "IGA",
+      "price": 1.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "carottes",
+      "store": "IGA",
+      "price": 2.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "laitue romaine",
+      "store": "IGA",
+      "price": 2.49,
+      "format": "unité",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "tomates cerises",
+      "store": "IGA",
+      "price": 3.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "fromage cheddar fort",
+      "store": "IGA",
+      "price": 7.99,
+      "format": "400g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "jus d'orange tropicana",
+      "store": "IGA",
+      "price": 4.49,
+      "format": "1.75L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Walmart",
+      "price": 4.47,
+      "format": "2L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "675g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Walmart",
+      "price": 3.97,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Walmart",
+      "price": 5.47,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "750g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Walmart",
+      "price": 11.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Walmart",
+      "price": 7.97,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Walmart",
+      "price": 3.47,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes",
+      "store": "Walmart",
+      "price": 1.27,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "céréales cheerios",
+      "store": "Walmart",
+      "price": 4.97,
+      "format": "430g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pâtes barilla",
+      "store": "Walmart",
+      "price": 1.97,
+      "format": "500g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "sauce tomate",
+      "store": "Walmart",
+      "price": 2.47,
+      "format": "680ml",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "riz basmati",
+      "store": "Walmart",
+      "price": 8.97,
+      "format": "5kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "café moulu",
+      "store": "Walmart",
+      "price": 9.97,
+      "format": "925g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "papier toilette 12 rouleaux",
+      "store": "Walmart",
+      "price": 7.97,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "lait 2% 4l",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "4L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Costco",
+      "price": 7.49,
+      "format": "2x12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Costco",
+      "price": 10.99,
+      "format": "4x454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Costco",
+      "price": 10.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Costco",
+      "price": 6.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "fromage cheddar fort",
+      "store": "Costco",
+      "price": 14.99,
+      "format": "900g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain bagels",
+      "store": "Costco",
+      "price": 4.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Costco",
+      "price": 7.99,
+      "format": "3kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes biologiques",
+      "store": "Costco",
+      "price": 2.99,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "huile d'olive extra vierge",
+      "store": "Costco",
+      "price": 16.99,
+      "format": "3L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "café grains kirkland",
+      "store": "Costco",
+      "price": 19.99,
+      "format": "907g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "papier toilette 30 rouleaux",
+      "store": "Costco",
+      "price": 24.99,
+      "format": "30 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "Costco",
+      "price": 3.99,
+      "format": "35x500ml",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pizza surgelée",
+      "store": "Costco",
+      "price": 12.99,
+      "format": "3 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Maxi",
+      "price": 4.79,
+      "format": "2L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "Maxi",
+      "price": 2.29,
+      "format": "675g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Maxi",
+      "price": 4.49,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Maxi",
+      "price": 5.79,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "yogourt grec",
+      "store": "Maxi",
+      "price": 4.99,
+      "format": "750g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Maxi",
+      "price": 12.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Maxi",
+      "price": 8.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Maxi",
+      "price": 3.79,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes",
+      "store": "Maxi",
+      "price": 1.39,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "carottes biologiques",
+      "store": "Maxi",
+      "price": 3.49,
+      "format": "2 lb",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "brocoli",
+      "store": "Maxi",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "fromage mozzarella",
+      "store": "Maxi",
+      "price": 6.99,
+      "format": "400g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "chips lays",
+      "store": "Maxi",
+      "price": 3.99,
+      "format": "235g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "crème glacée",
+      "store": "Maxi",
+      "price": 4.99,
+      "format": "1.5L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "détergent à lessive",
+      "store": "Maxi",
+      "price": 9.99,
+      "format": "2.95L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Super C",
+      "price": 4.29,
+      "format": "2L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain tranché blanc",
+      "store": "Super C",
+      "price": 1.99,
+      "format": "675g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Super C",
+      "price": 3.79,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Super C",
+      "price": 5.29,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "yogourt nature",
+      "store": "Super C",
+      "price": 3.29,
+      "format": "750g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Super C",
+      "price": 11.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Super C",
+      "price": 7.49,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes",
+      "store": "Super C",
+      "price": 1.19,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "concombres",
+      "store": "Super C",
+      "price": 0.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poivrons",
+      "store": "Super C",
+      "price": 1.99,
+      "format": "lb",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "fromage cheddar",
+      "store": "Super C",
+      "price": 5.99,
+      "format": "400g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "jambon tranché",
+      "store": "Super C",
+      "price": 6.99,
+      "format": "500g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "jus de pomme",
+      "store": "Super C",
+      "price": 2.99,
+      "format": "1.89L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "eau embouteillée",
+      "store": "Super C",
+      "price": 2.49,
+      "format": "12x500ml",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "lait 2% 2l",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "2L",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pain tranché multigrains",
+      "store": "Metro",
+      "price": 2.79,
+      "format": "675g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "oeufs gros calibre",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "12 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "beurre salé",
+      "store": "Metro",
+      "price": 5.99,
+      "format": "454g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "yogourt grec",
+      "store": "Metro",
+      "price": 4.49,
+      "format": "750g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "poulet poitrine",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "boeuf haché mi-maigre",
+      "store": "Metro",
+      "price": 8.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "saumon atlantique",
+      "store": "Metro",
+      "price": 15.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "pommes gala",
+      "store": "Metro",
+      "price": 3.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "bananes biologiques",
+      "store": "Metro",
+      "price": 1.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "laitue boston",
+      "store": "Metro",
+      "price": 2.99,
+      "format": "unité",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "tomates italiennes",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "kg",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "fromage brie",
+      "store": "Metro",
+      "price": 8.99,
+      "format": "300g",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "croissants",
+      "store": "Metro",
+      "price": 4.99,
+      "format": "6 unités",
+      "updatedAt": "2025-11-08"
+    },
+    {
+      "name": "vin rouge",
+      "store": "Metro",
+      "price": 12.99,
+      "format": "750ml",
+      "updatedAt": "2025-11-08"
+    },
     {
       "name": "lait quebon 2l",
       "store": "IGA",
