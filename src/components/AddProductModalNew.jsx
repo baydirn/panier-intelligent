@@ -146,46 +146,61 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
   }
   
   const handleScanBarcode = async () => {
-    if (!barcodeSupported) {
-      alert('Votre navigateur ne supporte pas le scan de code-barres. Utilisez Chrome ou Edge.')
-      return
-    }
-    
     try {
       setScanning(true)
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      })
-      
+      const constraints = {
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      }
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
       }
-      
-      const barcodeDetector = new window.BarcodeDetector()
-      
-      const detectBarcode = async () => {
-        if (!scanning || !videoRef.current) return
-        
+
+      let barcodeDetector = null
+      if (barcodeSupported) {
         try {
-          const barcodes = await barcodeDetector.detect(videoRef.current)
-          if (barcodes.length > 0) {
-            const barcode = barcodes[0].rawValue
-            await handleBarcodeDetected(barcode)
-            stopScanning()
-          } else {
-            requestAnimationFrame(detectBarcode)
-          }
-        } catch (error) {
-          console.error('Erreur détection:', error)
-          requestAnimationFrame(detectBarcode)
+          barcodeDetector = new window.BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128'] })
+        } catch (e) {
+          console.warn('BarcodeDetector init fallback', e)
+          barcodeDetector = null
         }
       }
-      
-      detectBarcode()
+
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+
+      const poll = async () => {
+        if (!scanning || !videoRef.current) return
+        const video = videoRef.current
+        if (video.readyState === 4) {
+          canvas.width = video.videoWidth
+          canvas.height = video.videoHeight
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          if (barcodeDetector) {
+            try {
+              const codes = await barcodeDetector.detect(video)
+              if (codes.length > 0) {
+                const code = codes[0].rawValue
+                await handleBarcodeDetected(code)
+                stopScanning()
+                return
+              }
+            } catch (e) {
+              console.debug('Detect error, continuing', e)
+            }
+          }
+        }
+        requestAnimationFrame(poll)
+      }
+      poll()
     } catch (error) {
       console.error('Erreur accès caméra:', error)
-      alert('Impossible d\'accéder à la caméra')
+      alert("Accès caméra refusé ou impossible. Vérifiez les permissions navigateur.")
       setScanning(false)
     }
   }
