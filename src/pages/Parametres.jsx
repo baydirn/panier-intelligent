@@ -25,6 +25,8 @@ export default function Parametres(){
   const [nearbyStores, setNearbyStores] = useState([])
   const [weeklyMeta, setWeeklyMeta] = useState(null)
   const [priceStatus, setPriceStatus] = useState(null)
+  const [loadingWeekly, setLoadingWeekly] = useState(false)
+  const [loadingStatus, setLoadingStatus] = useState(false)
 
   useEffect(() => {
     // Load stored radius override
@@ -224,12 +226,20 @@ export default function Parametres(){
               <span>Dernière mise à jour: {weeklyMeta?.lastFetched ? new Date(weeklyMeta.lastFetched).toLocaleDateString() : 'jamais'}</span>
               <Button
                 variant="secondary"
+                disabled={loadingWeekly}
                 onClick={async () => {
-                  await refreshWeeklyPrices({ force: true })
-                  const meta = await getWeeklyPricesMeta()
-                  setWeeklyMeta(meta)
+                  setLoadingWeekly(true)
+                  try {
+                    await refreshWeeklyPrices({ force: true })
+                    const meta = await getWeeklyPricesMeta()
+                    setWeeklyMeta(meta)
+                  } catch(e) {
+                    console.error('Erreur refresh:', e)
+                  } finally {
+                    setLoadingWeekly(false)
+                  }
                 }}
-              >🔁 Forcer la mise à jour</Button>
+              >{loadingWeekly ? '⏳ Chargement...' : '🔁 Forcer la mise à jour'}</Button>
             </div>
             <div className="text-xs text-gray-500">Items chargés: {weeklyMeta?.items?.length || 0}</div>
             <p className="text-xs text-gray-500">Pour utiliser une source réelle, déploie un JSON à l'URL configurée VITE_PRICE_DATA_URL (ex: sur GitHub raw ou petite API).</p>
@@ -246,11 +256,19 @@ export default function Parametres(){
                   )}
                   <Button
                     variant="secondary"
+                    disabled={loadingStatus}
                     onClick={async () => {
-                      const s = await fetchPriceStatus({ force: true })
-                      setPriceStatus(s.meta)
+                      setLoadingStatus(true)
+                      try {
+                        const s = await fetchPriceStatus({ force: true })
+                        setPriceStatus(s.meta)
+                      } catch(e) {
+                        console.error('Erreur status:', e)
+                      } finally {
+                        setLoadingStatus(false)
+                      }
                     }}
-                  >🔁 Rafraîchir statut</Button>
+                  >{loadingStatus ? '⏳ Chargement...' : '🔁 Rafraîchir statut'}</Button>
                 </div>
               )}
             </div>
