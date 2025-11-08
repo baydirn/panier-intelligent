@@ -18,14 +18,20 @@ function haversine(lat1, lon1, lat2, lon2){
 export async function requestUserLocation(){
   return new Promise((resolve, reject) => {
     if(!('geolocation' in navigator)){
+      console.error('Geolocation API not supported')
       reject(new Error('Geolocation non supportée'))
       return
     }
+    console.log('Requesting geolocation permission...')
     navigator.geolocation.getCurrentPosition(async pos => {
       const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude, ts: Date.now() }
+      console.log('Geolocation success:', coords)
       await localforage.setItem(GEO_KEY, coords)
       resolve(coords)
-    }, err => reject(err), { enableHighAccuracy: true, timeout: 10000 })
+    }, err => {
+      console.error('Geolocation error:', err.code, err.message)
+      reject(err)
+    }, { enableHighAccuracy: true, timeout: 10000 })
   })
 }
 

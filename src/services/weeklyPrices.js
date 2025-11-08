@@ -6,7 +6,7 @@ const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000
 const MAX_WEEKS = 8
 
 // Config: set VITE_PRICE_DATA_URL in Vercel to point to your JSON feed
-const PRICE_DATA_URL = import.meta?.env?.VITE_PRICE_DATA_URL || '/prices.json'
+const PRICE_DATA_URL = import.meta?.env?.VITE_PRICE_DATA_URL || '/prices.sample.json'
 
 export async function getWeeklyPricesMeta(){
   return (await localforage.getItem(WEEKLY_PRICES_KEY)) || { lastFetched: 0, items: [] }
