@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "generatedAt": "2025-11-08T15:55:42.280Z",
+  "generatedAt": "2025-11-08T16:36:14.035Z",
   "totalSources": 2,
-  "totalItems": 4,
+  "totalItems": 94,
   "perSource": [
     {
       "src": "https://panier-intelligent-b9wr.vercel.app/api/scrapers/flipp?secret=lxXfVr7gozWIiQAE2mFDs9uHkcpJZq56LjTn43dyPCtKaYe8&limit=50",
-      "count": 0
+      "count": 90
     },
     {
       "src": "https://raw.githubusercontent.com/baydirn/panier-intelligent/main/public/prices.sample.json",
@@ -14,5 +14,5 @@
     }
   ],
   "errors": [],
-  "hash": "805817edec685845f440d276f4224849"
+  "hash": "c46ec5212aaf0dc088923f7f0cbe3e0d"
 }
