@@ -15,8 +15,8 @@ export async function fetchPriceStatus({ force = false } = {}){
   }
   try{
     const res = await fetch('/api/price-status', { cache: 'no-cache' })
-    const data = await res.json()
-    const payload = { lastChecked: now, meta: data.meta || null, source: data.source || null }
+  const data = await res.json()
+  const payload = { lastChecked: now, meta: data.meta || null, source: data.source || null, resolved: data.resolved || null }
     await localforage.setItem(PRICE_STATUS_KEY, payload)
     return payload
   }catch(err){
