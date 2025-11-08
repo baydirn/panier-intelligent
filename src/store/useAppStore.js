@@ -61,7 +61,7 @@ const useAppStore = create((set, get) => ({
     const updates = combination.items
     for(const it of updates){
       try{
-        await dbUpdateProduct(it.id, { magasin: it.magasin, prix: it.prix })
+        await dbUpdateProduct(it.id, { magasin: it.magasin, prix: it.prix, prixSource: 'optimisation', autoAssigned: true })
       }catch(e){ /* ignore individual failures */ }
     }
     // reload products into state

@@ -61,10 +61,14 @@ export default function Recurrentes(){
     const existingProduct = products.find(p => p.nom?.toLowerCase() === normalizedName)
     
     if(existingProduct){
-      addToast(`"${item.name}" est déjà dans la liste`, 'error')
+      // Fusionner: addition quantités, conserver magasin existant si défini sinon prendre default_store
+      const newQty = (existingProduct.quantite || 1) + (item.default_quantity || 1)
+      const newStore = existingProduct.magasin || (item.default_store || null)
+      await useAppStore.getState().updateProduct(existingProduct.id, { quantite: newQty, magasin: newStore })
+      addToast(`Quantité fusionnée (+${item.default_quantity || 1})`, 'success')
       return
     }
-    
+
     await addProduct({ nom: item.name, quantite: item.default_quantity || 1, magasin: item.default_store || null, recurrent: false })
     addToast('Ajouté à la liste ✅', 'success')
   }

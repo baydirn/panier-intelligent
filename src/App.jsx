@@ -1,4 +1,7 @@
 import React from 'react'
+import { useEffect } from 'react'
+import { getAllPriceAlerts, getLatestPrice } from './services/db'
+import { useToast } from './components/ToastProvider'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
@@ -12,6 +15,27 @@ import MesListes from './pages/MesListes'
 import Parametres from './pages/Parametres'
 
 export default function App(){
+  const { addToast } = useToast()
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      try{
+        const alerts = await getAllPriceAlerts()
+        const entries = Object.entries(alerts || {})
+        for(const [name, cfg] of entries){
+          const latest = await getLatestPrice(name)
+          if(!mounted) return
+          const price = latest?.price
+          if(price != null && cfg?.targetPrice != null && price <= cfg.targetPrice){
+            addToast(`⏰ ${name}: ${price.toFixed(2)}$ ≤ cible ${cfg.targetPrice.toFixed(2)}$`, 'success')
+          }
+        }
+      }catch(_){/* ignore */}
+    })()
+    return () => { mounted = false }
+  }, [])
+
   return (
     <div className="min-h-screen">
       <InstallPWAButton variant="banner" />

@@ -56,9 +56,13 @@ export async function suggestSimilarProducts(productName, max = 5){
       const intersection = [...baseKeywords].filter(k => altKeywords.has(k)).length
       const union = new Set([...baseKeywords, ...altKeywords]).size
       const similarity = union > 0 ? intersection / union : 0
-      
+
+      // Dynamic threshold: a bit stricter when many tokens
+      const tokenCount = Math.max(baseKeywords.size, altKeywords.size)
+      const dynamicThreshold = Math.min(0.2, 1 / (1 + Math.log2(1 + tokenCount)))
+
       // Only suggest if some keyword overlap or very similar product name
-      if(similarity < 0.1 && !key.toLowerCase().includes(base.key.toLowerCase()) && !base.key.toLowerCase().includes(key.toLowerCase())){
+      if(similarity < dynamicThreshold && !key.toLowerCase().includes(base.key.toLowerCase()) && !base.key.toLowerCase().includes(key.toLowerCase())){
         continue
       }
       

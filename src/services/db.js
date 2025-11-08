@@ -36,7 +36,12 @@ async function init(){
 
 async function getAllProducts(){
   const list = await localforage.getItem(STORE_KEY)
-  return (list || []).slice().reverse()
+  // Migration: ensure new fields prixSource & autoAssigned exist
+  return (list || []).map(p => ({
+    ...p,
+    prixSource: p.prixSource || (p.prix != null ? 'manuel' : null),
+    autoAssigned: !!p.autoAssigned
+  })).slice().reverse()
 }
 
 async function getProductById(id){
@@ -44,9 +49,47 @@ async function getProductById(id){
   return list.find(p => p.id === id) || null
 }
 
+function sanitizeProductUpdate(fields){
+  const out = {}
+  if(Object.prototype.hasOwnProperty.call(fields, 'nom')){
+    const name = String(fields.nom ?? '').trim()
+    out.nom = name.slice(0, 140)
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'quantite')){
+    let q = parseInt(fields.quantite, 10)
+    if(!Number.isFinite(q) || q < 1) q = 1
+    out.quantite = q
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'magasin')){
+    out.magasin = fields.magasin ? String(fields.magasin).trim() : null
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'prix')){
+    let n = Number(fields.prix)
+    if(!Number.isFinite(n) || n < 0) n = null
+    if(n != null) n = Math.round(n * 100) / 100
+    out.prix = n
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'purchased')){
+    out.purchased = !!fields.purchased
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'recurrent')){
+    out.recurrent = !!fields.recurrent
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'prixSource')){
+    const allowed = ['manuel','optimisation','weekly','ocr','estime']
+    const val = String(fields.prixSource || '')
+    out.prixSource = allowed.includes(val) ? val : (val ? 'manuel' : null)
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'autoAssigned')){
+    out.autoAssigned = !!fields.autoAssigned
+  }
+  return out
+}
+
 async function addProduct(product){
   const list = await localforage.getItem(STORE_KEY) || []
-  const p = { id: nanoid(), nom: product.nom, quantite: product.quantite ?? 1, recurrent: !!product.recurrent, magasin: product.magasin || null, prix: product.prix ?? null, purchased: !!product.purchased }
+  const base = { id: nanoid(), nom: product.nom, quantite: product.quantite ?? 1, recurrent: !!product.recurrent, magasin: product.magasin || null, prix: product.prix ?? null, purchased: !!product.purchased, prixSource: product.prixSource || (product.prix != null ? 'manuel' : null), autoAssigned: !!product.autoAssigned }
+  const p = { ...base, ...sanitizeProductUpdate(base) }
   list.push(p)
   await localforage.setItem(STORE_KEY, list)
   return p
@@ -56,7 +99,8 @@ async function updateProduct(id, fields){
   const list = await localforage.getItem(STORE_KEY) || []
   const idx = list.findIndex(p => p.id === id)
   if(idx === -1) return null
-  list[idx] = { ...list[idx], ...fields }
+  const clean = sanitizeProductUpdate(fields || {})
+  list[idx] = { ...list[idx], ...clean }
   await localforage.setItem(STORE_KEY, list)
   return list[idx]
 }
@@ -282,15 +326,19 @@ async function clearCurrentList(){
 
 // --- Price history & alerts ---
 async function recordPriceObservation(name, store, price){
-  const key = String(name || '').trim()
+  const key = String(name || '').trim().toLowerCase()
   if(!key || price == null) return null
   const map = (await localforage.getItem(PRICE_HISTORY_KEY)) || {}
   const arr = map[key] || []
-  arr.push({ date: new Date().toISOString(), store, price: Number(price) })
-  // garder seulement les 50 dernières observations
+  const nowIso = new Date().toISOString()
+  const ymd = nowIso.slice(0,10)
+  const idxSameDay = arr.findIndex(it => it.store === store && String(it.date).slice(0,10) === ymd)
+  const entry = { date: nowIso, store, price: Number(price) }
+  if(idxSameDay >= 0) arr[idxSameDay] = entry; else arr.push(entry)
+  // keep last 50 entries overall
   map[key] = arr.slice(-50)
   await localforage.setItem(PRICE_HISTORY_KEY, map)
-  return map[key]
+  return entry
 }
 
 async function getPriceHistory(name){
@@ -320,6 +368,11 @@ async function getPriceAlert(name){
   const key = String(name || '').trim()
   const alerts = (await localforage.getItem(PRICE_ALERTS_KEY)) || {}
   return alerts[key] || null
+}
+
+async function getAllPriceAlerts(){
+  const alerts = (await localforage.getItem(PRICE_ALERTS_KEY)) || {}
+  return alerts
 }
 
 // initialize immediately
@@ -362,5 +415,6 @@ export {
   getPriceHistory,
   getLatestPrice,
   setPriceAlert,
-  getPriceAlert
+  getPriceAlert,
+  getAllPriceAlerts
 }

@@ -18,6 +18,7 @@ export default function Analyse() {
 
   const [loading, setLoading] = useState(false)
   const [prixData, setPrixData] = useState(null)
+  const [prixMeta, setPrixMeta] = useState(null) // Track price sources
   const [combis, setCombis] = useState([])
   const [error, setError] = useState(null)
   const [savedLists, setSavedLists] = useState([])
@@ -56,6 +57,7 @@ export default function Analyse() {
         const prix = await getPrixProduits(products)
         if (!mounted) return
         setPrixData(prix)
+        setPrixMeta(prix.__meta || null) // Extract metadata
 
         // compute best combinations (top 3)
         const results = trouverCombinaisonsOptimales(products, prix, maxMagasins, 3)
@@ -197,23 +199,35 @@ export default function Analyse() {
                             {c.unknownCount} sans prix
                           </span>
                         )}
+                        {c.coverage < 1 && (
+                          <span className="inline-block text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full" title="Certaines lignes sont estimées">
+                            Estimation
+                          </span>
+                        )}
                       </div>
                       {effectiveSavings != null && effectiveSavingsPct != null ? (
-                        <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mb-3">Économie: ${effectiveSavings.toFixed(2)} ({effectiveSavingsPct}%)</span>
+                        <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mb-3">Économie: ${effectiveSavings.toFixed(2)} ({effectiveSavingsPct}%) {c.coverage < 1 ? '(estimé)' : ''}</span>
                       ) : (
                         <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mb-3">Économie non calculable (prix manquants)</span>
                       )}
 
                       <div className="mb-3 max-h-40 overflow-auto">
                         <ul className="text-sm space-y-1">
-                          {c.assignment.map((a, i) => (
-                            <li key={i} className="flex justify-between">
-                              <span>{a.product}</span>
-                              <span className="text-gray-600">
-                                {a.store || '—'} • {a.price != null ? `$${a.price.toFixed(2)}` : 'Prix indisponible'}
-                              </span>
-                            </li>
-                          ))}
+                          {c.assignment.map((a, i) => {
+                            // Check if price came from stored data
+                            const isStored = prixMeta?.[a.product]?.[a.store]?.isStored || false
+                            return (
+                              <li key={i} className="flex justify-between">
+                                <span>{a.product}</span>
+                                <span className="text-gray-600">
+                                  {a.store || '—'} • {a.price != null 
+                                    ? `$${a.price.toFixed(2)}${isStored ? '' : ' (estimé)'}` 
+                                    : 'Prix indisponible'
+                                  }
+                                </span>
+                              </li>
+                            )
+                          })}
                         </ul>
                       </div>
 

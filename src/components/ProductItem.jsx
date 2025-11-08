@@ -40,6 +40,20 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
               : <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">Prix indisponible</span>
             }
           </div>
+          {product.prix != null && (
+            <span className="inline-block text-[10px] px-2 py-0.5 rounded-full border bg-white text-gray-600" title="Source du prix">
+              {(
+                {
+                  manuel: 'Manuel',
+                  optimisation: 'Optimisation',
+                  weekly: 'Hebdo',
+                  ocr: 'OCR',
+                  estime: 'Estimé'
+                }[product.prixSource]
+                ) || 'Source?'}
+              {product.autoAssigned ? ' • Auto' : ''}
+            </span>
+          )}
           {/* Hide sparkline on very small screens to avoid overflow */}
           <div className="hidden sm:block">
             <button onClick={() => setShowHistory(true)} className="hover:opacity-80 active:scale-[0.98]">
@@ -99,7 +113,7 @@ function AlternativesRow({ productName, onReplace }){
               key={idx}
               onClick={() => onReplace && onReplace(s.name)}
               className="px-2.5 py-1 rounded-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
-              title={s.type === 'brand' ? 'Marque alternative' : 'Même catégorie'}
+              title={`${s.type === 'brand' ? 'Marque alternative' : 'Même catégorie'}\nPrix base: ${s.basePrice != null ? s.basePrice.toFixed(2)+'$' : '—'}\nPrix alt: ${s.altPrice != null ? s.altPrice.toFixed(2)+'$' : '—'}\nUnit base: ${s.baseUnitPrice?.per != null ? s.baseUnitPrice.per.toFixed(3)+'$/'+(s.baseUnitPrice.unit||'u') : '—'}\nUnit alt: ${s.altUnitPrice?.per != null ? s.altUnitPrice.per.toFixed(3)+'$/'+(s.altUnitPrice.unit||'u') : '—'}${s.unitSaving != null ? '\nGain unitaire: '+s.unitSaving.toFixed(3) : ''}`}
             >
               ↻ {s.name}{savingText}{unitSavingText}
             </button>

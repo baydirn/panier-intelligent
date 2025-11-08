@@ -18,6 +18,38 @@ export async function getWeeklyPricesMeta(){
   return (await localforage.getItem(WEEKLY_PRICES_KEY)) || { lastFetched: 0, items: [] }
 }
 
+// Ingest products extracted via OCR into the weekly price base.
+// Each product: { name, price, confidence? }
+// Store: flyer store name; period: { from, to }
+// Strategy: if an existing item with same name+store exists, keep the lowest price
+// and update updatedAt if new price chosen.
+export async function ingestOcrProducts({ products = [], store, period, ocrConfidence }) {
+  if(!store || !Array.isArray(products) || products.length === 0) return { added: 0, updated: 0 }
+  const meta = await getWeeklyPricesMeta()
+  const items = meta.items || []
+  const nowIso = new Date().toISOString()
+  let added = 0, updated = 0
+  for(const p of products){
+    const name = String(p.name || '').trim().toLowerCase()
+    if(!name || p.price == null) continue
+    const existingIdx = items.findIndex(it => it.name.toLowerCase() === name && (it.store || '').toLowerCase() === String(store).toLowerCase())
+    if(existingIdx === -1){
+      items.push({ name, store, price: p.price, updatedAt: nowIso, source: 'ocr', period, ocrConfidence })
+      added++
+    } else {
+      const existing = items[existingIdx]
+      // Choose min price as best reference
+      if(p.price < existing.price){
+        items[existingIdx] = { ...existing, price: p.price, updatedAt: nowIso, source: 'ocr', period, ocrConfidence }
+        updated++
+      }
+    }
+  }
+  const payload = { ...meta, items }
+  await localforage.setItem(WEEKLY_PRICES_KEY, payload)
+  return { added, updated }
+}
+
 export async function refreshWeeklyPrices({ force = false } = {}){
   const now = Date.now()
   const meta = await getWeeklyPricesMeta()

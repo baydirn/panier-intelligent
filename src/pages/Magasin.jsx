@@ -109,13 +109,13 @@ export default function Magasin(){
       const key = (p.nom || '').toLowerCase()
       const mapped = assignMap.get(key)
       if(mapped && (!p.magasin || p.prix == null)){
-        toUpdate.push({ id: p.id, magasin: mapped.store || p.magasin || null, prix: typeof mapped.price === 'number' ? mapped.price : p.prix })
+        toUpdate.push({ id: p.id, magasin: mapped.store || p.magasin || null, prix: typeof mapped.price === 'number' ? mapped.price : p.prix, prixSource: 'optimisation', autoAssigned: true })
       }
     }
     if(toUpdate.length){
       ;(async () => {
         for(const it of toUpdate){
-          try{ await updateProduct(it.id, { magasin: it.magasin, prix: it.prix }) }catch{}
+          try{ await updateProduct(it.id, { magasin: it.magasin, prix: it.prix, prixSource: it.prixSource, autoAssigned: it.autoAssigned }) }catch{}
         }
       })()
     }

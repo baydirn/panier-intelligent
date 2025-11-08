@@ -8,6 +8,8 @@ import { fetchPriceStatus, getCachedPriceStatus } from '../services/priceMeta'
 import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
 import Badge from '../components/Badge'
+import UploadFlyerModal from '../components/UploadFlyerModal'
+import { listSubmissions as listOcrSubmissions, removeSubmission as removeOcrSubmission } from '../services/ocrKV'
 
 export default function Parametres(){
   const settings = useAppStore(s => s.settings)
@@ -28,6 +30,9 @@ export default function Parametres(){
   const [loadingWeekly, setLoadingWeekly] = useState(false)
   const [loadingStatus, setLoadingStatus] = useState(false)
   const [priceDataUrl, setPriceDataUrl] = useState('')
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [ocrSubs, setOcrSubs] = useState([])
+  const [loadingSubs, setLoadingSubs] = useState(false)
 
   useEffect(() => {
     // Load stored radius override
@@ -43,6 +48,21 @@ export default function Parametres(){
       setNearbyStores(stores)
       setPriceDataUrl(getPriceDataUrl())
     })()
+  }, [])
+
+  // Load local OCR submissions (debug UI)
+  async function loadOcrSubs(){
+    try{
+      setLoadingSubs(true)
+      const list = await listOcrSubmissions()
+      setOcrSubs(Array.isArray(list) ? list.slice().reverse() : [])
+    }finally{
+      setLoadingSubs(false)
+    }
+  }
+
+  useEffect(() => {
+    loadOcrSubs().catch(()=>{})
   }, [])
 
   function save(){
@@ -258,7 +278,9 @@ export default function Parametres(){
                     alert('Echec du test: ' + (e?.message || e))
                   }
                 }}>🧪 Tester la source</Button>
+                <Button variant="primary" onClick={() => setShowUploadModal(true)}>📄 Contribuer une circulaire (OCR)</Button>
               </div>
+              <div className="mt-2 text-[11px] text-gray-500">Déduplication automatique par magasin et période de validité. Les contributions sont stockées localement pour l'instant.</div>
             </div>
             <div className="pt-4 border-t">
               <h4 className="font-medium mb-2">Statut agrégation distante</h4>
@@ -343,6 +365,62 @@ export default function Parametres(){
           </CardBody>
         </Card>
 
+        {/* OCR debug submissions list (separate card) */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Contributions OCR (local) — Debug</CardTitle>
+          </CardHeader>
+            <CardBody>
+              <div className="flex items-center gap-2 mb-3">
+                <Button variant="secondary" onClick={loadOcrSubs} disabled={loadingSubs}>
+                  {loadingSubs ? 'Chargement…' : 'Rafraîchir'}
+                </Button>
+                <span className="text-xs text-gray-500">{ocrSubs?.length || 0} soumission(s)</span>
+              </div>
+              {(!ocrSubs || ocrSubs.length === 0) ? (
+                <div className="text-sm text-gray-500">Aucune soumission locale pour l’instant.</div>
+              ) : (
+                <div className="max-h-64 overflow-auto border rounded">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 text-gray-600">
+                      <tr>
+                        <th className="text-left p-2">Magasin</th>
+                        <th className="text-left p-2">Période</th>
+                        <th className="text-left p-2">Produits</th>
+                        <th className="text-left p-2">Créé</th>
+                        <th className="p-2">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ocrSubs.map((s) => (
+                        <tr key={s.id} className="border-t">
+                          <td className="p-2">{s.store || '—'}</td>
+                          <td className="p-2">{s.period?.from || '—'} → {s.period?.to || '—'}</td>
+                          <td className="p-2">{Array.isArray(s.products) ? s.products.length : 0}</td>
+                          <td className="p-2">{s.createdAt ? new Date(s.createdAt).toLocaleString() : '—'}</td>
+                          <td className="p-2 text-right">
+                            <Button
+                              variant="danger"
+                              onClick={async () => {
+                                try{
+                                  await removeOcrSubmission(s.id)
+                                  await loadOcrSubs()
+                                }catch(e){ /* ignore */ }
+                              }}
+                            >Supprimer</Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <div className="text-[11px] text-gray-500 mt-2">
+                Ces données sont stockées localement (navigateur) et utilisées pour enrichir la base des prix hebdomadaires.
+              </div>
+            </CardBody>
+        </Card>
+
         {/* Stats */}
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold mb-4">Statistiques</h3>
@@ -372,6 +450,16 @@ export default function Parametres(){
           </div>
         </div>
       </div>
+      {showUploadModal && (
+        <UploadFlyerModal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          onSuccess={() => {
+            setShowUploadModal(false)
+            loadOcrSubs().catch(()=>{})
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -48,7 +48,8 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
     const pr = prix[nom] || {}
     const vals = Object.values(pr)
     const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0
-    return sum + avg
+    const qty = Number(p.quantite) || 1
+    return sum + avg * qty
   }, 0)
 
   const combos = allCombos.map(combo => {
@@ -70,15 +71,21 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
         bestPrice = null
         unknownCount += 1
       }
-      return { product: nom, store: bestStore, price: bestPrice }
+      const qty = Number(p.quantite) || 1
+      const lineTotal = bestPrice != null ? bestPrice * qty : null
+      return { product: nom, store: bestStore, price: bestPrice, quantity: qty, lineTotal }
     })
-    // Sum only known prices
-    const knownPrices = assignment.filter(a => a.price != null)
-    const total = knownPrices.reduce((s,it)=> s + it.price, 0)
+    // Sum only known line totals
+    const knownPrices = assignment.filter(a => a.lineTotal != null)
+    const total = knownPrices.reduce((s,it)=> s + it.lineTotal, 0)
     const coverage = produits.length > 0 ? ( (produits.length - unknownCount) / produits.length ) : 0
-    // Only compute savings if full coverage, otherwise neutral (null)
-    const savings = (unknownCount === 0) ? (avgTotal - total) : null
-    const savingsPct = (unknownCount === 0 && avgTotal > 0) ? (savings / avgTotal) * 100 : null
+    // Compute savings; if partial coverage, scale by coverage to reflect uncertainty
+    let savings = (avgTotal - total)
+    let savingsPct = (avgTotal > 0) ? (savings / avgTotal) * 100 : null
+    if(unknownCount > 0){
+      savings = savings * coverage
+      savingsPct = savingsPct != null ? savingsPct * coverage : null
+    }
     return { 
       stores: combo, 
       assignment, 
