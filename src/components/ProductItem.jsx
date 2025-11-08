@@ -17,7 +17,7 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
 
   return (
     <>
-    <div className="bg-white rounded-xl shadow-sm border p-4 transition-all animate-fade-in">
+  <div className="bg-white rounded-xl shadow-sm border p-4 transition-all animate-fade-in">
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1">
           <div className="font-medium text-gray-900">
@@ -32,18 +32,21 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
           <button onClick={inc} className="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 active:scale-95 transition">+</button>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-3 flex flex-col gap-2">
         <div className="flex items-center gap-3">
           <div className="text-sm text-gray-600">{product.prix != null ? `${product.prix.toFixed?.(2) ?? product.prix} $` : '—'}</div>
-          <button onClick={() => setShowHistory(true)} className="hover:opacity-80 active:scale-[0.98]">
-            <PriceHistorySparkline name={product.nom} />
-          </button>
+          {/* Hide sparkline on very small screens to avoid overflow */}
+          <div className="hidden sm:block">
+            <button onClick={() => setShowHistory(true)} className="hover:opacity-80 active:scale-[0.98]">
+              <PriceHistorySparkline name={product.nom} />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button onClick={() => onPrice && onPrice(product)} className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-sm active:scale-95 transition">💵 Prix</button>
-          <button onClick={() => onEdit && onEdit(product)} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-sm active:scale-95 transition">✏️ Modifier</button>
-          <button onClick={() => onToggle && onToggle(product)} className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm active:scale-95 transition">Récurrent</button>
-          <button onClick={() => onDelete && onDelete(product.id)} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-sm active:scale-95 transition">Supprimer</button>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => onPrice && onPrice(product)} className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs md:text-sm active:scale-95 transition">💵 Prix</button>
+          <button onClick={() => onEdit && onEdit(product)} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs md:text-sm active:scale-95 transition">✏️ Modifier</button>
+            <button onClick={() => onToggle && onToggle(product)} className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs md:text-sm active:scale-95 transition">Récurrent</button>
+          <button onClick={() => onDelete && onDelete(product.id)} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs md:text-sm active:scale-95 transition">Supprimer</button>
         </div>
       </div>
 

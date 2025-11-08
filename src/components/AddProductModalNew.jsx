@@ -160,6 +160,11 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
       streamRef.current = stream
       if (videoRef.current) {
         videoRef.current.srcObject = stream
+        // Ensure play is triggered by user gesture for iOS
+        const playPromise = videoRef.current.play()
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.catch(()=>{})
+        }
       }
 
       let barcodeDetector = null
@@ -195,6 +200,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
         }
       }
 
+      let lastZXAttempt = 0
       const poll = async () => {
         if (!scanning || !videoRef.current) return
         const video = videoRef.current
@@ -217,6 +223,12 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
           } else if (!usedZXing) {
             // Start ZXing once if native detector is unavailable
             startZXing()
+          } else {
+            // For iOS (no BarcodeDetector), periodically attempt decode via canvas (future extension)
+            const now = Date.now()
+            if (now - lastZXAttempt > 1500) {
+              lastZXAttempt = now
+            }
           }
         }
         requestAnimationFrame(poll)

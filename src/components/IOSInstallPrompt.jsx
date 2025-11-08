@@ -21,6 +21,13 @@ export default function IOSInstallPrompt() {
     }
   }, [])
 
+  // Listen to custom event triggered by banner
+  useEffect(() => {
+    function open(){ setShow(true) }
+    window.addEventListener('open-ios-install', open)
+    return () => window.removeEventListener('open-ios-install', open)
+  }, [])
+
   const handleDismiss = () => {
     setShow(false)
     localStorage.setItem('ios-install-dismissed', 'true')

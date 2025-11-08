@@ -27,19 +27,25 @@ function IconFolder(){return (
     <path d="M2.25 6A2.25 2.25 0 014.5 3.75h4.94l1.28 1.28a1.5 1.5 0 001.06.44h6.72A2.25 2.25 0 0120.75 8v10.5A2.25 2.25 0 0118.5 20.75H4.5A2.25 2.25 0 012.25 18.5V6z"/>
   </svg>
 )}
+function IconSettings(){return (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+    <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.89 3.31.876 2.42 2.42a1.724 1.724 0 001.065 2.572c1.757.426 1.757 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.89 1.543-.876 3.31-2.42 2.42a1.724 1.724 0 00-2.572 1.065c-.426 1.757-2.924 1.757-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.89-3.31-.876-2.42-2.42a1.724 1.724 0 00-1.065-2.572c-1.757-.426-1.757-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.89-1.543.876-3.31 2.42-2.42.996.575 2.253.06 2.572-1.065z"/>
+    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+  </svg>
+)}
 
 const tabs = [
   { to: '/liste', label: 'Liste', Icon: IconList },
   { to: '/analyse', label: 'Analyse', Icon: IconAnalyse },
   { to: '/magasin', label: 'Magasin', Icon: IconStore },
   { to: '/mes-listes', label: 'Mes Listes', Icon: IconFolder },
-  { to: '/recurrentes', label: 'Récurrentes', Icon: IconRepeat }
+  { to: '/parametres', label: 'Paramètres', Icon: IconSettings }
 ]
 
 export default function BottomNav(){
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-t">
-      <div className="max-w-3xl mx-auto grid grid-cols-5">
+  <div className="max-w-3xl mx-auto grid grid-cols-5">
         {tabs.map(({to, label, Icon}) => (
           <NavLink
             key={to}

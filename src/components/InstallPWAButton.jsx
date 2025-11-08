@@ -5,6 +5,7 @@ export default function InstallPWAButton({ className = '', variant = 'button' })
   const [canInstall, setCanInstall] = useState(false)
   const [installed, setInstalled] = useState(false)
   const [dismissed, setDismissed] = useState(false)
+  const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
     function onBeforeInstallPrompt(e){
@@ -18,6 +19,10 @@ export default function InstallPWAButton({ className = '', variant = 'button' })
       setCanInstall(false)
       deferredPromptRef.current = null
     }
+
+    // Detect iOS (no beforeinstallprompt)
+    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
+    setIsIOS(iOS)
 
     // Already installed?
     if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches){
@@ -60,10 +65,12 @@ export default function InstallPWAButton({ className = '', variant = 'button' })
     localStorage.setItem('pwa-install-dismissed', 'true')
   }
 
-  if (installed || !canInstall || (dismissed && variant === 'banner')) return null
+  if (installed || (dismissed && variant === 'banner')) return null
 
   // Banner variant for mobile
   if (variant === 'banner') {
+    // Show on Android when canInstall=true OR on iOS as guidance
+    if (!canInstall && !isIOS) return null
     return (
       <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg md:hidden">
         <div className="flex items-center justify-between px-4 py-3">
@@ -75,12 +82,26 @@ export default function InstallPWAButton({ className = '', variant = 'button' })
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleInstall}
-              className="px-4 py-2 bg-white text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 active:scale-95 transition"
-            >
-              Installer
-            </button>
+            {canInstall ? (
+              <button
+                onClick={handleInstall}
+                className="px-4 py-2 bg-white text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 active:scale-95 transition"
+              >
+                Installer
+              </button>
+            ) : (
+              <a
+                href="#ios-install"
+                onClick={(e)=>{
+                  e.preventDefault();
+                  // trigger a custom event to open iOS modal if present
+                  window.dispatchEvent(new CustomEvent('open-ios-install'))
+                }}
+                className="px-4 py-2 bg-white text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-50 active:scale-95 transition"
+              >
+                Comment installer
+              </a>
+            )}
             <button
               onClick={handleDismiss}
               className="p-2 hover:bg-blue-800 rounded-lg transition"
