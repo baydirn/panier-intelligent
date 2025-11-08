@@ -1,9 +1,13 @@
 {
   "version": 1,
-  "generatedAt": "2025-11-08T13:49:48.744Z",
-  "totalSources": 1,
+  "generatedAt": "2025-11-08T15:55:42.280Z",
+  "totalSources": 2,
   "totalItems": 4,
   "perSource": [
+    {
+      "src": "https://panier-intelligent-b9wr.vercel.app/api/scrapers/flipp?secret=lxXfVr7gozWIiQAE2mFDs9uHkcpJZq56LjTn43dyPCtKaYe8&limit=50",
+      "count": 0
+    },
     {
       "src": "https://raw.githubusercontent.com/baydirn/panier-intelligent/main/public/prices.sample.json",
       "count": 4
