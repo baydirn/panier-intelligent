@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import Modal from './Modal'
 import Button from './Button'
-import { processFlyer } from '../services/ocrService'
 import { useToast } from './ToastProvider'
 import { hasSubmissionFor, saveSubmission } from '../services/ocrKV'
 import { ingestOcrProducts } from '../services/weeklyPrices'
@@ -69,7 +68,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
 
   const handleProcess = async () => {
     if (!file) {
-      addToast('Veuillez sélectionner une image', 'error')
+      addToast('Veuillez sélectionner une image ou un PDF', 'error')
       return
     }
 
@@ -297,12 +296,19 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
           <Button
             variant="primary"
             onClick={handleProcess}
-            disabled={!file || !store || processing}
+            disabled={!file || !store || !fromDate || !toDate || (fromDate && toDate && new Date(fromDate) > new Date(toDate)) || processing}
             className="flex-1"
           >
             {processing ? 'Traitement...' : 'Analyser la circulaire'}
           </Button>
         </div>
+
+        {/* Inline requirements hint */}
+        {!processing && (!file || !store || !fromDate || !toDate) && (
+          <p className="text-xs text-amber-600 mt-2">
+            Sélectionnez le magasin, les dates de validité et un fichier (image ou PDF) pour activer l'analyse.
+          </p>
+        )}
 
         {/* Help text */}
         <p className="text-xs text-gray-500 mt-4">
