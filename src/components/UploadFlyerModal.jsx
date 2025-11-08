@@ -101,12 +101,11 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     try {
       // Process OCR client-side (image or PDF)
       let result
+      const svc = await import('../services/ocrService')
       if(file.type === 'application/pdf'){
-        const svc = await import('../services/ocrService')
-        result = await svc.processPdf(file, (p) => setProgress(Math.round(p * 100)))
+        result = await svc.processPdf(file, (fraction) => setProgress(Math.round(fraction * 100)))
       } else {
-        const svc = await import('../services/ocrService')
-        result = await svc.processFlyer(file, (p) => setProgress(Math.round(p * 100)))
+        result = await svc.processFlyer(file, (fraction) => setProgress(Math.round(fraction * 100)))
       }
 
       setResults(result)
@@ -169,7 +168,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         <h2 className="text-2xl font-bold mb-4">📸 Téléverser une circulaire</h2>
         
         <p className="text-sm text-gray-600 mb-6">
-          Prenez une photo claire de votre circulaire papier. Notre IA extraira automatiquement les prix.
+          Prenez une photo claire de votre circulaire papier ou importez un PDF. Notre IA extraira automatiquement les prix.
         </p>
 
         {/* Store selection */}

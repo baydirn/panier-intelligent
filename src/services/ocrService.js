@@ -187,16 +187,17 @@ export async function processPdf(pdfFile, onProgress = () => {}){
     combinedText += '\n' + (data.text || '')
     confidenceAcc += (data.confidence || 0)
     count += 1
-    onProgress(Math.round((i / maxPages) * 70)) // map first 70% to rendering+OCR
+    // Map page progress into first 70% as a fraction
+    onProgress((i / maxPages) * 0.7)
   }
 
   await worker.terminate()
 
-  onProgress(80)
+  onProgress(0.8)
   const rawProducts = parseProductsFromText(combinedText)
-  onProgress(90)
+  onProgress(0.9)
   const validProducts = validateProducts(rawProducts)
-  onProgress(100)
+  onProgress(1.0)
 
   const avgConf = count ? (confidenceAcc / count) : null
   return {
