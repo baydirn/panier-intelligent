@@ -179,23 +179,39 @@ export default function Analyse() {
             {(() => {
               const baseline = computeAverageBaseline(prixData, products)
               return combis.map((c, idx) => {
-                const savings = Math.round(((baseline - c.total) || 0) * 100) / 100
-                const savingsPct = baseline > 0 ? Math.round(((baseline - c.total) / baseline) * 10000) / 100 : 0
+                const effectiveSavings = (c.savings != null) ? c.savings : null
+                const effectiveSavingsPct = (c.savingsPct != null) ? c.savingsPct : null
                 return (
                   <div key={idx} className="bg-white rounded-xl shadow-sm border overflow-hidden animate-fade-in">
                     <div className="bg-blue-50 border-b px-4 py-2 text-sm text-blue-800 font-medium">
                       {c.stores.join(' • ')}
                     </div>
                     <div className="p-4">
-                      <p className="text-2xl font-bold mb-2">${c.total.toFixed(2)}</p>
-                      <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mb-3">Économie: ${savings.toFixed(2)} ({savingsPct}%)</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-2xl font-bold">${c.total.toFixed(2)}</p>
+                        <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
+                          Couverture: {Math.round((c.coverage || 0)*100)}%
+                        </span>
+                        {c.unknownCount > 0 && (
+                          <span className="inline-block text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                            {c.unknownCount} sans prix
+                          </span>
+                        )}
+                      </div>
+                      {effectiveSavings != null && effectiveSavingsPct != null ? (
+                        <span className="inline-block text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mb-3">Économie: ${effectiveSavings.toFixed(2)} ({effectiveSavingsPct}%)</span>
+                      ) : (
+                        <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mb-3">Économie non calculable (prix manquants)</span>
+                      )}
 
                       <div className="mb-3 max-h-40 overflow-auto">
                         <ul className="text-sm space-y-1">
                           {c.assignment.map((a, i) => (
                             <li key={i} className="flex justify-between">
                               <span>{a.product}</span>
-                              <span className="text-gray-600">{a.store} • ${a.price.toFixed(2)}</span>
+                              <span className="text-gray-600">
+                                {a.store || '—'} • {a.price != null ? `$${a.price.toFixed(2)}` : 'Prix indisponible'}
+                              </span>
                             </li>
                           ))}
                         </ul>

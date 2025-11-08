@@ -34,7 +34,14 @@ export default async function handler(req){
       }catch(_e){ /* fallthrough */ }
     }
 
-    // 3) Fallback: build meta from prices.json
+    // 3) Try local public meta file if present (served from /public/prices-meta.json)
+    try{
+      const localMetaUrl = '/prices-meta.json'
+      const m = await fetchJson(localMetaUrl)
+      return new Response(JSON.stringify({ ok: true, source: 'public-meta', resolved: { metaUrl: localMetaUrl }, meta: m }), { status: 200, headers: cors() })
+    }catch(_e){ /* fallthrough */ }
+
+    // 4) Fallback: build meta from prices.json
     try{
       const data = await fetchJson(dataUrl)
       const items = Array.isArray(data) ? data : (data.items || [])

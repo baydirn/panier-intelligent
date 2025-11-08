@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { BrowserMultiFormatReader } from '@zxing/browser'
 import Modal from './Modal'
 import Input from './Input'
 import Button from './Button'
@@ -181,24 +180,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
       const ctx = canvas.getContext('2d')
 
       // Try native BarcodeDetector first; if not available, fallback to ZXing reader
-      let usedZXing = false
-
-      const startZXing = async () => {
-        try {
-          const reader = new BrowserMultiFormatReader()
-          await reader.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
-            if (result) {
-              const text = result.getText()
-              handleBarcodeDetected(text)
-              reader.reset()
-              stopScanning()
-            }
-          })
-          usedZXing = true
-        } catch (e) {
-          console.warn('ZXing fallback failed', e)
-        }
-      }
+      // NOTE: Removed ZXing fallback due to bundler resolution issues; native BarcodeDetector only.
 
       let lastZXAttempt = 0
       // rAF loop for smoother iOS performance & throttled detection
@@ -220,15 +202,6 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
               }
             } catch (e) {
               console.debug('Detect error, continuing', e)
-            }
-          } else if (!usedZXing) {
-            // Start ZXing once if native detector is unavailable
-            startZXing()
-          } else {
-            // For iOS (no BarcodeDetector), periodically attempt decode via canvas (future extension)
-            const now = Date.now()
-            if (now - lastZXAttempt > 1500) {
-              lastZXAttempt = now
             }
           }
         }

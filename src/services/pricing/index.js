@@ -19,7 +19,12 @@ export async function fetchBestOffers({ name, barcode }){
       allOffers.push(...normalized)
     } catch(e){ /* ignore provider errors */ }
   }
-  // Trier par prix
-  allOffers.sort((a,b) => a.price - b.price)
+  // Trier par prix (offres sans prix en bas)
+  allOffers.sort((a,b) => {
+    if(a.price == null && b.price == null) return 0
+    if(a.price == null) return 1
+    if(b.price == null) return -1
+    return a.price - b.price
+  })
   return allOffers
 }
