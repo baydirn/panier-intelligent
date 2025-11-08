@@ -3,7 +3,8 @@
     { "source": "/(.*)", "destination": "/" }
   ],
   "crons": [
-    { "path": "/api/update-prices", "schedule": "0 5 * * 1" }
+    { "path": "/api/update-prices", "schedule": "0 5 * * 1" },
+    { "path": "/api/scrapers/flipp", "schedule": "0 3 * * 1" }
   ],
   "headers": [
     {
