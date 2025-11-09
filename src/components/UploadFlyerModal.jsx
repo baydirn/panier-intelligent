@@ -15,6 +15,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState(null)
+  const [ingestionStats, setIngestionStats] = useState(null) // { added, updated }
   const { addToast } = useToast()
 
   const STORES = [
@@ -124,22 +125,42 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         ocrConfidence: result.ocrConfidence
       })
       // Ingest immediately into weekly price base
+      let ingestRes = null
       try {
-        const ingestRes = await ingestOcrProducts({
+        ingestRes = await ingestOcrProducts({
           products: result.products,
           store,
           period: { from: fromDate, to: toDate },
           ocrConfidence: result.ocrConfidence
         })
-        if(ingestRes.added || ingestRes.updated){
-          addToast(`Base prix mise à jour (+${ingestRes.added} / ⟳${ingestRes.updated})`, 'info')
-        }
+        setIngestionStats(ingestRes) // Store for display in modal
       } catch(e){
         console.warn('Ingestion OCR échouée', e)
       }
-      addToast(`✅ ${result.validCount} produits soumis (${store}, ${fromDate} → ${toDate})`, 'success')
+
+      // Success message with ingestion details
+      if(ingestRes && (ingestRes.added || ingestRes.updated)){
+        addToast(
+          `🎉 Merci pour votre contribution! ${result.validCount} produits analysés. ` +
+          `${ingestRes.added} nouveaux prix ajoutés, ${ingestRes.updated} mis à jour. ` +
+          `(${store}, ${fromDate} → ${toDate})`,
+          'success',
+          8000 // Show longer
+        )
+      } else {
+        addToast(
+          `✅ Merci pour votre contribution! ${result.validCount} produits soumis (${store}, ${fromDate} → ${toDate})`,
+          'success',
+          5000
+        )
+      }
+      
       if (onSuccess) onSuccess(result.products, saved)
-      handleClose()
+      
+      // Close after a delay to let user see the success message in the modal
+      setTimeout(() => {
+        handleClose()
+      }, 1500)
 
     } catch (error) {
       console.error('OCR error:', error)
@@ -152,12 +173,14 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const handleClose = () => {
     setFile(null)
     setPreview(null)
+    setPdfInfo(null)
     setStore('')
     setFromDate('')
     setToDate('')
     setProcessing(false)
     setProgress(0)
     setResults(null)
+    setIngestionStats(null)
     onClose()
   }
 
@@ -265,8 +288,16 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         {results && !processing && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
             <h3 className="font-semibold text-green-900 mb-2">
-              ✓ {results.validCount} produits détectés
+              🎉 Merci pour votre contribution!
             </h3>
+            <p className="text-sm text-green-800 mb-3">
+              {results.validCount} produits détectés et analysés.
+              {ingestionStats && (ingestionStats.added > 0 || ingestionStats.updated > 0) && (
+                <span className="block mt-1 font-medium">
+                  ✓ {ingestionStats.added} nouveaux prix ajoutés, {ingestionStats.updated} mis à jour
+                </span>
+              )}
+            </p>
             <div className="max-h-40 overflow-auto text-sm">
               {results.products.slice(0, 10).map((p, i) => (
                 <div key={i} className="flex justify-between py-1 border-b border-green-100">
