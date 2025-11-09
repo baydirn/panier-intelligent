@@ -5,6 +5,8 @@ import { useToast } from './ToastProvider'
 import { hasSubmissionFor, saveSubmission } from '../services/ocrKV'
 import { ingestOcrProducts } from '../services/weeklyPrices'
 
+import useAppStore from '../store/useAppStore'
+
 export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [file, setFile] = useState(null)
   const [preview, setPreview] = useState(null)
@@ -16,7 +18,12 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState(null)
   const [ingestionStats, setIngestionStats] = useState(null) // { added, updated }
+  const [mergeStats, setMergeStats] = useState(null) // { addedToList, updatedInList }
   const { addToast } = useToast()
+  // Access store actions for merging OCR results into the shopping list
+  const products = useAppStore(s => s.products)
+  const addProductStore = useAppStore(s => s.addProduct)
+  const updateProductStore = useAppStore(s => s.updateProduct)
 
   const STORES = [
     'IGA', 'Metro', 'Walmart', 'Maxi', 'Provigo', 
@@ -44,7 +51,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     setFile(selectedFile)
     setPdfInfo(null)
 
-    if(isImage){
+  if(isImage){
       // Create preview for image
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -60,7 +67,8 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
         const ab = await selectedFile.arrayBuffer()
         const doc = await pdfjsLib.getDocument({ data: ab }).promise
-        setPdfInfo({ pages: doc.numPages })
+        const pageCount = doc.numPages
+        setPdfInfo({ pages: pageCount, truncated: pageCount > 15 })
       }catch(err){
         console.warn('PDF parse info failed', err)
       }
@@ -138,6 +146,46 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         console.warn('Ingestion OCR échouée', e)
       }
 
+      // Merge into main products list (business rule: reflect new OCR prices in user list)
+      // Strategy:
+      //  - Normalize product names (lowercase trim)
+      //  - If existing product with same normalized name:
+      //       * Update if no price yet OR OCR price < existing price
+      //       * Set magasin=flyer store, prixSource='ocr', autoAssigned=true
+      //  - Else add new product with prixSource='ocr'
+      //  - Track counts
+      try {
+        const existingByName = new Map()
+        products.forEach(p => { existingByName.set((p.nom||'').trim().toLowerCase(), p) })
+        let addedToList = 0, updatedInList = 0
+        for(const op of result.products){
+          const norm = (op.name || '').trim().toLowerCase()
+            .replace(/\s+/g,' ')
+          if(!norm) continue
+          const existing = existingByName.get(norm)
+          if(existing){
+            const shouldUpdate = (existing.prix == null) || (typeof existing.prix === 'number' && op.price < existing.prix)
+            if(shouldUpdate){
+              try {
+                await updateProductStore(existing.id, { prix: op.price, magasin: store, prixSource: 'ocr', autoAssigned: true })
+                updatedInList++
+              } catch(_){}
+            }
+          } else {
+            try {
+              const added = await addProductStore({ nom: norm, prix: op.price, magasin: store, quantite: 1, prixSource: 'ocr', autoAssigned: true })
+              if(added) addedToList++
+            } catch(_){ /* ignore single failure */ }
+          }
+        }
+        setMergeStats({ addedToList, updatedInList })
+        if(addedToList || updatedInList){
+          addToast(`Liste mise à jour via OCR (+${addedToList} ajoutés, ⟳${updatedInList} mis à jour)`, 'info', 6000)
+        }
+      } catch(mergeErr){
+        console.warn('Merge OCR -> liste échoué', mergeErr)
+      }
+
       // Success message with ingestion details
       if(ingestRes && (ingestRes.added || ingestRes.updated)){
         addToast(
@@ -181,6 +229,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     setProgress(0)
     setResults(null)
     setIngestionStats(null)
+    setMergeStats(null)
     onClose()
   }
 
@@ -263,6 +312,11 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         {!preview && pdfInfo && (
           <div className="mb-4 text-sm text-gray-600">
             PDF chargé • Pages: {pdfInfo.pages}
+            {pdfInfo.truncated && (
+              <span className="ml-2 inline-block text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700" title="Limite de 15 pages pour performance">
+                15 premières analysées
+              </span>
+            )}
           </div>
         )}
 
@@ -290,11 +344,16 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
             <h3 className="font-semibold text-green-900 mb-2">
               🎉 Merci pour votre contribution!
             </h3>
-            <p className="text-sm text-green-800 mb-3">
-              {results.validCount} produits détectés et analysés.
+            <p className="text-sm text-green-800 mb-3 space-y-1">
+              <span>{results.validCount} produits détectés et analysés.</span>
               {ingestionStats && (ingestionStats.added > 0 || ingestionStats.updated > 0) && (
-                <span className="block mt-1 font-medium">
-                  ✓ {ingestionStats.added} nouveaux prix ajoutés, {ingestionStats.updated} mis à jour
+                <span className="block font-medium">
+                  Base hebdo: +{ingestionStats.added} / ⟳{ingestionStats.updated}
+                </span>
+              )}
+              {mergeStats && (mergeStats.addedToList > 0 || mergeStats.updatedInList > 0) && (
+                <span className="block font-medium">
+                  Liste: +{mergeStats.addedToList} / ⟳{mergeStats.updatedInList}
                 </span>
               )}
             </p>
