@@ -22,6 +22,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const { addToast } = useToast()
   // Access store actions for merging OCR results into the shopping list
   const products = useAppStore(s => s.products)
+  const settings = useAppStore(s => s.settings)
   const addProductStore = useAppStore(s => s.addProduct)
   const updateProductStore = useAppStore(s => s.updateProduct)
 
@@ -155,16 +156,29 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
       //  - Else add new product with prixSource='ocr'
       //  - Track counts
       try {
+        const { recordPriceObservation } = await import('../services/db')
         const existingByName = new Map()
         products.forEach(p => { existingByName.set((p.nom||'').trim().toLowerCase(), p) })
-        let addedToList = 0, updatedInList = 0
+        let addedToList = 0, updatedInList = 0, historyCount = 0
+        const replaceMode = settings?.ocrPriceReplaceMode || 'better'
         for(const op of result.products){
-          const norm = (op.name || '').trim().toLowerCase()
-            .replace(/\s+/g,' ')
+          const norm = (op.name || '').trim().toLowerCase().replace(/\s+/g,' ')
           if(!norm) continue
           const existing = existingByName.get(norm)
+          // Enregistrement systématique dans l'historique
+          try {
+            await recordPriceObservation(norm, store, op.price)
+            historyCount++
+          } catch(_){ /* ignore single failure */ }
           if(existing){
-            const shouldUpdate = (existing.prix == null) || (typeof existing.prix === 'number' && op.price < existing.prix)
+            let shouldUpdate = false
+            if(replaceMode === 'always'){
+              shouldUpdate = true
+            } else if(replaceMode === 'better'){
+              shouldUpdate = (existing.prix == null) || (typeof existing.prix === 'number' && op.price < existing.prix)
+            } else if(replaceMode === 'never'){
+              shouldUpdate = (existing.prix == null) // Only update if no price set
+            }
             if(shouldUpdate){
               try {
                 await updateProductStore(existing.id, { prix: op.price, magasin: store, prixSource: 'ocr', autoAssigned: true })
@@ -178,9 +192,9 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
             } catch(_){ /* ignore single failure */ }
           }
         }
-        setMergeStats({ addedToList, updatedInList })
+        setMergeStats({ addedToList, updatedInList, historyCount })
         if(addedToList || updatedInList){
-          addToast(`Liste mise à jour via OCR (+${addedToList} ajoutés, ⟳${updatedInList} mis à jour)`, 'info', 6000)
+          addToast(`Liste mise à jour via OCR (+${addedToList} ajoutés, ⟳${updatedInList} mis à jour, 🕒 ${historyCount} historiques)`, 'info', 6000)
         }
       } catch(mergeErr){
         console.warn('Merge OCR -> liste échoué', mergeErr)

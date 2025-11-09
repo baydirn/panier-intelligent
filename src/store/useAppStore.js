@@ -4,7 +4,8 @@ import { getAllProducts, addProduct as dbAddProduct, updateProduct as dbUpdatePr
 const DEFAULT_SETTINGS = {
   maxStoresToCombine: 3,
   searchRadiusKm: 5,
-  favoriteStores: []
+  favoriteStores: [],
+  ocrPriceReplaceMode: 'better' // 'always' | 'better' | 'never'
 }
 
 const useAppStore = create((set, get) => ({

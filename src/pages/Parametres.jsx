@@ -21,6 +21,7 @@ export default function Parametres(){
   const [maxStores, setMaxStores] = useState(settings.maxStoresToCombine)
   const [searchRadius, setSearchRadius] = useState(settings.searchRadiusKm || 5)
   const [favoriteStores, setFavoriteStores] = useState((settings.favoriteStores || []).join(', '))
+  const [ocrPriceMode, setOcrPriceMode] = useState(settings.ocrPriceReplaceMode || 'better')
   const [saved, setSaved] = useState(false)
   const fileInputRef = useRef(null)
   const [geoStatus, setGeoStatus] = useState('idle')
@@ -70,7 +71,8 @@ export default function Parametres(){
     setSettings({ 
       maxStoresToCombine: Number(maxStores),
       searchRadiusKm: Number(searchRadius),
-      favoriteStores: stores
+      favoriteStores: stores,
+      ocrPriceReplaceMode: ocrPriceMode
     })
     setRadiusKm(Number(searchRadius)).catch(()=>{})
     setSaved(true)
@@ -187,6 +189,24 @@ export default function Parametres(){
             <p className="text-xs text-gray-500 -mt-2">
               Ces magasins seront priorisés dans les suggestions
             </p>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Logique de remplacement des prix OCR
+              </label>
+              <select
+                value={ocrPriceMode}
+                onChange={e => setOcrPriceMode(e.target.value)}
+                className="w-full max-w-xs border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="always">Toujours remplacer</option>
+                <option value="better">Remplacer si meilleur prix</option>
+                <option value="never">Ne jamais remplacer</option>
+              </select>
+              <p className="text-xs text-gray-500">
+                Choisissez comment les prix OCR modifient vos produits existants
+              </p>
+            </div>
 
             <div className="flex items-center gap-3 pt-2">
               <Button onClick={save} variant="primary">
