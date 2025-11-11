@@ -108,24 +108,41 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
     setProcessing(true)
     setProgress(0)
     setResults(null)
+    setIngestionStats(null)
+    setMergeStats(null)
 
     try {
       // Process OCR client-side (image or PDF)
+      console.log('[OCR] Starting OCR processing for:', file.name, file.type)
       let result
       const svc = await import('../services/ocrService')
       if(file.type === 'application/pdf'){
-        result = await svc.processPdf(file, (fraction) => setProgress(Math.round(fraction * 100)))
+        console.log('[OCR] Processing PDF...')
+        result = await svc.processPdf(file, (fraction) => {
+          const pct = Math.round(fraction * 100)
+          console.log('[OCR] Progress:', pct + '%')
+          setProgress(pct)
+        })
       } else {
-        result = await svc.processFlyer(file, (fraction) => setProgress(Math.round(fraction * 100)))
+        console.log('[OCR] Processing image...')
+        result = await svc.processFlyer(file, (fraction) => {
+          const pct = Math.round(fraction * 100)
+          console.log('[OCR] Progress:', pct + '%')
+          setProgress(pct)
+        })
       }
 
+      console.log('[OCR] OCR completed. Results:', result)
       setResults(result)
       
       if (result.validCount === 0) {
-        addToast('Aucun produit détecté. Essayez une autre photo.', 'warning')
+        console.warn('[OCR] No products detected')
+        addToast('❌ Aucun produit détecté. Essayez une autre photo plus claire.', 'warning', 5000)
+        setProcessing(false)
         return
       }
 
+      console.log('[OCR] Saving submission...')
       // Save locally (KV) for now; could POST to server later
       const saved = await saveSubmission({
         store,
@@ -135,18 +152,23 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         imageUrl: null,
         ocrConfidence: result.ocrConfidence
       })
+      console.log('[OCR] Submission saved:', saved)
+      
       // Ingest immediately into weekly price base
       let ingestRes = null
       try {
+        console.log('[OCR] Ingesting products into weekly price base...')
         ingestRes = await ingestOcrProducts({
           products: result.products,
           store,
           period: { from: fromDate, to: toDate },
           ocrConfidence: result.ocrConfidence
         })
+        console.log('[OCR] Ingestion result:', ingestRes)
         setIngestionStats(ingestRes) // Store for display in modal
       } catch(e){
-        console.warn('Ingestion OCR échouée', e)
+        console.warn('[OCR] Ingestion OCR échouée', e)
+        addToast('⚠️ Produits analysés mais non ajoutés à la base hebdomadaire', 'warning', 3000)
       }
 
       // Merge into main products list (business rule: reflect new OCR prices in user list)
@@ -158,12 +180,15 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
       //  - Else add new product with prixSource='ocr'
       //  - Track counts
       try {
+        console.log('[OCR] Merging products into list...')
         const { recordPriceObservation } = await import('../services/db')
         const existingByKey = new Map()
         products.forEach(p => { if(p.nameKey){ existingByKey.set(p.nameKey, p) } })
         let addedToList = 0, updatedInList = 0, historyCount = 0
         const replaceMode = settings?.ocrPriceReplaceMode || 'better'
         const canonStore = canonicalizeStoreName(store)
+        console.log('[OCR] Merge mode:', replaceMode, 'Store:', canonStore)
+        
         for(const op of result.products){
           const norm = normalizeProductName({ nom: op.name })
           if(!norm?.nameKey) continue
@@ -195,43 +220,55 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
             } catch(_){ /* ignore single failure */ }
           }
         }
+        console.log('[OCR] Merge complete. Added:', addedToList, 'Updated:', updatedInList, 'History:', historyCount)
         setMergeStats({ addedToList, updatedInList, historyCount })
         if(addedToList || updatedInList){
           addToast(`Liste mise à jour via OCR (+${addedToList} ajoutés, ⟳${updatedInList} mis à jour, 🕒 ${historyCount} historiques)`, 'info', 6000)
         }
       } catch(mergeErr){
-        console.warn('Merge OCR -> liste échoué', mergeErr)
+        console.error('[OCR] Merge OCR -> liste échoué', mergeErr)
+        addToast('⚠️ Erreur lors de la fusion avec votre liste: ' + mergeErr.message, 'warning', 5000)
       }
 
       // Success message with ingestion details
+      console.log('[OCR] Showing success message...')
       if(ingestRes && (ingestRes.added || ingestRes.updated)){
         addToast(
           `🎉 Merci pour votre contribution! ${result.validCount} produits analysés. ` +
           `${ingestRes.added} nouveaux prix ajoutés, ${ingestRes.updated} mis à jour. ` +
           `(${store}, ${fromDate} → ${toDate})`,
           'success',
-          8000 // Show longer
+          10000 // Show longer
         )
       } else {
         addToast(
-          `✅ Merci pour votre contribution! ${result.validCount} produits soumis (${store}, ${fromDate} → ${toDate})`,
+          `✅ ${result.validCount} produits analysés avec succès! (${store}, ${fromDate} → ${toDate})`,
           'success',
-          5000
+          8000
         )
       }
       
       if (onSuccess) onSuccess(result.products, saved)
       
-      // Close after a delay to let user see the success message in the modal
-      setTimeout(() => {
-        handleClose()
-      }, 1500)
+      // Don't close automatically - let user review results
+      console.log('[OCR] Processing complete. Modal remains open for review.')
+      // setTimeout(() => {
+      //   handleClose()
+      // }, 1500)
 
     } catch (error) {
-      console.error('OCR error:', error)
-      addToast('Erreur lors du traitement: ' + error.message, 'error')
+      console.error('[OCR] Error during processing:', error)
+      addToast('❌ Erreur lors du traitement OCR: ' + (error.message || 'Erreur inconnue'), 'error', 8000)
+      // Show error in modal too
+      setResults({
+        products: [],
+        validCount: 0,
+        error: error.message || 'Erreur inconnue',
+        ocrConfidence: 0
+      })
     } finally {
       setProcessing(false)
+      console.log('[OCR] Processing finished (finally block)')
     }
   }
 
@@ -342,7 +379,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
           <div className="mb-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium text-gray-700">
-                Traitement en cours...
+                Traitement en cours... (cela peut prendre 30-60 secondes)
               </span>
               <span className="text-sm text-gray-600">{progress}%</span>
             </div>
@@ -352,14 +389,32 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
                 style={{ width: `${progress}%` }}
               />
             </div>
+            <p className="text-xs text-gray-500 mt-2">
+              💡 Astuce: Vérifiez la console (F12) pour voir les détails du traitement
+            </p>
+          </div>
+        )}
+
+        {/* Error display */}
+        {results && results.error && !processing && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <h3 className="font-semibold text-red-900 mb-2">
+              ❌ Erreur de traitement
+            </h3>
+            <p className="text-sm text-red-800">
+              {results.error}
+            </p>
+            <p className="text-xs text-red-600 mt-2">
+              Vérifiez que l'image est claire et que les prix sont visibles. Ouvrez la console (F12) pour plus de détails.
+            </p>
           </div>
         )}
 
         {/* Results preview */}
-        {results && !processing && (
+        {results && !results.error && results.validCount > 0 && !processing && (
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
             <h3 className="font-semibold text-green-900 mb-2">
-              🎉 Merci pour votre contribution!
+              🎉 Analyse terminée avec succès!
             </h3>
             <p className="text-sm text-green-800 mb-3 space-y-1">
               <span>{results.validCount} produits détectés et analysés.</span>
