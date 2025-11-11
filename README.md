@@ -175,3 +175,68 @@ Remplacement futur possible par scraping légal des circulaires ou contribution 
 
 CI (facultatif): `.github/workflows/scrape-prices.yml` peut récupérer les sources hebdo (PRICE_SOURCE_URLS via Repository variables) et pousser `raw-prices.json`.
 
+## 🔧 Dépannage
+
+### Problème: Géolocalisation ne fonctionne pas
+
+**Symptômes**: Message "Geolocation has been disabled in this document by permissions policy" ou géolocalisation refusée.
+
+**Solutions**:
+1. **Utiliser le code postal** : Au lieu de la géolocalisation GPS, entrez votre code postal (ex: G3A 2W5, H1A 1B1) dans le champ prévu et cliquez sur "📍 Utiliser code postal"
+2. **Autoriser la géolocalisation** : 
+   - Dans Chrome/Edge: Cliquez sur l'icône de cadenas (ou info) à gauche de l'URL → Site settings → Location → Allow
+   - Dans Firefox: Cliquez sur l'icône (i) à gauche de l'URL → Permissions → Location → Allow
+3. **Si sur HTTP local**: Certains navigateurs bloquent la géolocalisation sur HTTP. Utilisez `https://localhost` ou le code postal comme alternative
+
+**Codes postaux supportés**: Montréal (H1-H9), Québec (G1-G8), Laval (H7), Gatineau (J8-J9), Sherbrooke (J1), Trois-Rivières (G8-G9), Rive-Nord (J6-J7)
+
+### Problème: Upload OCR ne s'affiche pas
+
+**Symptômes**: Le bouton "📄 Contribuer une circulaire (OCR)" est absent ou grisé.
+
+**Solutions**:
+1. **Vérifier la variable d'environnement**: Assurez-vous que `VITE_COMMUNITY_OCR_UPLOAD_ENABLED=true` est défini dans `.env.local`
+2. **Redémarrer le serveur**: Après modification de `.env.local`, arrêtez et redémarrez `npm run dev`
+3. **Vérifier dans la console**: Ouvrez les DevTools (F12) → Console et cherchez des erreurs liées à `tesseract.js` ou `pdfjs-dist`
+4. **Descendre dans la page**: Le bouton OCR est dans la section "Base de prix hebdomadaire" en bas de la page Paramètres
+
+### Problème: OCR échoue lors du traitement
+
+**Symptômes**: Erreur lors de l'analyse d'image ou PDF, ou "Aucun produit détecté".
+
+**Solutions**:
+1. **Qualité de l'image**: Utilisez une image claire, bien éclairée, avec des prix visibles et nets
+2. **Taille du fichier**: Maximum 10MB. Réduisez la taille si nécessaire
+3. **Format supporté**: Images (JPG, PNG, WEBP) ou PDF (max 15 pages analysées)
+4. **Langue**: L'OCR est configuré pour français + anglais. Si votre circulaire contient beaucoup de symboles, l'analyse peut échouer
+5. **Vérifier la console**: Regardez les logs dans DevTools → Console pour des détails sur l'erreur
+
+### Problème: Aucun magasin trouvé
+
+**Symptômes**: Liste vide après avoir activé la géolocalisation ou entré un code postal.
+
+**Solutions**:
+1. **Ajuster le rayon de recherche**: Dans Paramètres → "Rayon de recherche (km)", augmentez la valeur (ex: 10, 20, 50 km)
+2. **Vérifier le code postal**: Assurez-vous qu'il est bien formaté (ex: G3A 2W5, pas g3a2w5)
+3. **Catalogue de magasins**: Le fichier `public/stores.qc.json` contient la liste des magasins. Vérifiez qu'il existe et contient des coordonnées GPS
+4. **Ajouter manuellement**: Si aucun magasin proche n'est répertorié, vous pouvez toujours saisir des produits et comparer les prix disponibles
+
+### Problème: Les prix ne se mettent pas à jour
+
+**Symptômes**: Les prix restent les mêmes après avoir cliqué sur "🔁 Forcer la mise à jour".
+
+**Solutions**:
+1. **Vérifier l'URL source**: Dans Paramètres → "Base de prix hebdomadaire", cliquez sur "🧪 Tester la source" pour vérifier que l'URL est accessible
+2. **Console réseau**: Ouvrez DevTools → Network, filtrez par "weekly-prices", et vérifiez s'il y a des erreurs 404 ou CORS
+3. **Cache**: Videz le cache du navigateur (Ctrl+Shift+Delete) et rechargez la page
+4. **Déploiement**: Si en production, assurez-vous que `VITE_PRICE_DATA_URL` pointe vers une URL publique valide (ex: GitHub raw, CDN)
+
+### Besoin d'aide supplémentaire?
+
+Ouvrez une issue sur GitHub avec:
+- Description du problème
+- Étapes pour reproduire
+- Capture d'écran si applicable
+- Messages d'erreur de la console (F12 → Console)
+
+

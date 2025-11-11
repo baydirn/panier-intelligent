@@ -290,29 +290,41 @@ export default function Parametres(){
             <CardTitle>Localisation & Magasins proches</CardTitle>
           </CardHeader>
           <CardBody className="space-y-4">
+            {geoStatus.includes('disabled') && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+                ⚠️ La géolocalisation a été refusée par votre navigateur. 
+                <br/>Utilisez plutôt votre <strong>code postal</strong> ci-dessous pour trouver des magasins proches.
+              </div>
+            )}
             <div className="flex gap-3 flex-wrap items-center">
               <Button
                 onClick={async () => {
                   setGeoStatus('demande...')
+                  setPostalStatus('')
                   try {
                     await requestUserLocation()
-                    setGeoStatus('ok')
+                    setGeoStatus('✓ Position activée')
                     const stores = await listNearbyStores()
                     setNearbyStores(stores)
                   } catch(e){
-                    setGeoStatus('erreur: ' + e.message)
+                    const msg = e.message || 'Erreur inconnue'
+                    if(msg.includes('denied') || msg.includes('refus') || e.code === 1){
+                      setGeoStatus('Statut: erreur: Geolocation has been disabled in this document by permissions policy.')
+                    } else {
+                      setGeoStatus('erreur: ' + msg)
+                    }
                   }
                 }}
                 variant="secondary"
               >🔍 Actualiser ma position</Button>
-              <div className="text-xs text-gray-500">Statut: {geoStatus}</div>
+              <div className="text-xs text-gray-500">{geoStatus || 'idle'}</div>
             </div>
             <div className="flex gap-3 items-center mt-2">
               <input
                 type="text"
                 value={postalCode}
-                onChange={e => setPostalCode(e.target.value)}
-                placeholder="Code postal (ex: H1A)"
+                onChange={e => setPostalCode(e.target.value.toUpperCase())}
+                placeholder="Code postal (ex: G3A 2W5)"
                 className="border border-gray-300 rounded-lg px-3 py-2 max-w-[120px]"
                 disabled={geoStatus === 'demande...'}
               />
@@ -321,14 +333,16 @@ export default function Parametres(){
                 disabled={!postalCode || geoStatus === 'demande...'}
                 onClick={async () => {
                   setPostalStatus('Recherche...')
+                  setGeoStatus('')
                   try {
                     const coords = await setLocationFromPostal(postalCode)
                     if(coords){
-                      setPostalStatus('Position définie')
+                      setPostalStatus('✓ Position définie via code postal')
+                      setGeoStatus('')
                       const stores = await listNearbyStores()
                       setNearbyStores(stores)
                     } else {
-                      setPostalStatus('Code postal inconnu')
+                      setPostalStatus('❌ Code postal non reconnu (essayez: G1, G3, H1, H2, J7, J8, etc.)')
                     }
                   } catch(e){
                     setPostalStatus('Erreur: ' + e.message)

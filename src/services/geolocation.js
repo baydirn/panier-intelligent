@@ -44,12 +44,36 @@ export async function requestUserLocation(){
 
 // Postal code centroid lightweight fallback (Canada approximate mapping by first 3 chars)
 const POSTAL_PREFIX = {
+  // Montréal
   'H1': { lat: 45.59, lon: -73.54 },
   'H2': { lat: 45.52, lon: -73.57 },
   'H3': { lat: 45.49, lon: -73.58 },
   'H4': { lat: 45.47, lon: -73.67 },
   'H7': { lat: 45.61, lon: -73.77 },
-  'J7': { lat: 45.73, lon: -73.52 }
+  'H8': { lat: 45.45, lon: -73.68 },
+  'H9': { lat: 45.43, lon: -73.83 },
+  // Laval
+  'H7': { lat: 45.61, lon: -73.77 },
+  // Rive-Nord
+  'J7': { lat: 45.73, lon: -73.52 },
+  'J6': { lat: 45.58, lon: -73.45 },
+  // Québec
+  'G1': { lat: 46.81, lon: -71.21 },
+  'G2': { lat: 46.79, lon: -71.28 },
+  'G3': { lat: 46.77, lon: -71.27 },
+  'G4': { lat: 46.85, lon: -71.24 },
+  'G5': { lat: 46.76, lon: -71.33 },
+  'G6': { lat: 46.78, lon: -71.23 },
+  'G7': { lat: 46.74, lon: -71.30 },
+  'G8': { lat: 46.83, lon: -71.26 },
+  // Gatineau
+  'J8': { lat: 45.48, lon: -75.70 },
+  'J9': { lat: 45.43, lon: -75.65 },
+  // Sherbrooke
+  'J1': { lat: 45.40, lon: -71.89 },
+  // Trois-Rivières
+  'G8': { lat: 46.34, lon: -72.54 },
+  'G9': { lat: 46.35, lon: -72.55 }
 }
 
 export async function setLocationFromPostal(postal){
