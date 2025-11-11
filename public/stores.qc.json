@@ -1,46 +1,275 @@
 [
-  { "id": "iga_st_denys", "name": "IGA Saint-Denis", "lat": 45.5234, "lon": -73.585 },
-  { "id": "metro_mont_royal", "name": "Metro Mont-Royal", "lat": 45.5262, "lon": -73.574 },
-  { "id": "walmart_anjou", "name": "Walmart Anjou", "lat": 45.607, "lon": -73.560 },
-  { "id": "maxi_papineau", "name": "Maxi Papineau", "lat": 45.537, "lon": -73.611 },
-  { "id": "costco_brossard", "name": "Costco Brossard", "lat": 45.455, "lon": -73.454 },
-  { "id": "provigo_berri", "name": "Provigo Berri", "lat": 45.5176, "lon": -73.561 },
-  { "id": "super_c_plateau", "name": "Super C Plateau", "lat": 45.5283, "lon": -73.573 },
-  { "id": "maxi_rosement", "name": "Maxi Rosemont", "lat": 45.5598, "lon": -73.568 },
-  { "id": "iga_atwater", "name": "IGA Atwater", "lat": 45.4881, "lon": -73.5796 },
-  { "id": "metro_villeray", "name": "Metro Villeray", "lat": 45.5456, "lon": -73.619 },
-  
-  { "id": "iga_ste_foy", "name": "IGA Sainte-Foy", "lat": 46.7745, "lon": -71.2929 },
-  { "id": "iga_beauport", "name": "IGA Beauport", "lat": 46.8602, "lon": -71.1864 },
-  { "id": "metro_laurier_qc", "name": "Metro Laurier Québec", "lat": 46.7788, "lon": -71.2650 },
-  { "id": "metro_st_sacrement", "name": "Metro Saint-Sacrement", "lat": 46.7988, "lon": -71.2408 },
-  { "id": "maxi_charlesbourg", "name": "Maxi Charlesbourg", "lat": 46.8519, "lon": -71.2714 },
-  { "id": "maxi_duberger", "name": "Maxi Duberger", "lat": 46.8063, "lon": -71.3046 },
-  { "id": "super_c_quebec", "name": "Super C Québec", "lat": 46.8078, "lon": -71.2159 },
-  { "id": "walmart_ste_foy", "name": "Walmart Sainte-Foy", "lat": 46.7624, "lon": -71.2867 },
-  { "id": "walmart_beauport", "name": "Walmart Beauport", "lat": 46.8688, "lon": -71.1897 },
-  { "id": "costco_ste_foy", "name": "Costco Sainte-Foy", "lat": 46.7519, "lon": -71.3122 },
-  { "id": "costco_lebourgneuf", "name": "Costco Lebourgneuf", "lat": 46.8417, "lon": -71.3012 },
-  { "id": "provigo_sillery", "name": "Provigo Sillery", "lat": 46.7573, "lon": -71.2489 },
-  
-  { "id": "iga_laval", "name": "IGA Laval Centre", "lat": 45.5703, "lon": -73.7344 },
-  { "id": "metro_laval", "name": "Metro Laval", "lat": 45.6065, "lon": -73.7247 },
-  { "id": "maxi_laval", "name": "Maxi Laval", "lat": 45.5889, "lon": -73.7520 },
-  { "id": "walmart_laval", "name": "Walmart Laval", "lat": 45.5593, "lon": -73.7461 },
-  { "id": "costco_laval", "name": "Costco Laval", "lat": 45.5825, "lon": -73.7408 },
-  
-  { "id": "iga_gatineau", "name": "IGA Gatineau", "lat": 45.4765, "lon": -75.7013 },
-  { "id": "metro_gatineau", "name": "Metro Gatineau", "lat": 45.4832, "lon": -75.6527 },
-  { "id": "walmart_gatineau", "name": "Walmart Gatineau", "lat": 45.4897, "lon": -75.6515 },
-  { "id": "costco_gatineau", "name": "Costco Gatineau", "lat": 45.4671, "lon": -75.7311 },
-  
-  { "id": "iga_sherbrooke", "name": "IGA Sherbrooke", "lat": 45.4042, "lon": -71.8929 },
-  { "id": "metro_sherbrooke", "name": "Metro Sherbrooke", "lat": 45.4011, "lon": -71.9007 },
-  { "id": "walmart_sherbrooke", "name": "Walmart Sherbrooke", "lat": 45.3976, "lon": -71.9145 },
-  { "id": "maxi_sherbrooke", "name": "Maxi Sherbrooke", "lat": 45.4102, "lon": -71.8846 },
-  
-  { "id": "iga_trois_rivieres", "name": "IGA Trois-Rivières", "lat": 46.3432, "lon": -72.5477 },
-  { "id": "metro_trois_rivieres", "name": "Metro Trois-Rivières", "lat": 46.3521, "lon": -72.5613 },
-  { "id": "walmart_trois_rivieres", "name": "Walmart Trois-Rivières", "lat": 46.3389, "lon": -72.5729 },
-  { "id": "maxi_trois_rivieres", "name": "Maxi Trois-Rivières", "lat": 46.3598, "lon": -72.5502 }
+  {
+    "id": "iga_st_denys",
+    "name": "IGA Saint-Denis",
+    "lat": 45.5234,
+    "lon": -73.585,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "metro_mont_royal",
+    "name": "Metro Mont-Royal",
+    "lat": 45.5262,
+    "lon": -73.574,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "walmart_anjou",
+    "name": "Walmart Anjou",
+    "lat": 45.607,
+    "lon": -73.56,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "maxi_papineau",
+    "name": "Maxi Papineau",
+    "lat": 45.537,
+    "lon": -73.611,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "costco_brossard",
+    "name": "Costco Brossard",
+    "lat": 45.455,
+    "lon": -73.454,
+    "note": "Approximatif - Rive-Sud"
+  },
+  {
+    "id": "provigo_berri",
+    "name": "Provigo Berri",
+    "lat": 45.5176,
+    "lon": -73.561,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "super_c_plateau",
+    "name": "Super C Plateau",
+    "lat": 45.5283,
+    "lon": -73.573,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "maxi_rosement",
+    "name": "Maxi Rosemont",
+    "lat": 45.5598,
+    "lon": -73.568,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "iga_atwater",
+    "name": "IGA Atwater",
+    "lat": 45.4881,
+    "lon": -73.5796,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "metro_villeray",
+    "name": "Metro Villeray",
+    "lat": 45.5456,
+    "lon": -73.619,
+    "note": "Approximatif - Montréal"
+  },
+  {
+    "id": "iga_ste_foy",
+    "name": "IGA Sainte-Foy (DEMO - quartier Ste-Foy)",
+    "lat": 46.7745,
+    "lon": -71.2929,
+    "note": "Zone Sainte-Foy - coordonnées approximatives"
+  },
+  {
+    "id": "iga_beauport",
+    "name": "IGA Beauport (DEMO - secteur Beauport)",
+    "lat": 46.8602,
+    "lon": -71.1864,
+    "note": "Zone Beauport - coordonnées approximatives"
+  },
+  {
+    "id": "metro_laurier_qc",
+    "name": "Metro Laurier Québec (DEMO - Laurier)",
+    "lat": 46.7788,
+    "lon": -71.265,
+    "note": "Zone av. Laurier - coordonnées approximatives"
+  },
+  {
+    "id": "metro_st_sacrement",
+    "name": "Metro Saint-Sacrement (DEMO - centre-ville QC)",
+    "lat": 46.7988,
+    "lon": -71.2408,
+    "note": "Zone Saint-Sacrement - coordonnées approximatives"
+  },
+  {
+    "id": "maxi_charlesbourg",
+    "name": "Maxi Charlesbourg (DEMO - Charlesbourg)",
+    "lat": 46.8519,
+    "lon": -71.2714,
+    "note": "Zone Charlesbourg - coordonnées approximatives"
+  },
+  {
+    "id": "maxi_duberger",
+    "name": "Maxi Duberger (DEMO - Les Saules)",
+    "lat": 46.8063,
+    "lon": -71.3046,
+    "note": "Zone Les Saules/Duberger - coordonnées approximatives"
+  },
+  {
+    "id": "super_c_quebec",
+    "name": "Super C Québec (DEMO - Lebourgneuf)",
+    "lat": 46.8078,
+    "lon": -71.2159,
+    "note": "Zone Lebourgneuf - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_ste_foy",
+    "name": "Walmart Sainte-Foy (DEMO - Ste-Foy)",
+    "lat": 46.7624,
+    "lon": -71.2867,
+    "note": "Zone Sainte-Foy - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_beauport",
+    "name": "Walmart Beauport (DEMO - Beauport)",
+    "lat": 46.8688,
+    "lon": -71.1897,
+    "note": "Zone Beauport - coordonnées approximatives"
+  },
+  {
+    "id": "costco_ste_foy",
+    "name": "Costco Sainte-Foy (DEMO - Ste-Foy)",
+    "lat": 46.7519,
+    "lon": -71.3122,
+    "note": "Zone Sainte-Foy - coordonnées approximatives"
+  },
+  {
+    "id": "costco_lebourgneuf",
+    "name": "Costco Lebourgneuf (DEMO - Lebourgneuf)",
+    "lat": 46.8417,
+    "lon": -71.3012,
+    "note": "Zone Lebourgneuf - coordonnées approximatives"
+  },
+  {
+    "id": "provigo_sillery",
+    "name": "Provigo Sillery (DEMO - Sillery)",
+    "lat": 46.7573,
+    "lon": -71.2489,
+    "note": "Zone Sillery - coordonnées approximatives"
+  },
+  {
+    "id": "iga_laval",
+    "name": "IGA Laval Centre (DEMO)",
+    "lat": 45.5703,
+    "lon": -73.7344,
+    "note": "Zone Laval - coordonnées approximatives"
+  },
+  {
+    "id": "metro_laval",
+    "name": "Metro Laval (DEMO)",
+    "lat": 45.6065,
+    "lon": -73.7247,
+    "note": "Zone Laval - coordonnées approximatives"
+  },
+  {
+    "id": "maxi_laval",
+    "name": "Maxi Laval (DEMO)",
+    "lat": 45.5889,
+    "lon": -73.752,
+    "note": "Zone Laval - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_laval",
+    "name": "Walmart Laval (DEMO)",
+    "lat": 45.5593,
+    "lon": -73.7461,
+    "note": "Zone Laval - coordonnées approximatives"
+  },
+  {
+    "id": "costco_laval",
+    "name": "Costco Laval (DEMO)",
+    "lat": 45.5825,
+    "lon": -73.7408,
+    "note": "Zone Laval - coordonnées approximatives"
+  },
+  {
+    "id": "iga_gatineau",
+    "name": "IGA Gatineau (DEMO)",
+    "lat": 45.4765,
+    "lon": -75.7013,
+    "note": "Zone Gatineau - coordonnées approximatives"
+  },
+  {
+    "id": "metro_gatineau",
+    "name": "Metro Gatineau (DEMO)",
+    "lat": 45.4832,
+    "lon": -75.6527,
+    "note": "Zone Gatineau - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_gatineau",
+    "name": "Walmart Gatineau (DEMO)",
+    "lat": 45.4897,
+    "lon": -75.6515,
+    "note": "Zone Gatineau - coordonnées approximatives"
+  },
+  {
+    "id": "costco_gatineau",
+    "name": "Costco Gatineau (DEMO)",
+    "lat": 45.4671,
+    "lon": -75.7311,
+    "note": "Zone Gatineau - coordonnées approximatives"
+  },
+  {
+    "id": "iga_sherbrooke",
+    "name": "IGA Sherbrooke (DEMO)",
+    "lat": 45.4042,
+    "lon": -71.8929,
+    "note": "Zone Sherbrooke - coordonnées approximatives"
+  },
+  {
+    "id": "metro_sherbrooke",
+    "name": "Metro Sherbrooke (DEMO)",
+    "lat": 45.4011,
+    "lon": -71.9007,
+    "note": "Zone Sherbrooke - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_sherbrooke",
+    "name": "Walmart Sherbrooke (DEMO)",
+    "lat": 45.3976,
+    "lon": -71.9145,
+    "note": "Zone Sherbrooke - coordonnées approximatives"
+  },
+  {
+    "id": "maxi_sherbrooke",
+    "name": "Maxi Sherbrooke (DEMO)",
+    "lat": 45.4102,
+    "lon": -71.8846,
+    "note": "Zone Sherbrooke - coordonnées approximatives"
+  },
+  {
+    "id": "iga_trois_rivieres",
+    "name": "IGA Trois-Rivières (DEMO)",
+    "lat": 46.3432,
+    "lon": -72.5477,
+    "note": "Zone Trois-Rivières - coordonnées approximatives"
+  },
+  {
+    "id": "metro_trois_rivieres",
+    "name": "Metro Trois-Rivières (DEMO)",
+    "lat": 46.3521,
+    "lon": -72.5613,
+    "note": "Zone Trois-Rivières - coordonnées approximatives"
+  },
+  {
+    "id": "walmart_trois_rivieres",
+    "name": "Walmart Trois-Rivières (DEMO)",
+    "lat": 46.3389,
+    "lon": -72.5729,
+    "note": "Zone Trois-Rivières - coordonnées approximatives"
+  },
+  {
+    "id": "maxi_trois_rivieres",
+    "name": "Maxi Trois-Rivières (DEMO)",
+    "lat": 46.3598,
+    "lon": -72.5502,
+    "note": "Zone Trois-Rivières - coordonnées approximatives"
+  }
 ]

@@ -4,6 +4,7 @@ import Button from './Button'
 import { useToast } from './ToastProvider'
 import { hasSubmissionFor, saveSubmission } from '../services/ocrKV'
 import { ingestOcrProducts } from '../services/weeklyPrices'
+import OcrReviewModal from './OcrReviewModal'
 
 import useAppStore from '../store/useAppStore'
 import { normalizeProductName } from '../domain/productNormalization'
@@ -19,6 +20,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [processing, setProcessing] = useState(false)
   const [progress, setProgress] = useState(0)
   const [results, setResults] = useState(null)
+  const [showReview, setShowReview] = useState(false) // Show review modal
   const [ingestionStats, setIngestionStats] = useState(null) // { added, updated }
   const [mergeStats, setMergeStats] = useState(null) // { addedToList, updatedInList }
   const { addToast } = useToast()
@@ -142,15 +144,51 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         return
       }
 
+      console.log(`[OCR] Detected ${result.validCount} products. Opening review modal...`)
+      // Show review modal instead of saving directly
+      setProcessing(false)
+      setShowReview(true)
+      
+    } catch (error) {
+      console.error('[OCR] Error during processing:', error)
+      addToast('❌ Erreur lors du traitement OCR: ' + (error.message || 'Erreur inconnue'), 'error', 8000)
+      // Show error in modal too
+      setResults({
+        products: [],
+        validCount: 0,
+        error: error.message || 'Erreur inconnue',
+        ocrConfidence: 0
+      })
+    } finally {
+      setProcessing(false)
+      console.log('[OCR] Processing finished (finally block)')
+    }
+  }
+
+  // New function: Save reviewed products
+  const handleReviewSave = async (reviewedProducts) => {
+    try {
+      console.log('[OCR] Saving reviewed products...', reviewedProducts)
+      setShowReview(false)
+      setProcessing(true)
+
+      // Update results with reviewed products
+      const updatedResults = {
+        ...results,
+        products: reviewedProducts,
+        validCount: reviewedProducts.length
+      }
+      setResults(updatedResults)
+
       console.log('[OCR] Saving submission...')
       // Save locally (KV) for now; could POST to server later
       const saved = await saveSubmission({
         store,
         period: { from: fromDate, to: toDate },
-        products: result.products,
+        products: reviewedProducts,
         uploadedBy: 'community',
         imageUrl: null,
-        ocrConfidence: result.ocrConfidence
+        ocrConfidence: updatedResults.ocrConfidence || 0
       })
       console.log('[OCR] Submission saved:', saved)
       
@@ -159,10 +197,10 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
       try {
         console.log('[OCR] Ingesting products into weekly price base...')
         ingestRes = await ingestOcrProducts({
-          products: result.products,
+          products: reviewedProducts,
           store,
           period: { from: fromDate, to: toDate },
-          ocrConfidence: result.ocrConfidence
+          ocrConfidence: updatedResults.ocrConfidence || 0
         })
         console.log('[OCR] Ingestion result:', ingestRes)
         setIngestionStats(ingestRes) // Store for display in modal
@@ -189,7 +227,7 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
         const canonStore = canonicalizeStoreName(store)
         console.log('[OCR] Merge mode:', replaceMode, 'Store:', canonStore)
         
-        for(const op of result.products){
+        for(const op of reviewedProducts){
           const norm = normalizeProductName({ nom: op.name })
           if(!norm?.nameKey) continue
           const existing = existingByKey.get(norm.nameKey)
@@ -290,10 +328,41 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="p-6 max-w-2xl">
-        <h2 className="text-2xl font-bold mb-4">📸 Téléverser une circulaire</h2>
+        <h2 className="text-2xl font-bold mb-4">📸 Téléverser une circulaire (Expérimental)</h2>
+        
+        {/* Disclaimer réaliste */}
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-amber-800">
+                Fonctionnalité expérimentale - Précision limitée
+              </h3>
+              <div className="mt-2 text-sm text-amber-700">
+                <p className="mb-2">L'OCR fonctionne mieux avec:</p>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>Circulaires <strong>simples</strong> (texte noir sur blanc)</li>
+                  <li>Un produit par ligne, prix clairement séparé</li>
+                  <li>Images claires, bien éclairées</li>
+                </ul>
+                <p className="mt-2 font-semibold">
+                  ⚠️ Précision attendue: 30-50% sur circulaires réelles
+                </p>
+                <p className="text-xs mt-1">
+                  Les circulaires avec mise en page complexe (colonnes, images colorées) donnent de mauvais résultats. 
+                  <strong> Vérifiez toujours les produits détectés.</strong>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <p className="text-sm text-gray-600 mb-6">
-          Prenez une photo claire de votre circulaire papier ou importez un PDF. Notre IA extraira automatiquement les prix.
+          Prenez une photo claire de votre circulaire papier ou importez un PDF.
         </p>
 
         {/* Store selection */}
@@ -477,6 +546,15 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
           💡 Conseil: Assurez-vous que les prix sont clairement visibles et que l'éclairage est bon pour de meilleurs résultats.
         </p>
       </div>
+
+      {/* OCR Review Modal */}
+      {showReview && results?.products && (
+        <OcrReviewModal
+          products={results.products}
+          onSave={handleReviewSave}
+          onCancel={() => setShowReview(false)}
+        />
+      )}
     </Modal>
   )
 }

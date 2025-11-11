@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test OCR - Tesseract.js</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 { color: #333; margin-top: 0; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover { background: #2563eb; }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    .log {
+      background: #1f2937;
+      color: #10b981;
+      padding: 15px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 400px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      margin-top: 20px;
+    }
+    .error { color: #ef4444; }
+    .success { color: #10b981; }
+    .info { color: #3b82f6; }
+    input[type="file"] {
+      padding: 10px;
+      border: 2px solid #d1d5db;
+      border-radius: 6px;
+      margin: 10px 0;
+      display: block;
+    }
+    .progress {
+      width: 100%;
+      height: 24px;
+      background: #e5e7eb;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 10px 0;
+      display: none;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #3b82f6, #2563eb);
+      transition: width 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    #preview {
+      max-width: 100%;
+      max-height: 300px;
+      margin: 10px 0;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧪 Test OCR - Tesseract.js</h1>
+    <p>Ce test vérifie si Tesseract.js fonctionne correctement dans votre navigateur.</p>
+    
+    <button onclick="testImport()">1️⃣ Test import Tesseract</button>
+    <button onclick="testWorkerCreation()">2️⃣ Test création worker</button>
+    
+    <hr style="margin: 20px 0;">
+    
+    <h3>Test OCR complet</h3>
+    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
+    <img id="preview" alt="Preview">
+    <div class="progress" id="progressBar">
+      <div class="progress-bar" id="progressBarInner">0%</div>
+    </div>
+    <button id="processBtn" onclick="processImage()" disabled>3️⃣ Analyser l'image</button>
+    
+    <div class="log" id="log">Console de débogage...\n</div>
+  </div>
+
+  <script type="module">
+    let selectedFile = null;
+
+    window.log = function(msg, type = 'info') {
+      const logEl = document.getElementById('log');
+      const timestamp = new Date().toLocaleTimeString();
+      const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+      logEl.innerHTML += `<span class="${type}">[${timestamp}] ${prefix} ${msg}</span>\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(`[${timestamp}] ${msg}`);
+    }
+
+    window.testImport = async function() {
+      try {
+        log('Test: Import de tesseract.js...');
+        const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+        log('✓ Import réussi! createWorker est disponible.', 'success');
+        log(`Type: ${typeof createWorker}`, 'info');
+      } catch(err) {
+        log(`✗ Erreur d'import: ${err.message}`, 'error');
+        log(`Stack: ${err.stack}`, 'error');
+      }
+    }
+
+    window.testWorkerCreation = async function() {
+      try {
+        log('Test: Création d\'un worker Tesseract...');
+        const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+        
+        log('Création du worker (français + anglais)...');
+        const worker = await createWorker('fra+eng', 1, {
+          logger: m => log(`Logger: ${m.status} ${m.progress ? Math.round(m.progress*100)+'%' : ''}`)
+        });
+        
+        log('✓ Worker créé avec succès!', 'success');
+        log('Fermeture du worker...');
+        await worker.terminate();
+        log('✓ Worker fermé proprement.', 'success');
+      } catch(err) {
+        log(`✗ Erreur création worker: ${err.message}`, 'error');
+        log(`Stack: ${err.stack}`, 'error');
+      }
+    }
+
+    window.handleFile = function(file) {
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        log('Sélectionnez une image (JPG, PNG, etc.)', 'error');
+        return;
+      }
+      
+      selectedFile = file;
+      log(`Fichier sélectionné: ${file.name} (${(file.size/1024).toFixed(1)} KB)`);
+      
+      const preview = document.getElementById('preview');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+      
+      document.getElementById('processBtn').disabled = false;
+    }
+
+    window.processImage = async function() {
+      if (!selectedFile) {
+        log('Sélectionnez d\'abord une image', 'error');
+        return;
+      }
+      
+      const progressBar = document.getElementById('progressBar');
+      const progressBarInner = document.getElementById('progressBarInner');
+      const processBtn = document.getElementById('processBtn');
+      
+      progressBar.style.display = 'block';
+      processBtn.disabled = true;
+      
+      try {
+        log('=== DÉBUT DE L\'ANALYSE OCR ===', 'info');
+        log(`Import de tesseract.js depuis CDN...`);
+        const { createWorker } = await import('https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js');
+        
+        log('Création du worker OCR (fra+eng)...');
+        const worker = await createWorker('fra+eng', 1, {
+          logger: m => {
+            if (m.status === 'recognizing text') {
+              const pct = Math.round(m.progress * 100);
+              progressBarInner.style.width = pct + '%';
+              progressBarInner.textContent = pct + '%';
+              log(`Progression: ${pct}%`);
+            } else {
+              log(`Status: ${m.status}`);
+            }
+          }
+        });
+        
+        log('Démarrage de la reconnaissance...');
+        const { data } = await worker.recognize(selectedFile);
+        
+        log('✓ OCR TERMINÉ!', 'success');
+        log(`Texte détecté (${data.text.length} caractères):`);
+        log('─'.repeat(50));
+        log(data.text || '(vide)');
+        log('─'.repeat(50));
+        log(`Confiance moyenne: ${data.confidence?.toFixed(1)}%`);
+        log(`Nombre de mots: ${data.words?.length || 0}`);
+        
+        await worker.terminate();
+        log('✓ Worker fermé.', 'success');
+        log('=== FIN DE L\'ANALYSE ===', 'success');
+        
+      } catch(err) {
+        log(`❌ ERREUR OCR: ${err.message}`, 'error');
+        log(`Stack complet:`, 'error');
+        log(err.stack, 'error');
+      } finally {
+        progressBar.style.display = 'none';
+        processBtn.disabled = false;
+      }
+    }
+    
+    log('Page chargée. Prêt pour les tests!', 'success');
+  </script>
+</body>
+</html>
