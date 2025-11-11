@@ -1,11 +1,14 @@
 import create from 'zustand'
 import { getAllProducts, addProduct as dbAddProduct, updateProduct as dbUpdateProduct, deleteProduct as dbDeleteProduct } from '../services/db'
+import { DEFAULT_WEIGHTS } from '../domain/scoring'
 
 const DEFAULT_SETTINGS = {
   maxStoresToCombine: 3,
   searchRadiusKm: 5,
   favoriteStores: [],
-  ocrPriceReplaceMode: 'better' // 'always' | 'better' | 'never'
+  ocrPriceReplaceMode: 'better', // 'always' | 'better' | 'never'
+  // Allow user to tune multi-criteria optimisation weights
+  scoringWeights: { ...DEFAULT_WEIGHTS }
 }
 
 const useAppStore = create((set, get) => ({

@@ -4,6 +4,8 @@
 
 import localforage from 'localforage'
 import { nanoid } from 'nanoid'
+import { normalizeProductName } from '../domain/productNormalization'
+import { canonicalizeStoreName } from '../domain/stores'
 
 const STORE_KEY = 'panier_products_v1'
 const RECURR_KEY = 'panier_recurrent_products_v1'
@@ -32,6 +34,26 @@ async function init(){
   if(!(await localforage.getItem(SAVED_LISTS_KEY))){ await localforage.setItem(SAVED_LISTS_KEY, []) }
   if(!(await localforage.getItem(PRICE_HISTORY_KEY))){ await localforage.setItem(PRICE_HISTORY_KEY, {}) }
   if(!(await localforage.getItem(PRICE_ALERTS_KEY))){ await localforage.setItem(PRICE_ALERTS_KEY, {}) }
+
+  // Migration: backfill nameKey & canonical store for existing products
+  try {
+    const list = await localforage.getItem(STORE_KEY) || []
+    let changed = false
+    const newList = list.map(p => {
+      const next = { ...p }
+      if(!next.nameKey || next.nameKey.length < 3){
+        const norm = normalizeProductName({ nom: next.nom, marque: next.marque, volume: next.volume })
+        next.nameKey = norm.nameKey
+        changed = true
+      }
+      if(next.magasin){
+        const canon = canonicalizeStoreName(next.magasin)
+        if(canon !== next.magasin){ next.magasin = canon; changed = true }
+      }
+      return next
+    })
+    if(changed){ await localforage.setItem(STORE_KEY, newList) }
+  } catch(e){ /* silent migration failure */ }
 }
 
 async function getAllProducts(){
@@ -55,19 +77,42 @@ function sanitizeProductUpdate(fields){
     const name = String(fields.nom ?? '').trim()
     out.nom = name.slice(0, 140)
   }
+  if(Object.prototype.hasOwnProperty.call(fields, 'marque')){
+    const m = fields.marque == null ? null : String(fields.marque).trim()
+    out.marque = m || null
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'volume')){
+    const v = fields.volume == null ? null : String(fields.volume).trim()
+    out.volume = v || null
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'categorie')){
+    const c = fields.categorie == null ? null : String(fields.categorie).trim()
+    out.categorie = c || null
+  }
+  if(Object.prototype.hasOwnProperty.call(fields, 'tags')){
+    const t = Array.isArray(fields.tags) ? fields.tags.map(x => String(x).trim()).filter(Boolean) : []
+    out.tags = t
+  }
   if(Object.prototype.hasOwnProperty.call(fields, 'quantite')){
     let q = parseInt(fields.quantite, 10)
     if(!Number.isFinite(q) || q < 1) q = 1
     out.quantite = q
   }
   if(Object.prototype.hasOwnProperty.call(fields, 'magasin')){
-    out.magasin = fields.magasin ? String(fields.magasin).trim() : null
+    const canon = fields.magasin ? canonicalizeStoreName(fields.magasin) : null
+    out.magasin = canon
   }
   if(Object.prototype.hasOwnProperty.call(fields, 'prix')){
-    let n = Number(fields.prix)
-    if(!Number.isFinite(n) || n < 0) n = null
-    if(n != null) n = Math.round(n * 100) / 100
-    out.prix = n
+    // Preserve null/undefined as null; avoid converting null -> 0
+    let raw = fields.prix
+    if(raw === null || raw === undefined || raw === ''){
+      out.prix = null
+    } else {
+      let n = Number(raw)
+      if(!Number.isFinite(n) || n < 0) n = null
+      if(n != null) n = Math.round(n * 100) / 100
+      out.prix = n
+    }
   }
   if(Object.prototype.hasOwnProperty.call(fields, 'purchased')){
     out.purchased = !!fields.purchased
@@ -83,16 +128,35 @@ function sanitizeProductUpdate(fields){
   if(Object.prototype.hasOwnProperty.call(fields, 'autoAssigned')){
     out.autoAssigned = !!fields.autoAssigned
   }
+  // nameKey is computed server-side; ignore external setting here
   return out
 }
 
 async function addProduct(product){
   const list = await localforage.getItem(STORE_KEY) || []
-  const base = { id: nanoid(), nom: product.nom, quantite: product.quantite ?? 1, recurrent: !!product.recurrent, magasin: product.magasin || null, prix: product.prix ?? null, purchased: !!product.purchased, prixSource: product.prixSource || (product.prix != null ? 'manuel' : null), autoAssigned: !!product.autoAssigned }
-  const p = { ...base, ...sanitizeProductUpdate(base) }
-  list.push(p)
+  const base = {
+    id: nanoid(),
+    nom: product.nom,
+    marque: product.marque ?? null,
+    volume: product.volume ?? null,
+    categorie: product.categorie ?? null,
+    tags: Array.isArray(product.tags) ? product.tags.slice() : [],
+    quantite: product.quantite ?? 1,
+    recurrent: !!product.recurrent,
+    magasin: product.magasin || null,
+    prix: product.prix ?? null,
+    purchased: !!product.purchased,
+    prixSource: product.prixSource || (product.prix != null ? 'manuel' : null),
+    autoAssigned: !!product.autoAssigned
+  }
+  // sanitize primitives & canonical store
+  const clean = sanitizeProductUpdate(base)
+  // compute nameKey from (nom, marque, volume)
+  const norm = normalizeProductName({ nom: clean.nom, marque: clean.marque, volume: clean.volume })
+  const withComputed = { ...clean, nameKey: norm.nameKey }
+  list.push(withComputed)
   await localforage.setItem(STORE_KEY, list)
-  return p
+  return withComputed
 }
 
 async function updateProduct(id, fields){
@@ -100,7 +164,13 @@ async function updateProduct(id, fields){
   const idx = list.findIndex(p => p.id === id)
   if(idx === -1) return null
   const clean = sanitizeProductUpdate(fields || {})
-  list[idx] = { ...list[idx], ...clean }
+  const next = { ...list[idx], ...clean }
+  // recompute nameKey if any identity field changed
+  if(Object.prototype.hasOwnProperty.call(clean, 'nom') || Object.prototype.hasOwnProperty.call(clean, 'marque') || Object.prototype.hasOwnProperty.call(clean, 'volume')){
+    const norm = normalizeProductName({ nom: next.nom, marque: next.marque, volume: next.volume })
+    next.nameKey = norm.nameKey
+  }
+  list[idx] = next
   await localforage.setItem(STORE_KEY, list)
   return list[idx]
 }

@@ -6,6 +6,8 @@ import { hasSubmissionFor, saveSubmission } from '../services/ocrKV'
 import { ingestOcrProducts } from '../services/weeklyPrices'
 
 import useAppStore from '../store/useAppStore'
+import { normalizeProductName } from '../domain/productNormalization'
+import { canonicalizeStoreName } from '../domain/stores'
 
 export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
   const [file, setFile] = useState(null)
@@ -157,17 +159,18 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
       //  - Track counts
       try {
         const { recordPriceObservation } = await import('../services/db')
-        const existingByName = new Map()
-        products.forEach(p => { existingByName.set((p.nom||'').trim().toLowerCase(), p) })
+        const existingByKey = new Map()
+        products.forEach(p => { if(p.nameKey){ existingByKey.set(p.nameKey, p) } })
         let addedToList = 0, updatedInList = 0, historyCount = 0
         const replaceMode = settings?.ocrPriceReplaceMode || 'better'
+        const canonStore = canonicalizeStoreName(store)
         for(const op of result.products){
-          const norm = (op.name || '').trim().toLowerCase().replace(/\s+/g,' ')
-          if(!norm) continue
-          const existing = existingByName.get(norm)
-          // Enregistrement systématique dans l'historique
+          const norm = normalizeProductName({ nom: op.name })
+          if(!norm?.nameKey) continue
+          const existing = existingByKey.get(norm.nameKey)
+          // Enregistrement systématique dans l'historique (par nameKey + store canonical)
           try {
-            await recordPriceObservation(norm, store, op.price)
+            await recordPriceObservation(norm.nameKey, canonStore, op.price)
             historyCount++
           } catch(_){ /* ignore single failure */ }
           if(existing){
@@ -181,13 +184,13 @@ export default function UploadFlyerModal({ isOpen, onClose, onSuccess }) {
             }
             if(shouldUpdate){
               try {
-                await updateProductStore(existing.id, { prix: op.price, magasin: store, prixSource: 'ocr', autoAssigned: true })
+                await updateProductStore(existing.id, { prix: op.price, magasin: canonStore, prixSource: 'ocr', autoAssigned: true })
                 updatedInList++
               } catch(_){}
             }
           } else {
             try {
-              const added = await addProductStore({ nom: norm, prix: op.price, magasin: store, quantite: 1, prixSource: 'ocr', autoAssigned: true })
+              const added = await addProductStore({ nom: norm.baseName, marque: norm.marque, volume: norm.volume, prix: op.price, magasin: canonStore, quantite: 1, prixSource: 'ocr', autoAssigned: true })
               if(added) addedToList++
             } catch(_){ /* ignore single failure */ }
           }

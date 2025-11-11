@@ -13,7 +13,10 @@ export async function extractTextFromImage(imageFile, onProgress = () => {}) {
       if (m.status === 'recognizing text') {
         onProgress(m.progress)
       }
-    }
+    },
+    // Optimize for speed
+    tessedit_pageseg_mode: '3', // Fully automatic page segmentation
+    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$.,% àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ-',
   })
 
   try {
@@ -162,21 +165,19 @@ export async function processPdf(pdfFile, onProgress = () => {}){
   // Create a single tesseract worker for all pages
   const { createWorker } = await import('tesseract.js')
   const worker = await createWorker('fra+eng', 1, {
-    logger: (m) => {
-      if (m.status === 'recognizing text') {
-        // per-page progress handled below
-      }
-    }
+    logger: () => {}, // Reduce logging overhead
+    tessedit_pageseg_mode: '3',
+    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$.,% àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ-',
   })
 
   let combinedText = ''
   let confidenceAcc = 0
   let count = 0
-  const maxPages = Math.min(pageCount, 15) // cap for performance
+  const maxPages = Math.min(pageCount, 10) // Reduce to 10 pages for speed
 
   for(let i=1; i<=maxPages; i++){
     const page = await doc.getPage(i)
-    const viewport = page.getViewport({ scale: 2 })
+    const viewport = page.getViewport({ scale: 1.5 }) // Reduced from 2 for speed
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     canvas.width = viewport.width

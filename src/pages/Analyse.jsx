@@ -14,7 +14,9 @@ export default function Analyse() {
   const products = useAppStore((s) => s.products || [])
   const loadProducts = useAppStore((s) => s.loadProducts)
   const setCombinaisonOptimale = useAppStore((s) => s.setCombinaisonOptimale)
-  const maxMagasins = useAppStore((s) => s.settings?.maxStoresToCombine ?? 2)
+  const settings = useAppStore((s) => s.settings || {})
+  const maxMagasins = settings.maxStoresToCombine ?? 2
+  const favoriteStores = settings.favoriteStores ?? []
 
   const [loading, setLoading] = useState(false)
   const [prixData, setPrixData] = useState(null)
@@ -24,9 +26,17 @@ export default function Analyse() {
   const [savedLists, setSavedLists] = useState([])
   const [currentListId, setCurrentListId] = useState(null)
   const [showListSelector, setShowListSelector] = useState(false)
+  const [userLocation, setUserLocation] = useState(null) // {lat, lon}
 
   useEffect(() => {
     loadSavedListsData()
+    // Try to get user location for distance calc (non-blocking)
+    if(navigator?.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos => setUserLocation({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+        () => {} // silent fail
+      )
+    }
   }, [])
 
   async function loadSavedListsData(){
@@ -60,7 +70,19 @@ export default function Analyse() {
         setPrixMeta(prix.__meta || null) // Extract metadata
 
         // compute best combinations (top 3)
-        const results = trouverCombinaisonsOptimales(products, prix, maxMagasins, 3)
+        // Build weights from settings; if no geolocation, ignore distance by setting its weight to 0
+        const userWeights = { ...(settings.scoringWeights || {}) }
+        if(!userLocation){ userWeights.distance = 0 }
+        const opts = {
+          userLat: userLocation?.lat,
+          userLon: userLocation?.lon,
+          favoriteStores,
+          weights: userWeights,
+          debug: import.meta?.env?.VITE_DEBUG === '1',
+          pruneLargeSearch: true,
+          maxCombos: 8000
+        }
+        const results = trouverCombinaisonsOptimales(products, prix, maxMagasins, 3, opts)
         if (!mounted) return
         setCombis(results)
       } catch (err) {
@@ -74,7 +96,7 @@ export default function Analyse() {
     return () => {
       mounted = false
     }
-  }, [products, maxMagasins])
+  }, [products, maxMagasins, favoriteStores, userLocation])
 
   function computeAverageBaseline(prix, productsList) {
     // average price per product across available stores
@@ -185,12 +207,27 @@ export default function Analyse() {
                 const effectiveSavingsPct = (c.savingsPct != null) ? c.savingsPct : null
                 return (
                   <div key={idx} className="bg-white rounded-xl shadow-sm border overflow-hidden animate-fade-in">
-                    <div className="bg-blue-50 border-b px-4 py-2 text-sm text-blue-800 font-medium">
-                      {c.stores.join(' • ')}
+                    <div className="bg-blue-50 border-b px-4 py-2 text-sm text-blue-800 font-medium flex items-center justify-between">
+                      <span>{c.stores.join(' • ')}</span>
+                      {c.score != null && (
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full" title="Score composite (prix, distance, nb magasins, favoris, couverture)">
+                          Score: {c.score.toFixed(3)}
+                        </span>
+                      )}
                     </div>
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <p className="text-2xl font-bold">${c.total.toFixed(2)}</p>
+                        {c.totalDistanceKm > 0 && (
+                          <span className="inline-block text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full" title="Distance totale (aller)">
+                            📍 {c.totalDistanceKm} km
+                          </span>
+                        )}
+                        {c.favoritesCount > 0 && (
+                          <span className="inline-block text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full" title="Magasins favoris">
+                            ⭐ {c.favoritesCount}
+                          </span>
+                        )}
                         <span className="inline-block text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
                           Couverture: {Math.round((c.coverage || 0)*100)}%
                         </span>

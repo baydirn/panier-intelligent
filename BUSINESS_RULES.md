@@ -1,150 +1,90 @@
-# Business Rules: Prix (Price) Handling
+# Business Rules: Données, Prix, Normalisation & Uploads
 
-## Current Problem
-**Inconsistency identified:** Products showing "Prix indisponible" in Liste can show a price in Analyse.
+Ce document définit les standards incontournables avant toute évolution majeure.
 
-### Root Cause
-- **Liste (ProductItem.jsx):** Uses `product.prix` field stored in LocalForage database
-- **Analyse:** Uses `getPrixProduits()` mock API which generates random prices
-- **Result:** Two different price sources = inconsistent user experience
+## 1) Schéma Produit (standard minimal)
 
-## Data Sources for Prix
+Champs persistés (LocalForage via `db.js`) — extensions compatibles rétro:
 
-### 1. Product.prix (Database field)
-- Stored in LocalForage via `db.js`
-- Set manually by user via "💵 Prix" button
-- Can be null (never set) or a number
-- Used by: Liste, Magasin
+- id: string (nanoid)
+- nom: string (affichage)
+- nameKey: string (clé identité normalisée — voir Normalisation)
+- marque: string|null
+- volume: string|null (ex: `2L`, `500g`)
+- quantite: number (>=1)
+- categorie: string|null
+- tags: string[] (bio, vegan, etc.)
+- magasin: string|null (code canonical — voir Magasins)
+- prix: number|null (>= 0, arrondi 2 décimales)
+- prixSource: 'manuel' | 'optimisation' | 'weekly' | 'ocr' | 'estime' | null
+- autoAssigned: boolean
+- purchased: boolean
+- createdAt/updatedAt: ISO string (optionnel)
 
-### 2. getPrixProduits() API (Mock service)
-- Returns random prices 1.5-10.0$ for all products
-- Does NOT check if product.prix is set
-- Used by: Analyse optimization algorithm
+Règles d’intégrité:
+- `prix` >= 0, arrondi 2 décimales (déjà pris en charge par `db.js`).
+- `quantite` >= 1.
+- `magasin` doit être un code canonical si non-null.
+- `nameKey` doit être mis à jour sur tout add/update/OCR merge.
 
-### 3. Weekly Prices (prices.json / weeklyPrices.js)
-- External price feed (currently empty/initial)
-- Normalized format: `{ name, store, price, updatedAt }`
-- Used by: Suggestions, future price history
+## 2) Normalisation & Déduplication
 
-## Expected Behavior (To Fix)
+- Fonction canonique: `normalizeProductName({ nom, marque?, volume? }) -> { baseName, marque, volume, nameKey, tokens }`.
+- `nameKey = "{baseName}|{marque?}|{canonicalVolume?}"`.
+- Similarité minimale: `computeSimilarity(a, b)` (Jaccard tokens) ∈ [0..1].
+- Déduplication:
+  - Auto-fusion si `nameKey` identique.
+  - Proposer fusion si similarity > 0.85.
+  - Fusion conserve historique des prix; un seul produit final.
 
-### Liste Page
-- If `product.prix == null`: Show "Prix indisponible"
-- If `product.prix != null`: Show price in $
+## 3) Magasins (catalogue & canonicalisation)
 
-### Analyse Page
-**Option A (Recommended):** Use stored product.prix when available
-```javascript
-// In Analyse.jsx, before calling optimization:
-const productsWithPrices = products.map(p => ({
-  ...p,
-  hasStoredPrice: p.prix != null
-}))
+- Catalogue commun (`src/domain/stores.js`).
+- `canonicalizeStoreName(name)` mappe toute saisie vers un code canonical (ex: `Maxi`).
+- Historique des prix et `magasin` dans produits utilisent toujours le code canonical.
 
-// In getPrixProduits or optimization logic:
-// Prioritize product.prix over mock data
-```
+## 4) Unités & Prix Unitaire
 
-**Option B:** Clearly indicate mock prices
-```javascript
-// Show badge: "Prix estimé" vs "Prix réel"
-{a.price != null ? (
-  a.isEstimated 
-    ? `~${a.price.toFixed(2)}$ (estimé)` 
-    : `${a.price.toFixed(2)}$`
-) : 'Prix indisponible'}
-```
+- `parseUnit(volume)` → { amount, unit } avec unités: `ml|l|g|kg`.
+- `toCanonical(parsed)` convertit en base (ml/g) pour comparer.
+- `computeUnitPrice(prix, volume)` → prix par unité canonique.
+- Les suggestions et l’optimisation privilégient les meilleurs prix unitaires comparables (même type d’unité).
 
-### Magasin Page
-- Uses `product.prix` for total calculation
-- Auto-applies combination assignments
-- Consistent with Liste (both use stored prix)
+## 5) Sources de Prix & Provenance
 
-## Proposed Fix Strategy
+Priorité logique (du plus fort au plus faible):
+1. `product.prix` stocké + `magasin` (manuel/optimisation/OCR/weekly)
+2. `product.prix` stocké sans magasin (appliqué à tous pour l’analyse)
+3. Estimation (mock API `apiPrix.js`)
 
-### Phase 1: Short-term (Consistency)
-1. Modify `getPrixProduits()` to check product.prix first
-2. Only generate mock price if product.prix == null
-3. Mark prices as `isEstimated: true/false` in response
+- Toute modification de prix doit définir `prixSource` et `autoAssigned` si non saisi manuellement.
+- OCR: `prixSource='ocr'`. Optimisation: `prixSource='optimisation'`. Saisie manuelle: `prixSource='manuel'`.
 
-### Phase 2: Medium-term (Real Data)
-1. Integrate weekly prices data feed
-2. Build community OCR upload feature (in progress)
-3. Deprecate mock price generator
+## 6) Historique, Stats & Alertes
 
-### Phase 3: Long-term (User Trust)
-1. Always show price source: "Metro", "IGA", "Communauté", "Estimé"
-2. Price history per product
-3. Price alerts when drops below target
+- Chaque observation de prix est enregistrée via `recordPriceObservation(nameKey, store, price)` (dédoublon jour+magasin).
+- Alerte: `setPriceAlert(name, targetPrice)` → notification UI quand le prix < cible.
+- Stats (à venir): économies cumulées vs baseline, moyennes par magasin, tendances.
 
-## Code Changes Required
+## 7) OCR Upload — Politique Admin-Only (Sécurité)
 
-### 1. src/services/apiPrix.js
-```javascript
-export async function getPrixProduits(products){
-  const result = {}
-  for(const p of products){
-    const key = String(p.nom || '').trim().toLowerCase()
-    if(!key) continue
-    
-    const map = {}
-    const STORES = ['IGA','Metro','Walmart','Maxi','Provigo']
-    
-    for(const store of STORES){
-      // PRIORITY 1: Use stored product.prix if available
-      if(p.prix != null && p.magasin === store){
-        map[store] = p.prix
-        continue
-      }
-      
-      // PRIORITY 2: Check weekly prices feed
-      // (future: check getBestWeeklyOffers)
-      
-      // PRIORITY 3: Generate mock price (fallback)
-      const r = Math.random() * 8.5
-      const price = 1.5 + r
-      map[store] = Math.round(price * 100) / 100
-    }
-    result[key] = map
-  }
-  return result
-}
-```
+- Par défaut, l’upload OCR communautaire est désactivé (admin uniquement).
+- Feature flag: `VITE_COMMUNITY_OCR_UPLOAD_ENABLED` (`"true"|"false"`).
+- La UI ne doit afficher le bouton d’upload que si `canShowOcrUpload()` est vrai (admin OU flag true).
+- Workflow cible: `submitOcrForAdminReview(payload)` côté backend → validation → inclusion en base hebdo.
 
-### 2. src/pages/Analyse.jsx
-Add price source tracking and display:
-```javascript
-// In combination card:
-<span className="text-gray-600">
-  {a.store || '—'} • {a.price != null 
-    ? `$${a.price.toFixed(2)}${a.isStored ? '' : ' (estimé)'}` 
-    : 'Prix indisponible'
-  }
-</span>
-```
+## 8) Optimisation Multi-Critères
 
-### 3. src/components/ProductItem.jsx
-Keep current behavior (already correct):
-```javascript
-{product.prix != null 
-  ? `${product.prix.toFixed?.(2) ?? product.prix} $`
-  : <span className="inline-block text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-      Prix indisponible
-    </span>
-}
-```
+- Critères pris en compte: prix total, distance totale (km), nb de magasins, couverture (% items avec prix), favoris.
+- Poids par défaut: `{ price: 0.6, distance: 0.25, nbStores: 0.1, favoritesBoost: 0.05, coveragePenalty: 0.2 }`.
+- Score `scoreCombination(inputs, weights, bounds)` (plus bas = meilleur).
+- La couverture partielle applique une pénalité.
 
-## Testing Checklist
-- [ ] Product with prix=null in Liste shows "Prix indisponible"
-- [ ] Same product in Analyse shows "Prix estimé" or no price
-- [ ] Product with prix=5.99 in Liste shows 5.99$
-- [ ] Same product in Analyse uses 5.99$ for optimization
-- [ ] Magasin total calculation matches Liste prices
-- [ ] Weekly price feed integration (when available) prioritized
+## 9) Règles de Remplacement OCR
 
-## Future Enhancements
-1. Real-time price comparison (scraping/API)
-2. Historical price charts per product
-3. Price drop notifications
-4. User-submitted prices via OCR (in progress)
-5. Crowd-sourced price validation
+- Paramètre: `ocrPriceReplaceMode` ∈ { `always`, `better`, `never` }.
+- `always`: remplace toujours.
+- `better`: remplace si prix OCR < prix courant ou prix courant absent.
+- `never`: ne remplace pas un prix existant (sauf si null).
+
+Ces standards sont verrouillés pour les prochaines itérations; toute déviation doit être explicitée et documentée.

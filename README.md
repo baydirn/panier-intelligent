@@ -108,6 +108,13 @@ src/
 - 4 magasins simulés: IGA, Maxi, Metro, Walmart
 - Délai simulé de 200ms pour réalisme
 
+### Standards & Domain Contracts
+- Normalisation produit: `normalizeProductName({nom, marque?, volume?}) -> { baseName, marque, volume, nameKey, tokens }`
+- Magasins: `canonicalizeStoreName(name)` et catalogue commun (`src/domain/stores.js`)
+- Unités: `parseUnit`, `toCanonical`, `computeUnitPrice`
+- Scoring multi-critères: `scoreCombination(inputs, weights)` avec `DEFAULT_WEIGHTS`
+- Upload OCR (sécurité): admin-only par défaut. Flag: `VITE_COMMUNITY_OCR_UPLOAD_ENABLED`
+
 ## 🔮 Prochaines étapes
 
 - [ ] Intégration API réelle de prix
@@ -141,6 +148,11 @@ Configure ces variables pour activer la mise à jour automatique hebdomadaire de
 - GITHUB_PATH: Chemin du fichier agrégé (par défaut: prices.json).
 - GITHUB_META_PATH: Chemin du fichier méta (par défaut: prices-meta.json).
 - GITHUB_HISTORY_DIR: Dossier pour les snapshots hebdo (ex: prices-history). Optionnel.
+
+### UI & Sécurité (Frontend)
+- VITE_COMMUNITY_OCR_UPLOAD_ENABLED: `true|false` (défaut: false)
+	- false: le bouton "Contribuer une circulaire (OCR)" est masqué pour les utilisateurs non-admin
+	- true: permet l'upload communautaire (déconseillé en prod sans modération)
 
 ### 🛒 Données de démarrage (Québec)
 

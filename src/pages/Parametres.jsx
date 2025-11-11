@@ -2,13 +2,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import useAppStore from '../store/useAppStore'
 import { getAllProducts } from '../services/db'
 import Button from '../components/Button'
-import { requestUserLocation, listNearbyStores, setRadiusKm, getRadiusKm } from '../services/geolocation'
+import { requestUserLocation, listNearbyStores, setRadiusKm, getRadiusKm, setLocationFromPostal } from '../services/geolocation'
 import { refreshWeeklyPrices, getWeeklyPricesMeta, getPriceDataUrl } from '../services/weeklyPrices'
 import { fetchPriceStatus, getCachedPriceStatus } from '../services/priceMeta'
 import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
 import Badge from '../components/Badge'
 import UploadFlyerModal from '../components/UploadFlyerModal'
+import { canShowOcrUpload } from '../domain/adminUpload'
 import { listSubmissions as listOcrSubmissions, removeSubmission as removeOcrSubmission } from '../services/ocrKV'
 
 export default function Parametres(){
@@ -22,9 +23,19 @@ export default function Parametres(){
   const [searchRadius, setSearchRadius] = useState(settings.searchRadiusKm || 5)
   const [favoriteStores, setFavoriteStores] = useState((settings.favoriteStores || []).join(', '))
   const [ocrPriceMode, setOcrPriceMode] = useState(settings.ocrPriceReplaceMode || 'better')
+  // Scoring weights UI state (fallback to defaults from scoring when absent)
+  const [weights, setWeights] = useState(() => ({
+    price: settings.scoringWeights?.price ?? 0.6,
+    distance: settings.scoringWeights?.distance ?? 0.25,
+    nbStores: settings.scoringWeights?.nbStores ?? 0.1,
+    favoritesBoost: settings.scoringWeights?.favoritesBoost ?? 0.05,
+    coveragePenalty: settings.scoringWeights?.coveragePenalty ?? 0.2
+  }))
   const [saved, setSaved] = useState(false)
   const fileInputRef = useRef(null)
   const [geoStatus, setGeoStatus] = useState('idle')
+  const [postalCode, setPostalCode] = useState('')
+  const [postalStatus, setPostalStatus] = useState('')
   const [nearbyStores, setNearbyStores] = useState([])
   const [weeklyMeta, setWeeklyMeta] = useState(null)
   const [priceStatus, setPriceStatus] = useState(null)
@@ -32,6 +43,7 @@ export default function Parametres(){
   const [loadingStatus, setLoadingStatus] = useState(false)
   const [priceDataUrl, setPriceDataUrl] = useState('')
   const [showUploadModal, setShowUploadModal] = useState(false)
+  const canUploadOcr = canShowOcrUpload()
   const [ocrSubs, setOcrSubs] = useState([])
   const [loadingSubs, setLoadingSubs] = useState(false)
 
@@ -72,7 +84,14 @@ export default function Parametres(){
       maxStoresToCombine: Number(maxStores),
       searchRadiusKm: Number(searchRadius),
       favoriteStores: stores,
-      ocrPriceReplaceMode: ocrPriceMode
+      ocrPriceReplaceMode: ocrPriceMode,
+      scoringWeights: {
+        price: Number(weights.price),
+        distance: Number(weights.distance),
+        nbStores: Number(weights.nbStores),
+        favoritesBoost: Number(weights.favoritesBoost),
+        coveragePenalty: Number(weights.coveragePenalty)
+      }
     })
     setRadiusKm(Number(searchRadius)).catch(()=>{})
     setSaved(true)
@@ -217,7 +236,55 @@ export default function Parametres(){
           </CardBody>
         </Card>
 
-        {/* Geolocalisation */}
+        {/* Scoring Weights */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pondération du score (prix vs distance)</CardTitle>
+          </CardHeader>
+          <CardBody className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Importance du prix</label>
+                <input type="range" min={0} max={1} step={0.01} value={weights.price}
+                  onChange={e=>setWeights(w=>({...w, price: Number(e.target.value)}))} className="w-full" />
+                <div className="text-xs text-gray-600">{weights.price.toFixed(2)}</div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Importance de la distance</label>
+                <input type="range" min={0} max={1} step={0.01} value={weights.distance}
+                  onChange={e=>setWeights(w=>({...w, distance: Number(e.target.value)}))} className="w-full" />
+                <div className="text-xs text-gray-600">{weights.distance.toFixed(2)}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Pénalité nb de magasins</label>
+                <input type="number" min={0} max={1} step={0.01} value={weights.nbStores}
+                  onChange={e=>setWeights(w=>({...w, nbStores: Number(e.target.value)}))}
+                  className="w-full max-w-[120px] border border-gray-300 rounded-lg px-2 py-1" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Bonus favoris (plus haut = mieux)</label>
+                <input type="number" min={0} max={0.5} step={0.01} value={weights.favoritesBoost}
+                  onChange={e=>setWeights(w=>({...w, favoritesBoost: Number(e.target.value)}))}
+                  className="w-full max-w-[120px] border border-gray-300 rounded-lg px-2 py-1" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Pénalité couverture (0..1)</label>
+                <input type="number" min={0} max={1} step={0.01} value={weights.coveragePenalty}
+                  onChange={e=>setWeights(w=>({...w, coveragePenalty: Number(e.target.value)}))}
+                  className="w-full max-w-[120px] border border-gray-300 rounded-lg px-2 py-1" />
+              </div>
+            </div>
+            <p className="text-xs text-gray-500">Astuce: si la localisation est désactivée, la distance est automatiquement ignorée dans l'analyse.</p>
+            <div className="flex items-center gap-3 pt-2">
+              <Button onClick={save} variant="primary">Enregistrer</Button>
+              {saved && <Badge variant="success">✓ Sauvegardé</Badge>}
+            </div>
+          </CardBody>
+        </Card>
+
+  {/* Geolocalisation + Postal Fallback */}
         <Card>
           <CardHeader>
             <CardTitle>Localisation & Magasins proches</CardTitle>
@@ -240,10 +307,40 @@ export default function Parametres(){
               >🔍 Actualiser ma position</Button>
               <div className="text-xs text-gray-500">Statut: {geoStatus}</div>
             </div>
+            <div className="flex gap-3 items-center mt-2">
+              <input
+                type="text"
+                value={postalCode}
+                onChange={e => setPostalCode(e.target.value)}
+                placeholder="Code postal (ex: H1A)"
+                className="border border-gray-300 rounded-lg px-3 py-2 max-w-[120px]"
+                disabled={geoStatus === 'demande...'}
+              />
+              <Button
+                variant="secondary"
+                disabled={!postalCode || geoStatus === 'demande...'}
+                onClick={async () => {
+                  setPostalStatus('Recherche...')
+                  try {
+                    const coords = await setLocationFromPostal(postalCode)
+                    if(coords){
+                      setPostalStatus('Position définie')
+                      const stores = await listNearbyStores()
+                      setNearbyStores(stores)
+                    } else {
+                      setPostalStatus('Code postal inconnu')
+                    }
+                  } catch(e){
+                    setPostalStatus('Erreur: ' + e.message)
+                  }
+                }}
+              >📍 Utiliser code postal</Button>
+              <div className="text-xs text-gray-500">{postalStatus}</div>
+            </div>
             <div>
               <h4 className="font-medium mb-2">Magasins dans {searchRadius} km</h4>
               {nearbyStores.length === 0 && (
-                <div className="text-sm text-gray-500">Aucun magasin trouvé (autorise la géolocalisation).</div>
+                <div className="text-sm text-gray-500">Aucun magasin trouvé (autorise la géolocalisation ou entre un code postal).</div>
               )}
               <ul className="space-y-1">
                 {nearbyStores.map(s => (
@@ -298,7 +395,11 @@ export default function Parametres(){
                     alert('Echec du test: ' + (e?.message || e))
                   }
                 }}>🧪 Tester la source</Button>
-                <Button variant="primary" onClick={() => setShowUploadModal(true)}>📄 Contribuer une circulaire (OCR)</Button>
+                {canUploadOcr ? (
+                  <Button variant="primary" onClick={() => setShowUploadModal(true)}>📄 Contribuer une circulaire (OCR)</Button>
+                ) : (
+                  <span className="text-xs text-gray-500">Upload OCR réservé à l'administrateur (désactivé pour les utilisateurs).</span>
+                )}
               </div>
               <div className="mt-2 text-[11px] text-gray-500">Déduplication automatique par magasin et période de validité. Les contributions sont stockées localement pour l'instant.</div>
             </div>
