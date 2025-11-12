@@ -9,7 +9,7 @@ import { createWorker } from 'tesseract.js'
  * @returns {Promise<{text: string, confidence: number}>}
  */
 export async function extractTextFromImage(imageFile, onProgress = () => {}) {
-  const worker = await createWorker('fra+eng', 1, {
+  const worker = await createWorker('fra', 1, {
     logger: (m) => {
       if (m.status === 'recognizing text') {
         onProgress(m.progress)
@@ -18,12 +18,11 @@ export async function extractTextFromImage(imageFile, onProgress = () => {}) {
   })
 
   try {
-    // Configure Tesseract for better flyer recognition
+    // Configure Tesseract for faster flyer recognition
     await worker.setParameters({
-      tessedit_pageseg_mode: '1', // Automatic with OSD (better for complex layouts)
+      tessedit_pageseg_mode: '3', // Fully automatic (faster than OSD mode 1)
       preserve_interword_spaces: '1',
-      tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$.,% àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ-/',
-      // Improve number recognition (important for prices)
+      // Removed char_whitelist for better speed
       classify_bln_numeric_mode: '1',
     })
     
@@ -321,20 +320,24 @@ export async function processPdf(pdfFile, onProgress = () => {}){
 
   // Create a single tesseract worker for all pages
   const { createWorker } = await import('tesseract.js')
-  const worker = await createWorker('fra+eng', 1, {
+  const worker = await createWorker('fra', 1, {
     logger: () => {}, // Reduce logging overhead
+  })
+  
+  // Faster Tesseract config
+  await worker.setParameters({
     tessedit_pageseg_mode: '3',
-    tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$.,% àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ-',
+    classify_bln_numeric_mode: '1',
   })
 
   let combinedText = ''
   let confidenceAcc = 0
   let count = 0
-  const maxPages = Math.min(pageCount, 10) // Reduce to 10 pages for speed
+  const maxPages = Math.min(pageCount, 5) // Reduced to 5 pages for speed (most flyers have key info on first pages)
 
   for(let i=1; i<=maxPages; i++){
     const page = await doc.getPage(i)
-    const viewport = page.getViewport({ scale: 1.5 }) // Reduced from 2 for speed
+    const viewport = page.getViewport({ scale: 1.2 }) // Reduced to 1.2 for better speed
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
     canvas.width = viewport.width
