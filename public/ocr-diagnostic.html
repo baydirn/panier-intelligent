@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagnostic OCR - Panier Intelligent</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #4CAF50;
+      padding-bottom: 10px;
+    }
+    .submission {
+      background: white;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #eee;
+    }
+    .store-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      background: #2196F3;
+      color: white;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    .period {
+      color: #666;
+      font-size: 14px;
+    }
+    .products-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .products-table th {
+      background: #4CAF50;
+      color: white;
+      padding: 10px;
+      text-align: left;
+    }
+    .products-table td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+    .products-table tr:hover {
+      background: #f9f9f9;
+    }
+    .price {
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    .volume {
+      color: #666;
+      font-size: 13px;
+    }
+    .confidence {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .confidence.high {
+      background: #4CAF50;
+      color: white;
+    }
+    .confidence.medium {
+      background: #FF9800;
+      color: white;
+    }
+    .confidence.low {
+      background: #f44336;
+      color: white;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: bold;
+      color: #4CAF50;
+    }
+    .stat-label {
+      color: #666;
+      margin-top: 5px;
+    }
+    .raw-text {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+    }
+    .btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .btn:hover {
+      background: #45a049;
+    }
+    .btn-danger {
+      background: #f44336;
+    }
+    .btn-danger:hover {
+      background: #da190b;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 Diagnostic OCR - Contributions</h1>
+  
+  <div class="stats" id="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="totalSubmissions">0</div>
+      <div class="stat-label">Soumissions totales</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="totalProducts">0</div>
+      <div class="stat-label">Produits détectés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="avgProducts">0</div>
+      <div class="stat-label">Moyenne par soumission</div>
+    </div>
+  </div>
+
+  <div id="submissions"></div>
+
+  <script type="module">
+    import localforage from 'https://cdn.jsdelivr.net/npm/localforage@1.10.0/+esm'
+
+    async function loadDiagnostics() {
+      const submissions = await localforage.getItem('ocr_submissions_v1') || []
+      const weeklyPrices = await localforage.getItem('weekly_prices_v2') || []
+      
+      console.log('[DIAGNOSTIC] OCR Submissions:', submissions)
+      console.log('[DIAGNOSTIC] Weekly Prices DB:', weeklyPrices)
+
+      const totalSubmissions = submissions.length
+      const totalProducts = submissions.reduce((sum, s) => sum + (s.products?.length || 0), 0)
+      const avgProducts = totalSubmissions > 0 ? Math.round(totalProducts / totalSubmissions) : 0
+
+      document.getElementById('totalSubmissions').textContent = totalSubmissions
+      document.getElementById('totalProducts').textContent = totalProducts
+      document.getElementById('avgProducts').textContent = avgProducts
+
+      const container = document.getElementById('submissions')
+
+      if (submissions.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h2>Aucune soumission OCR trouvée</h2>
+            <p>Uploadez une circulaire dans l'application pour voir les résultats ici.</p>
+          </div>
+        `
+        return
+      }
+
+      container.innerHTML = submissions.map((sub, idx) => {
+        const products = sub.products || []
+        const period = sub.period || {}
+        const fromDate = period.from ? new Date(period.from).toLocaleDateString('fr-CA') : 'N/A'
+        const toDate = period.to ? new Date(period.to).toLocaleDateString('fr-CA') : 'N/A'
+        const createdAt = sub.createdAt ? new Date(sub.createdAt).toLocaleString('fr-CA') : 'N/A'
+
+        return `
+          <div class="submission">
+            <div class="header">
+              <div>
+                <span class="store-badge">${sub.store || 'Inconnu'}</span>
+                <div class="period">Période: ${fromDate} → ${toDate}</div>
+                <div class="period">Créé: ${createdAt}</div>
+              </div>
+              <div>
+                <button class="btn" onclick="downloadJSON(${idx})">📥 Télécharger JSON</button>
+                <button class="btn btn-danger" onclick="deleteSubmission('${sub.id}')">🗑️ Supprimer</button>
+              </div>
+            </div>
+
+            <h3>Produits détectés (${products.length})</h3>
+            ${products.length > 0 ? `
+              <table class="products-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nom du produit</th>
+                    <th>Prix</th>
+                    <th>Volume</th>
+                    <th>Confiance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${products.map((p, i) => `
+                    <tr>
+                      <td>${i + 1}</td>
+                      <td>${p.name || 'N/A'}</td>
+                      <td class="price">${p.price != null ? p.price.toFixed(2) + ' $' : 'N/A'}</td>
+                      <td class="volume">${p.volume || '-'}</td>
+                      <td>
+                        <span class="confidence ${p.confidence || 'medium'}">
+                          ${(p.confidence || 'medium').toUpperCase()}
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : '<p style="color: #999; text-align: center; padding: 20px;">Aucun produit détecté</p>'}
+
+            ${sub.rawText ? `
+              <details>
+                <summary style="cursor: pointer; padding: 10px; background: #f0f0f0; border-radius: 5px; margin-top: 15px;">
+                  📄 Texte OCR brut (cliquer pour voir)
+                </summary>
+                <div class="raw-text">${sub.rawText}</div>
+              </details>
+            ` : ''}
+          </div>
+        `
+      }).join('')
+
+      // Vérifier quels produits sont dans la base hebdomadaire
+      console.log('[DIAGNOSTIC] Vérification dans weekly_prices_v2...')
+      submissions.forEach(sub => {
+        const products = sub.products || []
+        products.forEach(p => {
+          const found = weeklyPrices.find(wp => 
+            wp.name?.toLowerCase() === p.name?.toLowerCase() && 
+            wp.store?.toLowerCase() === sub.store?.toLowerCase()
+          )
+          if (found) {
+            console.log(`✅ Produit trouvé dans DB:`, p.name, '-', p.price + '$', '→', found)
+          } else {
+            console.log(`❌ Produit NON trouvé dans DB:`, p.name, '-', p.price + '$')
+          }
+        })
+      })
+    }
+
+    window.downloadJSON = function(index) {
+      localforage.getItem('ocr_submissions_v1').then(submissions => {
+        const sub = submissions[index]
+        const json = JSON.stringify(sub, null, 2)
+        const blob = new Blob([json], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `ocr_${sub.store}_${sub.id}.json`
+        a.click()
+      })
+    }
+
+    window.deleteSubmission = async function(id) {
+      if (!confirm('Êtes-vous sûr de vouloir supprimer cette soumission?')) return
+      
+      let submissions = await localforage.getItem('ocr_submissions_v1') || []
+      submissions = submissions.filter(s => s.id !== id)
+      await localforage.setItem('ocr_submissions_v1', submissions)
+      
+      alert('Soumission supprimée!')
+      location.reload()
+    }
+
+    loadDiagnostics()
+  </script>
+</body>
+</html>

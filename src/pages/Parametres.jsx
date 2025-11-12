@@ -9,6 +9,7 @@ import Input from '../components/Input'
 import Card, { CardHeader, CardTitle, CardBody } from '../components/Card'
 import Badge from '../components/Badge'
 import UploadFlyerModal from '../components/UploadFlyerModal'
+import WebScraperSync from '../components/WebScraperSync'
 import { canShowOcrUpload } from '../domain/adminUpload'
 import { listSubmissions as listOcrSubmissions, removeSubmission as removeOcrSubmission } from '../services/ocrKV'
 
@@ -464,6 +465,9 @@ export default function Parametres(){
             </div>
           </CardBody>
         </Card>
+
+        {/* Web Scraper Sync */}
+        <WebScraperSync />
 
         {/* Import/Export */}
         <Card>
