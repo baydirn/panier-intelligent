@@ -1,15 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { getRecurrentProducts, addRecurrentProduct, updateRecurrentProduct, deleteRecurrentProduct, toggleRecurrentProduct } from '../services/db'
-import useAppStore from '../store/useAppStore'
+import useFirestoreStore from '../store/useFirestoreStore'
 import { useToast } from '../components/ToastProvider'
 import Button from '../components/Button'
 import Input from '../components/Input'
 import Card from '../components/Card'
 import Modal from '../components/Modal'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Recurrentes(){
-  const addProduct = useAppStore(s => s.addProduct)
-  const products = useAppStore(s => s.products)
+  const addProduct = useFirestoreStore(s => s.addProduct)
+  const products = useFirestoreStore(s => s.products)
+  const loadProducts = useFirestoreStore(s => s.loadProducts)
+  const subscribeToProducts = useFirestoreStore(s => s.subscribeToProducts)
+  const unsubscribeFromProducts = useFirestoreStore(s => s.unsubscribeFromProducts)
+  const { user } = useAuth()
   const { addToast } = useToast()
 
   const [items, setItems] = useState([])
@@ -24,7 +29,21 @@ export default function Recurrentes(){
     try{ setItems(await getRecurrentProducts()) } finally { setLoading(false) }
   }
 
-  useEffect(() => { refresh() }, [])
+  useEffect(() => {
+    // Load products from Firestore when user is authenticated
+    if (user?.uid) {
+      loadProducts(user.uid).catch(() => {})
+      subscribeToProducts(user.uid)
+    }
+    
+    // Load recurrent products
+    refresh()
+    
+    // Cleanup: unsubscribe on unmount
+    return () => {
+      unsubscribeFromProducts()
+    }
+  }, [user?.uid, loadProducts, subscribeToProducts, unsubscribeFromProducts])
 
   async function onAdd(){
     const name = form.name.trim()
@@ -64,7 +83,8 @@ export default function Recurrentes(){
       // Fusionner: addition quantités, conserver magasin existant si défini sinon prendre default_store
       const newQty = (existingProduct.quantite || 1) + (item.default_quantity || 1)
       const newStore = existingProduct.magasin || (item.default_store || null)
-      await useAppStore.getState().updateProduct(existingProduct.id, { quantite: newQty, magasin: newStore, recurrent: true })
+      const updateProduct = useFirestoreStore.getState().updateProduct
+      await updateProduct(existingProduct.id, { quantite: newQty, magasin: newStore, recurrent: true })
       addToast(`Quantité fusionnée (+${item.default_quantity || 1})`, 'success')
       return
     }
