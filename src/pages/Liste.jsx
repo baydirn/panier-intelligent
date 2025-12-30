@@ -1,8 +1,11 @@
 import React, {useState, useEffect, useMemo} from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductItem from '../components/ProductItem'
-import useAppStore from '../store/useAppStore'
-import { getRecurrentProducts, startNewListSession, recordOccurrencesForCurrentList, detectRecurrentCandidates, addRecurrentProduct, ignoreRecurrentSuggestion, clearCurrentList, getCurrentListId, saveCurrentListAs, getSavedLists } from '../services/db'
+import useFirestoreStore from '../store/useFirestoreStore'
+import { Plus, Users, Sparkles, Settings, Trophy, Save, FilePlus } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { getRecurrentProducts, addRecurrentProduct, ignoreRecurrentSuggestion, getCurrentListId } from '../services/db'
+import { savePersonalListAsSnapshot } from '../services/firestore'
 import { useToast } from '../components/ToastProvider'
 import Button from '../components/Button'
 import Input from '../components/Input'
@@ -13,15 +16,26 @@ import AddProductModal from '../components/AddProductModalNew'
 import EditProductModal from '../components/EditProductModal'
 import { fetchBestOffers } from '../services/pricing'
 import { recordPriceObservation, getPriceAlert } from '../services/db'
+import { forceRegenerateAllProductIds } from '../services/db'
+import localforage from 'localforage'
+import ShareModal from '../components/ShareModal'
+import { useAuth } from '../contexts/AuthContext'
+import { syncSharedListsIfNeeded } from '../services/sharedLists'
+import FigmaMotionButton from '../components/FigmaMotionButton'
+import DuplicateModal from '../components/DuplicateModal'
 
 export default function Liste(){
   const navigate = useNavigate()
-  const products = useAppStore(s => s.products)
-  const addProduct = useAppStore(s => s.addProduct)
-  const updateProduct = useAppStore(s => s.updateProduct)
-  const removeProduct = useAppStore(s => s.removeProduct)
-  const loadProducts = useAppStore(s => s.loadProducts)
+  const products = useFirestoreStore(s => s.products)
+  const addProduct = useFirestoreStore(s => s.addProduct)
+  const updateProduct = useFirestoreStore(s => s.updateProduct)
+  const removeProduct = useFirestoreStore(s => s.removeProduct)
+  const removeProducts = useFirestoreStore(s => s.removeProducts)
+  const loadProducts = useFirestoreStore(s => s.loadProducts)
+  const subscribeToProducts = useFirestoreStore(s => s.subscribeToProducts)
+  const unsubscribeFromProducts = useFirestoreStore(s => s.unsubscribeFromProducts)
   const { addToast } = useToast()
+  const { user } = useAuth()
   
   const [name, setName] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
@@ -37,11 +51,54 @@ export default function Liste(){
   const [showAddProductModal, setShowAddProductModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [productToEdit, setProductToEdit] = useState(null)
+  const [showIds, setShowIds] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+    const [sharedMembers, setSharedMembers] = useState([])
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false)
+  const [duplicateData, setDuplicateData] = useState({ newProduct: null, existingProduct: null })
 
   useEffect(()=>{
-    loadProducts().catch(()=>{})
+    // Load products from Firestore when user is authenticated
+    if (user?.uid) {
+      loadProducts(user.uid).then(() => {
+        const ids = products.map(p => p.id)
+        const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index)
+        if (duplicates.length > 0) {
+          console.error('[Liste] DUPLICATE IDs FOUND:', duplicates)
+          console.error('[Liste] All IDs:', ids)
+        }
+      }).catch(()=>{})
+
+      // Subscribe to real-time updates
+      subscribeToProducts(user.uid)
+    }
     loadCurrentListId()
+
+    // Cleanup: unsubscribe on unmount
+    return () => {
+      unsubscribeFromProducts()
+    }
   }, [])
+
+  // Sync shared lists whenever products change
+  useEffect(() => {
+    let syncTimeout = null
+    
+    const performSync = async () => {
+      try {
+        await syncSharedListsIfNeeded(products, user?.email)
+      } catch (err) {
+        console.error('[Liste] Sync error:', err)
+      }
+    }
+
+    // Debounce sync to avoid too many API calls
+    syncTimeout = setTimeout(performSync, 1000)
+
+    return () => {
+      if (syncTimeout) clearTimeout(syncTimeout)
+    }
+  }, [products, user?.email])
 
   async function loadCurrentListId(){
     const id = await getCurrentListId()
@@ -72,7 +129,12 @@ export default function Liste(){
     const existingProduct = products.find(p => p.nom?.toLowerCase() === normalizedName)
     
     if(existingProduct){
-      addToast(`"${productData.nom}" est déjà dans la liste`, 'error')
+      // Show duplicate modal instead of error toast
+      setDuplicateData({
+        newProduct: productData,
+        existingProduct: existingProduct
+      })
+      setShowDuplicateModal(true)
       setShowAddProductModal(false)
       return
     }
@@ -94,11 +156,29 @@ export default function Liste(){
   }
 
   async function handleSaveEditedProduct(updatedProduct) {
-    await updateProduct(updatedProduct.id, updatedProduct)
+    // Update all provided fields from the modal
+    const fields = {
+      nom: updatedProduct.nom,
+      quantite: updatedProduct.quantite
+    }
+
+    // Add optional fields if provided
+    if (updatedProduct.magasin !== undefined) {
+      fields.magasin = updatedProduct.magasin
+    }
+    if (updatedProduct.prix !== undefined) {
+      fields.prix = updatedProduct.prix
+    }
+    if (updatedProduct.prixSource !== undefined) {
+      fields.prixSource = updatedProduct.prixSource
+    }
+
+    await updateProduct(updatedProduct.id, fields)
     setShowEditModal(false)
     setProductToEdit(null)
     addToast('Produit modifié ✅', 'success')
   }
+// Handler pour fusionner les doublons  async function handleMergeDuplicate(existingProductId, updates) {    await updateProduct(existingProductId, updates)    setShowDuplicateModal(false)    setDuplicateData({ newProduct: null, existingProduct: null })    setShowAddProductModal(false)    addToast('Produits fusionnes', 'success')  }  // Handler pour ajouter quand meme (creer doublon)  async function handleAddDuplicateAnyway() {    const { newProduct } = duplicateData    await addProduct({      nom: newProduct.nom,      quantite: newProduct.quantite || 1,      recurrent: false,      magasin: newProduct.magasin || null,      prix: newProduct.prix || null    })    setShowDuplicateModal(false)    setDuplicateData({ newProduct: null, existingProduct: null })    setShowAddProductModal(false)    addToast('Produit ajoute', 'success')  }  // Handler pour annuler  function handleCancelDuplicate() {    setShowDuplicateModal(false)    setDuplicateData({ newProduct: null, existingProduct: null })  }
 
   async function handleFetchPrice(product){
     try{
@@ -121,6 +201,27 @@ export default function Liste(){
     }
   }
 
+    async function handleResetAllData() {
+      if (!window.confirm('Vider TOUTES les données (produits, listes, cache) et recharger? Cette action est irréversible.')) return
+      try {
+        // Clear IndexedDB
+        await localforage.clear()
+        // Clear localStorage & sessionStorage
+        localStorage.clear()
+        sessionStorage.clear()
+        // Clear caches
+        const cacheNames = await caches.keys()
+        for (const cacheName of cacheNames) {
+          await caches.delete(cacheName)
+        }
+        addToast('Toutes les données ont été vidées. Rechargement...', 'success')
+        setTimeout(() => window.location.reload(), 1000)
+      } catch (error) {
+        console.error('Error clearing data:', error)
+        addToast('Erreur lors du vidage des données', 'error')
+      }
+    }
+
   async function onNewList(){
     try {
       if(products.length > 0){
@@ -138,6 +239,17 @@ export default function Liste(){
     }
   }
 
+  async function handleForceIds(){
+    try {
+      await forceRegenerateAllProductIds()
+      await loadProducts()
+      addToast('IDs régénérés', 'success')
+    } catch(e){
+      console.error('ForceIds error', e)
+      addToast('Erreur regen IDs', 'error')
+    }
+  }
+
   async function onSaveList(){
     try {
       if(products.length === 0){
@@ -145,16 +257,8 @@ export default function Liste(){
         return
       }
       
-      // Get current list name if exists
-      let defaultName = `Liste ${new Date().toLocaleDateString()}`
-      if(currentListId){
-        const lists = await getSavedLists()
-        const currentList = lists.find(l => l.id === currentListId)
-        if(currentList) {
-          defaultName = currentList.name
-        }
-      }
-      
+      // Generate default name
+      const defaultName = `Liste ${new Date().toLocaleDateString('fr-CA')}`
       setSaveListName(defaultName)
       setShowSaveOnlyModal(true)
     } catch(error) {
@@ -168,11 +272,23 @@ export default function Liste(){
       addToast('Veuillez entrer un nom pour la liste', 'error')
       return
     }
-    await saveCurrentListAs(saveListName.trim())
-    await loadCurrentListId()
-    setShowSaveOnlyModal(false)
-    setSaveListName('')
-    addToast('Liste sauvegardée ✅', 'success')
+    
+    if (!user?.uid) {
+      addToast('Vous devez être connecté', 'error')
+      return
+    }
+    
+    try {
+      console.log('[Liste] Saving list:', saveListName, 'Products:', products.length)
+      await savePersonalListAsSnapshot(user.uid, saveListName.trim(), products)
+      console.log('[Liste] Save successful')
+      setShowSaveOnlyModal(false)
+      setSaveListName('')
+      addToast('Liste sauvegardée ✅', 'success')
+    } catch (error) {
+      console.error('[Liste] Error saving list:', error)
+      addToast('Erreur lors de la sauvegarde: ' + error.message, 'error')
+    }
   }
 
   async function handleSaveAndNewList(){
@@ -180,11 +296,20 @@ export default function Liste(){
       addToast('Veuillez entrer un nom pour la liste', 'error')
       return
     }
-    await saveCurrentListAs(saveListName.trim())
+    
+    if (!user?.uid) {
+      addToast('Vous devez être connecté', 'error')
+      return
+    }
+    
+    await savePersonalListAsSnapshot(user.uid, saveListName.trim(), products)
+    // Effacer tous les produits de la liste personnelle
+    for (const product of products) {
+      await removeProduct(product.id)
+    }
     setShowSaveModal(false)
     setSaveListName('')
-    addToast('Liste sauvegardée ✅', 'success')
-    await createNewList()
+    addToast('Liste sauvegardée et nouvelle liste créée ✅', 'success')
   }
 
   async function handleNoSaveNewList(){
@@ -195,31 +320,41 @@ export default function Liste(){
 
   async function createNewList(){
     try {
-      // Clear current list
+      // Remove ALL products from the current list using removeProducts (batch operation)
+      const productIds = products.map(p => p.id)
+      if (productIds.length > 0) {
+        console.log('[Liste] Removing', productIds.length, 'products')
+        await removeProducts(productIds)
+      }
+      
+      // Clear local storage
       await clearCurrentList()
-      await loadProducts()
       setCurrentListId(null)
       
       // start a new session
       await startNewListSession()
       
       // load active recurrent products and add to list preventing duplicates
-      const rec = (await getRecurrentProducts()).filter(r => r.active)
-      if(rec.length){
-        for(const r of rec){
-          await addProduct({ nom: r.name, quantite: r.default_quantity || 1, magasin: r.default_store || null, recurrent: false })
+      try {
+        const rec = (await getRecurrentProducts()).filter(r => r.active)
+        if(rec.length){
+          for(const r of rec){
+            await addProduct({ nom: r.name, quantite: r.default_quantity || 1, magasin: r.default_store || null, recurrent: false })
+          }
+          addToast('Produits récurrents ajoutés automatiquement ✅', 'success')
+        } else {
+          addToast('Nouvelle liste créée ✅', 'success')
         }
-        await loadProducts()
-        addToast('Produits récurrents ajoutés automatiquement ✅', 'success')
-      } else {
+        
+        // record occurrences and compute suggestions
+        const names = rec.map(r => r.name)
+        await recordOccurrencesForCurrentList(names)
+        const cands = await detectRecurrentCandidates()
+        setSuggestions(cands || [])
+      } catch (recError) {
+        console.warn('[Liste] Recurrent products error (non-critical):', recError)
         addToast('Nouvelle liste créée ✅', 'success')
       }
-      
-      // record occurrences and compute suggestions
-      const names = rec.map(r => r.name)
-      await recordOccurrencesForCurrentList(names)
-      const cands = await detectRecurrentCandidates()
-      setSuggestions(cands || [])
     } catch(error) {
       console.error('Error creating new list:', error)
       addToast('Erreur lors de la création de la liste', 'error')
@@ -271,40 +406,119 @@ export default function Liste(){
     return result
   }, [products, searchQuery, filterRecurrent, filterPurchased, sortBy])
 
+    const handleShareClick = () => {
+      setShowShareModal(true)
+      const shared = JSON.parse(localStorage.getItem('sharedLists') || '[]')
+      setSharedMembers(shared.map(s => ({ name: s.ownerEmail?.split('@')[0] || 'Partagé', color: 'bg-blue-500' })))
+    }
+
+    const handleOptimizeClick = () => {
+      navigate('/analyse')
+    }
+
+    const handleSettingsClick = () => {
+      navigate('/parametres')
+    }
+
+    const handleGamificationClick = () => {
+      navigate('/parametres#gamification')
+    }
+
+    const totalPrice = useMemo(() => {
+      return products.reduce((sum, p) => sum + (p.prix || 0), 0)
+    }, [products])
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 animate-fade-in">
-      {/* Header section */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Ma liste d'épicerie</h2>
-          <div className="flex gap-2">
-            <Button 
-              onClick={onSaveList} 
-              variant="primary" 
-              size="sm"
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
+        {/* Header with design HomeScreen */}
+        <motion.div
+          className="bg-white px-6 pt-8 pb-6 shadow-sm sticky top-0 z-10"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
             >
-              💾 Enregistrer
-            </Button>
-            <Button 
-              onClick={onNewList} 
-              variant="success" 
-              size="sm"
-            >
-              ➕ Nouvelle
-            </Button>
+              <h1 className="text-2xl font-bold text-gray-900">Ma liste d'épicerie</h1>
+              <p className="text-gray-500 mt-1">{products.length} produits · {totalPrice.toFixed(2)} $</p>
+            </motion.div>
+            <div className="flex gap-2">
+              <motion.button
+                onClick={onSaveList}
+                className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgb(187 247 208)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                title="Enregistrer la liste"
+              >
+                <Save className="w-5 h-5 text-green-600" />
+              </motion.button>
+              <motion.button
+                onClick={onNewList}
+                className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgb(233 213 255)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                title="Nouvelle liste"
+              >
+                <FilePlus className="w-5 h-5 text-purple-600" />
+              </motion.button>
+              <motion.button
+                onClick={handleGamificationClick}
+                className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgb(252 211 77)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Trophy className="w-5 h-5 text-amber-600" />
+              </motion.button>
+              <motion.button
+                onClick={handleSettingsClick}
+                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgb(229 231 235)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Settings className="w-5 h-5 text-gray-600" />
+              </motion.button>
+            </div>
           </div>
-        </div>
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-sm text-gray-600">
-          <span>{products.length} produit{products.length !== 1 ? 's' : ''}</span>
-          {products.filter(p => p.purchased).length > 0 && (
-            <Badge variant="success">{products.filter(p => p.purchased).length} acheté{products.filter(p => p.purchased).length > 1 ? 's' : ''}</Badge>
-          )}
-          {products.filter(p => p.recurrent).length > 0 && (
-            <Badge variant="info">{products.filter(p => p.recurrent).length} récurrent{products.filter(p => p.recurrent).length > 1 ? 's' : ''}</Badge>
-          )}
-        </div>
-      </div>
+
+          {/* Shared indicator */}
+          <motion.div
+            onClick={handleShareClick}
+            className="bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 flex items-center justify-between cursor-pointer"
+            whileHover={{ scale: 1.02, backgroundColor: 'rgb(219 234 254)' }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          >
+            <div className="flex items-center gap-3">
+              <Users className="w-5 h-5 text-blue-600" />
+              <span className="text-blue-900 font-medium">Liste partagée</span>
+            </div>
+            <div className="flex -space-x-2">
+              {sharedMembers.length > 0 ? (
+                sharedMembers.map((member, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 + index * 0.1, type: "spring" }}
+                    className={`w-8 h-8 rounded-full ${member.color} border-2 border-white flex items-center justify-center text-white text-xs font-bold`}
+                  >
+                    {member.name[0]?.toUpperCase()}
+                  </motion.div>
+                ))
+              ) : (
+                <span className="text-blue-600 text-xs">Partager</span>
+              )}
+            </div>
+          </motion.div>
+        </motion.div>
 
       {/* Suggestions IA */}
       {suggestions.length > 0 && (
@@ -360,6 +574,15 @@ export default function Liste(){
           <Button onClick={() => setShowAddProductModal(true)} variant="secondary" size="md">
             📝 Détails
           </Button>
+            <Button onClick={handleResetAllData} variant="ghost" size="sm" title="Vider toutes les données">
+              🗑️
+            </Button>
+            <Button onClick={() => setShowIds(s => !s)} variant="ghost" size="sm" title="Afficher/masquer IDs">
+              🆔
+            </Button>
+            <Button onClick={handleForceIds} variant="ghost" size="sm" title="Forcer régénération des IDs">
+              ♻️
+            </Button>
         </div>
       </Card>
 
@@ -461,65 +684,44 @@ export default function Liste(){
             </p>
           </Card>
         )}
-        {filteredProducts.map(p => (
-          <ProductItem
-            key={p.id}
-            product={p}
-            onToggle={async (prod) => {
-              await updateProduct(prod.id, { recurrent: !prod.recurrent })
-            }}
-            onDelete={async (id) => {
-              await removeProduct(id)
-            }}
-            onEdit={handleEditProduct}
-            onPrice={handleFetchPrice}
-          />
+        {(() => {
+          const ids = filteredProducts.map(p => p.id)
+          const uniqueIds = new Set(ids)
+          if (ids.length !== uniqueIds.size) {
+            console.error('[Liste RENDER] DUPLICATE IDs in filteredProducts!', 
+              'Total:', ids.length, 'Unique:', uniqueIds.size,
+              'IDs:', ids)
+          }
+          return null
+        })()}
+        {filteredProducts.map((p, idx) => (
+          <React.Fragment key={p.id || `${p.nom}-${idx}`}>
+            <ProductItem
+              product={p}
+              updateProduct={updateProduct}
+              onToggle={async (prod) => {
+                await updateProduct(prod.id, { recurrent: !prod.recurrent })
+              }}
+              onDelete={async (id) => {
+                console.log('[Liste onDelete] Called with id:', id)
+                try {
+                  await removeProduct(id)
+                  console.log('[Liste onDelete] After removeProduct')
+                  addToast('Produit supprimé', 'success')
+                } catch(e) {
+                  console.error('[Liste onDelete] Error:', e)
+                  addToast('Erreur lors de la suppression', 'error')
+                }
+              }}
+              onEdit={handleEditProduct}
+              onPrice={handleFetchPrice}
+            />
+            {showIds && (
+              <div className="text-[10px] text-gray-400 ml-2 select-all">ID: {p.id}</div>
+            )}
+          </React.Fragment>
         ))}
       </div>
-
-      {/* Save Modal */}
-      {showSaveModal && (
-        <Modal onClose={() => setShowSaveModal(false)}>
-          <div className="p-6">
-            <h2 className="text-xl font-bold mb-4">Sauvegarder la liste actuelle ?</h2>
-            <p className="text-gray-600 mb-4">
-              Vous avez {products.length} produit{products.length > 1 ? 's' : ''} dans votre liste actuelle.
-            </p>
-            
-            <Input
-              label="Nom de la liste"
-              value={saveListName}
-              onChange={(e) => setSaveListName(e.target.value)}
-              placeholder="Ex: Courses de la semaine"
-              className="mb-6"
-            />
-
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="primary"
-                onClick={handleSaveAndNewList}
-                className="w-full"
-              >
-                💾 Oui, sauvegarder et créer une nouvelle
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={handleNoSaveNewList}
-                className="w-full"
-              >
-                🗑️ Non, créer une nouvelle sans sauvegarder
-              </Button>
-              <Button
-                variant="ghost"
-                onClick={() => setShowSaveModal(false)}
-                className="w-full"
-              >
-                ✖️ Annuler
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
 
       {/* Modal Save Only */}
       {showSaveOnlyModal && (
@@ -565,6 +767,41 @@ export default function Liste(){
         </Modal>
       )}
 
+      {/* Modal: Save current list before creating a new one */}
+      {showSaveModal && (
+        <Modal onClose={() => setShowSaveModal(false)}>
+          <div className="p-6">
+            <h2 className="text-xl font-bold mb-4">Créer une nouvelle liste</h2>
+            <p className="text-gray-600 mb-4">
+              Voulez-vous sauvegarder la liste actuelle avant d'en créer une nouvelle ?
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="primary"
+                onClick={handleSaveAndNewList}
+                className="w-full"
+              >
+                💾 Oui, sauvegarder et créer une nouvelle
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={handleNoSaveNewList}
+                className="w-full"
+              >
+                🗑️ Non, créer une nouvelle sans sauvegarder
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSaveModal(false)}
+                className="w-full"
+              >
+                ✖️ Annuler
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+
       {/* Modal d'ajout de produit avec détails */}
       {showAddProductModal && (
         <AddProductModal
@@ -586,6 +823,17 @@ export default function Liste(){
           onSave={handleSaveEditedProduct}
         />
       )}
+
+      {/* Modal de partage */}
+      {showShareModal && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          products={products}
+          ownerEmail={user?.email}
+        />
+      )}
+{/* Duplicate Detection Modal */}      {showDuplicateModal && (        <DuplicateModal          newProduct={duplicateData.newProduct}          existingProduct={duplicateData.existingProduct}          onMerge={handleMergeDuplicate}          onAddAnyway={handleAddDuplicateAnyway}          onCancel={handleCancelDuplicate}        />      )}
     </div>
   )
 }
