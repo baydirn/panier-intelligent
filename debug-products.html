@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Debug Products DB</title>
+  <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+</head>
+<body>
+  <h1>Debug IndexedDB Products</h1>
+  <button onclick="showProducts()">Afficher les produits</button>
+  <button onclick="checkDuplicates()">Vérifier les doublons</button>
+  <button onclick="checkAllStorage()">Vérifier tous les stockages</button>
+  <button onclick="deleteAllProducts()">Tout supprimer</button>
+  <pre id="output"></pre>
+
+  <script>
+    const STORE_KEY = 'panier_products_v1';
+    const output = document.getElementById('output');
+
+    async function showProducts() {
+      const products = await localforage.getItem(STORE_KEY) || [];
+      output.textContent = `Total: ${products.length} produits\n\n`;
+      output.textContent += JSON.stringify(products.map(p => ({
+        id: p.id,
+        nom: p.nom,
+        magasin: p.magasin,
+        type_id: typeof p.id
+      })), null, 2);
+    }
+
+    async function checkDuplicates() {
+      const products = await localforage.getItem(STORE_KEY) || [];
+      const ids = products.map(p => p.id);
+      const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
+      
+      output.textContent = `Total: ${products.length} produits\n`;
+      output.textContent += `IDs uniques: ${new Set(ids).size}\n`;
+      output.textContent += `Doublons: ${duplicates.length > 0 ? duplicates.join(', ') : 'Aucun'}\n\n`;
+      
+      if (duplicates.length > 0) {
+        const dupeDetails = products.filter(p => duplicates.includes(p.id));
+        output.textContent += 'Produits en double:\n';
+        output.textContent += JSON.stringify(dupeDetails, null, 2);
+      }
+    }
+
+    async function checkAllStorage() {
+      output.textContent = '=== INDEXEDDB (localforage) ===\n';
+      const indexedProducts = await localforage.getItem(STORE_KEY) || [];
+      output.textContent += `${STORE_KEY}: ${indexedProducts.length} produits\n\n`;
+
+      output.textContent += '=== LOCALSTORAGE ===\n';
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+        output.textContent += `${key}: ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}\n`;
+      }
+
+      output.textContent += '\n=== SESSIONSTORAGE ===\n';
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        const value = sessionStorage.getItem(key);
+        output.textContent += `${key}: ${value.substring(0, 100)}${value.length > 100 ? '...' : ''}\n`;
+      }
+
+      // Check all IndexedDB databases
+      output.textContent += '\n=== TOUTES LES BASES INDEXEDDB ===\n';
+      const databases = await indexedDB.databases();
+      for (const db of databases) {
+        output.textContent += `- ${db.name} (version ${db.version})\n`;
+      }
+    }
+
+    async function deleteAllProducts() {
+      if (confirm('Voulez-vous vraiment supprimer TOUS les produits ?')) {
+        await localforage.setItem(STORE_KEY, []);
+        output.textContent = 'Tous les produits ont été supprimés !';
+      }
+    }
+
+    // Auto-check on load
+    window.onload = checkAllStorage;
+  </script>
+</body>
+</html>

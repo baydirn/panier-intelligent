@@ -1,0 +1,121 @@
+Plan: Panier Intelligent - Conception Affinée (Web PWA Phase 1)
+TL;DR: Finaliser PWA web en 3-4 mois en deux phases. Phase 1 (Décembre 2025 - Janvier 2026): refactorer architecture pour abstraction métier + retirer OCR + ajouter freemium. Phase 2 (Février-Mars 2026): pricing réaliste avec patterns saisonniers/promotions + partenariat épiceries + optimisation multi-critères. Prêt pour React Native en avril 2026.
+
+Steps
+[Architecture - Phase 1.0] Abstraire couche persistence & services
+
+Créer interface IStorageProvider (add, get, update, delete, query) + implémentation LocalForageProvider
+Créer interface IGeolocationService (getCurrentLocation, getStoresByRadius)
+Remplacer tous les appels directs à localforage et navigator.geolocation par injection de dépendance
+Refactorer services/db.js pour utiliser IStorageProvider en interne
+Refactorer services/geolocation.js pour implémenter IGeolocationService
+Impact: ~25 fichiers modifiés, ~2-3 jours, zéro changement UX, prêt pour RN
+[Scope Reduction - Phase 1.0] Retirer OCR complètement
+
+Supprimer components/OcrReviewModal.jsx, UploadFlyerModal.jsx
+Supprimer services/ocrService.js, pages/OcrReview.jsx si existe
+Supprimer dépendances: tesseract.js, pdfjs-dist du package.json
+Supprimer routes OCR du Backend
+Documenter: "Phase 2 (2026): Partenariat Flipp/Reebee pour données prix temps réel"
+Impact: ~1 jour, simplifie codebase de 5%, réduit overhead de 80KB bundle
+[Freemium Model - Phase 1.1] Implémenter système d'authentification utilisateur
+
+Créer pages/Auth.jsx (signup/login simple email/password)
+Ajouter AuthContext (useAuth hook) pour persister session
+Créer table Backend: users(id, email, password_hash, subscription_tier, created_at)
+Subscription tiers: free | premium (défini au signup)
+Impact: ~500 lignes frontend + 200 backend, 2-3 jours
+[Freemium Model - Phase 1.1] Implémenter paywall pour fonctionnalités premium
+
+Gratuit: Listes de courses + optimisation basique (max 1 épicerie) + recherche prix basique
+Premium: Tout + alertes prix + partage familial (collab listes) + historique prix 12 mois
+Ajouter composant PaywallGate pour wrapper fonctionnalités premium
+Ajouter userStore.tier (Zustand) pour vérification côté client
+Routes /upgrade, /premium-features dans footer
+Impact: ~300 lignes composants, flag chaque feature, 1-2 jours
+[Freemium Model - Phase 1.2] Implémenter partage familial (core premium feature)
+
+Créer table Backend: shared_lists(id, list_id, owner_id, shared_with_user_id, permissions)
+Ajouter UI: bouton "Partager" sur chaque liste → modal email → invite link
+Sync collaborative: quand utilisateur A modifie liste partagée, utilisateur B voit mise à jour en temps réel (Websocket OU polling)
+Permissions: view | edit | admin
+Impact: ~600 lignes frontend + 400 backend, WebSocket ou polling, 3-4 jours
+[Pricing - Phase 2.1] Implémenter générateur de prix réaliste (hebdomadaire)
+
+Créer backend/scripts/generate-weekly-prices.js
+Logique:
+Base prices (définis par produit, stable)
+Seasonal multiplier: ±25% prod été, ±15% prod hiver, +8-15% périodes fêtes
+Promotional overlay: 15-20% produits aléatoires avec -12-18% discount (60% "2 pour X", 40% single)
+Psychological pricing: distribution .99/.95/.49/.00 selon catégorie
+Store variance: Maxi -8% vs Metro +10% comparé à baseline (compétition QC)
+Input: products.json (base prices) → Output: weekly-prices-{YYYY-WXX}.json
+Exécution: Via cron job backend (Sunday UTC 00:00) OU manuelle admin
+Stockage: IndexedDB + optionnellement PostgreSQL
+Impact: ~250 lignes Node.js + logique pricing ~400 lignes, 2-3 jours
+[Pricing - Phase 2.2] Implémenter système de partenariat épiceries
+
+Créer table Backend: partner_stores(id, store_code, commission_rate, boost_priority)
+Quand prix identique entre 2 épiceries: priorité partenaire (ajouter au score +5 points)
+Ajouter UI Admin: dashboard partenaires (commission, volume, CTR tracking)
+Ajouter tracking: click_tracking(id, user_id, store_id, date) pour mesurer impact
+Impact: ~300 lignes backend + 200 frontend, 2 jours
+[Optimisation - Phase 2.3] Refactorer algorithme multi-critères (sans temps)
+
+Remplacer brute-force actuel par algorithme génétique
+Paramètres: price (0.6) + distance (0.25) + nb_stores (0.1) + favorites_boost (0.05)
+Population: 50 chromosomes, 20 générations, mutation rate 10%
+Contrainte: coverage minimum (80% produits avec prix trouvés)
+Output: top 3 solutions triées par score composite
+Benchmark: <1s compute time pour 50 produits × 5 épiceries
+Impact: ~200 lignes code + tests, 2-3 jours
+[Backend Infrastructure - Phase 2.4] Setup PostgreSQL + déploiement
+
+Configurer PostgreSQL cloud (Supabase OU Render.com OU Railway)
+Activer routes /api/prices/* (CRUD prices historiques)
+Setup JWT refresh tokens (24h expiry, 30 jours refresh)
+Cron job pour generate-weekly-prices.js (exécution auto chaque dimanche)
+Validation SSL + HTTPS enforcement
+Impact: Infrastructure ready, 1-2 jours
+[Testing & Documentation - Phase 2.5] Finaliser pour production web
+
+Tests unitaires: algorithme optimisation, pricing generator, auth
+Tests E2E: user signup → create list → run optimization → share list
+Documentation: Business Rules finalisées, freemium tiers, partenariat épiceries
+Performance audit: bundle size, Lighthouse scores, mobile UX
+Impact: Quality gate, 3-4 jours
+Further Considerations
+Timing réaliste pour chaque phase?
+
+Phase 1.0-1.2 (Architecture + Auth + Freemium): 6-8 jours (fin décembre 2025)
+Phase 2.1-2.3 (Pricing + Optimisation): 8-10 jours (janvier 2026)
+Phase 2.4-2.5 (Backend + Testing): 5-7 jours (fin janvier)
+Total Phase 1 Web: 3-4 semaines, prêt pour lancement beta web début février
+Websocket ou polling pour partage familial?
+
+Websocket: Temps réel (<100ms), plus complexe, nécessite serveur avec support WS
+Polling (5-10s): Plus simple, acceptable UX, moins de charge serveur
+Recommandation: Polling 5s pour MVP, Websocket en V2
+Données prix: où stocker base historique?
+
+Option A: PostgreSQL uniquement (requiert backend online, plus robuste)
+Option B: IndexedDB client + sync hebdo vers PostgreSQL (offline-capable)
+Recommandation: Option B (meilleure UX offline)
+Monétisation freemium: comment implémenter paiement?
+
+Stripe API pour abonnement récurrent ($2.99/mois premium)
+Ou gratuit + partenariat épiceries (commission par clic/achat)?
+Quelle approche privilégiez-vous? (impacte architecture Auth + Backend)
+Expansion géographique (ON/BC): quand?
+
+Après lancement QC stable (février-mars 2026)
+Nécessite: ajouter stores ON/BC, ajuster pricing generator (coûts régionaux), partenariats locaux
+Estimé: 2-3 semaines additional pour chaque province
+React Native migration: commencer quand?
+
+Option A (recommandé): Avril 2026 (après stabilisation web)
+Option B: Janvier 2026 en parallèle (plus risqué, split effort)
+Avec architecture abstraite (phase 1.0), migration prend ~10-12 semaines
+Êtes-vous d'accord avec ce plan et ce timing? Voulez-vous que je commence par l'implémentation de la Phase 1.0 (abstraction architecture)?
+
+Claude Haiku 4.5 • 0.3x

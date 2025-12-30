@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import useAppStore from '../store/useAppStore'
 import { getAllProducts } from '../services/db'
 import Button from '../components/Button'

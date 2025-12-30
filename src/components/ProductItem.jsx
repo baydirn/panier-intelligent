@@ -2,31 +2,72 @@ import React, { useMemo, useState } from 'react'
 import useAppStore from '../store/useAppStore'
 import { useToast } from './ToastProvider'
 import { suggestSimilarProducts } from '../services/suggestions'
-import PriceHistorySparkline from './PriceHistorySparkline'
-import PriceHistoryModal from './PriceHistoryModal'
+import { Lock, LockOpen, Repeat } from 'lucide-react'
+import SubstitutionModal from './SubstitutionModal'
+import { findSubstitutions } from '../services/substitutions'
+import { getPrixProduits } from '../services/apiPrix'
 
-export default function ProductItem({ product, onToggle, onDelete, onEdit, onPrice }){
+export default function ProductItem({ product, onToggle, onDelete, onEdit, onPrice, updateProduct: updateProductProp }){
   const duplicateInfo = useDuplicateInfo(product)
 
-  const updateProduct = useAppStore(s => s.updateProduct)
-  const removeProduct = useAppStore(s => s.removeProduct)
+  const updateProductFromStore = useAppStore(s => s.updateProduct)
+  const removeProducts = useAppStore(s => s.removeProducts)
   const products = useAppStore(s => s.products)
   const { addToast } = useToast()
-  const [showHistory, setShowHistory] = useState(false)
+
+  // Use prop if provided, otherwise fallback to useAppStore
+  const updateProduct = updateProductProp || updateProductFromStore
+
+  const [showSubstitutions, setShowSubstitutions] = useState(false)
+  const [alternatives, setAlternatives] = useState([])
+  const [loadingSubstitutions, setLoadingSubstitutions] = useState(false)
 
   async function inc(){ await updateProduct(product.id, { quantite: (product.quantite || 1) + 1 }) }
   async function dec(){ await updateProduct(product.id, { quantite: Math.max(1, (product.quantite || 1) - 1) }) }
 
+  async function handleShowSubstitutions() {
+    if (!product.prix) {
+      addToast('Prix requis pour trouver des substitutions', 'warning')
+      return
+    }
+
+    setLoadingSubstitutions(true)
+    try {
+      // Récupérer tous les prix
+      const pricesMap = await getPrixProduits(products)
+
+      // Trouver les substitutions
+      const subs = findSubstitutions(product, pricesMap)
+      setAlternatives(subs)
+      setShowSubstitutions(true)
+    } catch (error) {
+      console.error('[ProductItem] Error finding substitutions:', error)
+      addToast('Erreur lors de la recherche de substitutions', 'error')
+    } finally {
+      setLoadingSubstitutions(false)
+    }
+  }
+
+  function handleSelectSubstitution(alt) {
+    updateProduct(product.id, {
+      nom: alt.nom,
+      magasin: alt.magasin,
+      prix: alt.prix,
+      prixSource: 'substitution'
+    })
+    addToast(`Produit remplacé par ${alt.nom} (économie: $${alt.savings.toFixed(2)})`, 'success')
+  }
+
   async function mergeDuplicates(){
     if(!duplicateInfo || duplicateInfo.others.length === 0) return
-    let totalQty = product.quantite || 1
-    for(const o of duplicateInfo.others){ totalQty += (o.quantite || 1) }
-    // Keep current product as canonical; remove others
-    for(const o of duplicateInfo.others){
-      if(o.id !== product.id){ try{ await removeProduct(o.id) }catch{} }
+    const others = duplicateInfo.others.filter(o => o.id !== product.id)
+    let totalQty = (product.quantite || 1) + others.reduce((sum,o)=> sum + (o.quantite || 1), 0)
+    // Batch delete for stability
+    if(others.length){
+      try { await removeProducts(others.map(o => o.id)) } catch(e){ console.warn('[mergeDuplicates] Batch delete error', e) }
     }
     await updateProduct(product.id, { quantite: totalQty })
-    addToast(`Fusion effectuée (${duplicateInfo.others.length} doublon(s))`, 'success')
+    addToast(`Fusion effectuée (${others.length} doublon(s))`, 'success')
   }
 
   return (
@@ -37,7 +78,6 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
           <div className="font-medium text-gray-900">
             {product.nom}
             {product.recurrent && <span className="ml-2 text-xs text-green-600">récurrent</span>}
-            <DuplicateBadge product={product} />
           </div>
           <div className="text-sm text-gray-500">{product.magasin || '—'}</div>
         </div>
@@ -75,17 +115,35 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
               {product.autoAssigned ? ' • Auto' : ''}
             </span>
           )}
-          {/* Hide sparkline on very small screens to avoid overflow */}
-          <div className="hidden sm:block">
-            <button onClick={() => setShowHistory(true)} className="hover:opacity-80 active:scale-[0.98]">
-              <PriceHistorySparkline name={product.nom} />
-            </button>
-          </div>
+          {/* Historique retiré sur cet écran */}
         </div>
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => onPrice && onPrice(product)} className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-xs md:text-sm active:scale-95 transition">💵 Prix</button>
           <button onClick={() => onEdit && onEdit(product)} className="px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs md:text-sm active:scale-95 transition">✏️ Modifier</button>
-            <button onClick={() => onToggle && onToggle(product)} className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs md:text-sm active:scale-95 transition">Récurrent</button>
+          {product.prix != null && (
+            <button
+              onClick={handleShowSubstitutions}
+              disabled={loadingSubstitutions}
+              className="px-3 py-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 text-xs md:text-sm active:scale-95 transition flex items-center gap-1"
+              title="Trouver des produits similaires moins chers"
+            >
+              <Repeat className="w-4 h-4" />
+              {loadingSubstitutions ? '...' : ''}
+            </button>
+          )}
+          {product.magasin && (
+            <button
+              onClick={() => updateProduct(product.id, { lockedStore: !product.lockedStore })}
+              className={`px-3 py-1.5 rounded-lg text-xs md:text-sm active:scale-95 transition flex items-center gap-1 ${
+                product.lockedStore
+                  ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+              title={product.lockedStore ? "Déverrouiller ce magasin" : "Verrouiller dans ce magasin"}
+            >
+              {product.lockedStore ? <Lock className="w-4 h-4" /> : <LockOpen className="w-4 h-4" />}
+            </button>
+          )}
+          <button onClick={() => onToggle && onToggle(product)} className="px-3 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-xs md:text-sm active:scale-95 transition">Récurrent</button>
           <button onClick={() => onDelete && onDelete(product.id)} className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 text-xs md:text-sm active:scale-95 transition">Supprimer</button>
         </div>
       </div>
@@ -94,22 +152,21 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
       <AlternativesRow productName={product.nom} onReplace={async (name) => {
         const targetName = String(name || '').trim()
         if(!targetName) return
-        // Si un autre produit possède déjà ce nom, fusionner quantités et supprimer l'autre
-        const other = products.find(p => (p.nom || '').toLowerCase() === targetName.toLowerCase() && p.id !== product.id)
-        let newQty = product.quantite || 1
-        if(other){ newQty += (other.quantite || 1) }
+        // Remplacer uniquement CE produit sans toucher aux autres
+        const newQty = product.quantite || 1
         await updateProduct(product.id, { nom: targetName, prix: null, magasin: null, quantite: newQty })
-        if(other){ await removeProduct(other.id) }
         addToast('Produit remplacé ✅', 'success')
       }} />
-    </div>
-    {showHistory && (
-      <PriceHistoryModal
-        isOpen={showHistory}
-        onClose={() => setShowHistory(false)}
-        productName={product.nom}
+
+      {/* Substitution Modal */}
+      <SubstitutionModal
+        isOpen={showSubstitutions}
+        onClose={() => setShowSubstitutions(false)}
+        product={product}
+        alternatives={alternatives}
+        onSelect={handleSelectSubstitution}
       />
-    )}
+    </div>
     </>
   )
 }
@@ -147,7 +204,7 @@ function AlternativesRow({ productName, onReplace }){
           const unitSavingText = s.unitSaving != null && s.unitSaving > 0 ? ` (↓/u)` : ''
           return (
             <button
-              key={idx}
+              key={`${s.name}-${idx}`}
               onClick={() => onReplace && onReplace(s.name)}
               className="px-2.5 py-1 rounded-full text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200"
               title={`${s.type === 'brand' ? 'Marque alternative' : 'Même catégorie'}\nPrix base: ${s.basePrice != null ? s.basePrice.toFixed(2)+'$' : '—'}\nPrix alt: ${s.altPrice != null ? s.altPrice.toFixed(2)+'$' : '—'}\nUnit base: ${s.baseUnitPrice?.per != null ? s.baseUnitPrice.per.toFixed(3)+'$/'+(s.baseUnitPrice.unit||'u') : '—'}\nUnit alt: ${s.altUnitPrice?.per != null ? s.altUnitPrice.per.toFixed(3)+'$/'+(s.altUnitPrice.unit||'u') : '—'}${s.unitSaving != null ? '\nGain unitaire: '+s.unitSaving.toFixed(3) : ''}`}

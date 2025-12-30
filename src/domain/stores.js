@@ -24,7 +24,20 @@ export function getStoreCatalog(){
     { code: 'Super C', name: 'Super C', lat: 45.5150, lon: -73.5950 },
     { code: 'Costco', name: 'Costco', lat: 45.4800, lon: -73.6200 },
     { code: 'Adonis', name: 'Adonis', lat: 45.5250, lon: -73.5650 },
-    { code: 'Avril', name: 'Avril', lat: 45.5180, lon: -73.5720 }
+    { code: 'Avril', name: 'Avril', lat: 45.5180, lon: -73.5720 },
+    // --- Quebec City / Sainte-Foy / Cap-Rouge / Saint-Augustin (approx coordinates) ---
+    { code: 'IGA', name: 'IGA Sainte-Foy', lat: 46.7631, lon: -71.3024 },
+    { code: 'Metro', name: 'Metro Sainte-Foy', lat: 46.7705, lon: -71.2910 },
+    { code: 'Maxi', name: 'Maxi Sainte-Foy', lat: 46.7750, lon: -71.2955 },
+    { code: 'Costco', name: 'Costco Sainte-Foy', lat: 46.7815, lon: -71.2923 },
+    { code: 'Provigo', name: 'Provigo Sainte-Foy', lat: 46.7680, lon: -71.3030 },
+    { code: 'Walmart', name: 'Walmart Sainte-Foy', lat: 46.7790, lon: -71.2860 },
+    { code: 'Super C', name: 'Super C Cap-Rouge', lat: 46.7407, lon: -71.3665 },
+    { code: 'IGA', name: 'IGA Cap-Rouge', lat: 46.7425, lon: -71.3700 },
+    { code: 'Metro', name: 'Metro Cap-Rouge', lat: 46.7390, lon: -71.3600 },
+    { code: 'IGA', name: 'IGA Saint-Augustin', lat: 46.6941, lon: -71.4661 },
+    { code: 'Super C', name: 'Super C Saint-Augustin', lat: 46.7000, lon: -71.4500 },
+    { code: 'Avril', name: 'Avril Sainte-Foy', lat: 46.7720, lon: -71.2940 }
   ]
 }
 

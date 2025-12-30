@@ -1,5 +1,6 @@
-import create from 'zustand'
-import { getAllProducts, addProduct as dbAddProduct, updateProduct as dbUpdateProduct, deleteProduct as dbDeleteProduct } from '../services/db'
+// Updated import per zustand deprecation warning
+import { create } from 'zustand'
+import { getAllProducts, addProduct as dbAddProduct, updateProduct as dbUpdateProduct, deleteProduct as dbDeleteProduct, deleteProducts as dbDeleteProducts } from '../services/db'
 import { DEFAULT_WEIGHTS } from '../domain/scoring'
 
 const DEFAULT_SETTINGS = {
@@ -19,6 +20,9 @@ const useAppStore = create((set, get) => ({
   settings: DEFAULT_SETTINGS,
   // store the last snapshot to allow undoing applied combination
   lastSnapshot: null,
+  
+  // Freemium: max stores for free users
+  maxStoresFreemium: 1,
 
   // initialization: load products from storage
   loadProducts: async () => {
@@ -40,8 +44,24 @@ const useAppStore = create((set, get) => ({
   },
 
   removeProduct: async (id) => {
-    await dbDeleteProduct(id)
-    set(state => ({ products: state.products.filter(p => p.id !== id) }))
+    if(!id) return
+    console.log('[removeProduct] Deleting product:', id)
+    const result = await dbDeleteProduct(id)
+    console.log('[removeProduct] Delete result:', result)
+    // Always reload to ensure sync
+    const list = await getAllProducts()
+    console.log('[removeProduct] Reloaded products count:', list.length)
+    set({ products: list })
+  },
+
+  removeProducts: async (ids) => {
+    if(!Array.isArray(ids) || ids.length === 0) return
+    console.log('[removeProducts] Deleting products:', ids)
+    const result = await dbDeleteProducts(ids)
+    console.log('[removeProducts] Batch delete result:', result)
+    const list = await getAllProducts()
+    console.log('[removeProducts] Reloaded products count:', list.length)
+    set({ products: list })
   },
 
   setOptimalCombinations: (comb) => set({ optimalCombinations: comb }),
@@ -50,6 +70,12 @@ const useAppStore = create((set, get) => ({
 
   setSettings: (s) => set({ settings: { ...get().settings, ...s } })
   ,
+  
+  // Freemium check: ensure max stores for tier
+  checkFreemiumLimit: (isPremium = false) => {
+    const maxStores = isPremium ? 999 : get().maxStoresFreemium
+    return maxStores
+  },
 
   // Apply a selected combination: update products' magasin and prix according to combination.items
   applyCombination: async (combination) => {

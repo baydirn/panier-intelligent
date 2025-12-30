@@ -1,0 +1,47 @@
+?? PANIER INTELLIGENT - ROADMAP TODO
+PHASE 1.0 - Architecture Abstraite (2-3 jours)
+? Abstraire IStorageProvider
+? Abstraire IGeolocationService
+? Retirer OCR complètement
+? Tests Phase 1.0
+VOUS TESTEZ (24-48h)
+PHASE 1.1 - Auth + Freemium (2-3 jours)
+? Firebase Auth setup (placeholder)
+? Logique freemium (tiers free/premium)
+? Tests Phase 1.1
+VOUS TESTEZ (24-48h)
+PHASE 1.2 - Partage Familial (3-4 jours)
+VOUS SETUP PlanetScale account
+? PlanetScale schema avec Prisma
+? Partage familial (polling 5s)
+? Tests Phase 1.2
+VOUS TESTEZ (24-48h)
+PHASE 2.1 - Pricing Réaliste (2-3 jours)
+? Générateur pricing hebdo
+? Cron job (Phase 2 uniquement)
+? Tests Phase 2.1
+VOUS TESTEZ (24-48h)
+PHASE 2.2-2.3 - Partenariats + Optimisation (3-4 jours)
+? Système partenariats épiceries
+? Algorithme génétique optimisation
+? Tests Phase 2.2-2.3
+VOUS TESTEZ (24-48h)
+PHASE 2.4 - Firebase Real + Déploiement (2-3 jours)
+VOUS SETUP Firebase
+? Intégrer vraies clés Firebase
+? Vercel env vars + déploiement
+? Documentation utilisateur finale
+? Checklist pré-lancement
+VOUS VALIDEZ (beta users)
+FUTURE - React Native (après validation web)
+? React Native migration (Expo)
+?? Comment m'aider avec cette TODO
+Pendant le développement, vous pouvez:
+
+"Où en es-tu?" ? je donne statut + quand livraison
+"Passe à [numéro task] après ça" ? je priorise
+"J'ai terminé [numéro task], tes résultats sont [description]" ? je corrige
+"Relance-moi quand tu as fini [numéro task]" ? je vous contacte
+Maintenant je démarre Phase 1.0. Prêt? ??
+
+Je vais commencer par l'abstraction du storage (Task 1).ta

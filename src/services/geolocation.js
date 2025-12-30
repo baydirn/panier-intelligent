@@ -1,4 +1,5 @@
-import localforage from 'localforage'
+import { getStorageProvider } from './storage'
+import { getGeolocationService } from './geolocation/index'
 import { getStoreCatalog } from '../domain/stores'
 
 const GEO_KEY = 'user_geo_v1'
@@ -16,30 +17,25 @@ function haversine(lat1, lon1, lat2, lon2){
 }
 
 export async function requestUserLocation(){
-  return new Promise((resolve, reject) => {
-    if(!('geolocation' in navigator)){
-      console.error('Geolocation API not supported')
-      reject(new Error('Geolocation non supportée'))
-      return
+  const storage = getStorageProvider()
+  const geoService = getGeolocationService()
+  
+  try {
+    const position = await geoService.getCurrentLocation()
+    const coords = { lat: position.latitude, lon: position.longitude, ts: Date.now(), source: 'geo' }
+    console.log('Geolocation success:', coords)
+    await storage.setItem(GEO_KEY, coords)
+    return coords
+  } catch (err) {
+    console.error('Geolocation error:', err.message)
+    // Graceful fallback: if user denies, keep previous location if exists
+    const prev = await storage.getItem(GEO_KEY)
+    if(prev){
+      console.warn('Using previously stored location as fallback.')
+      return prev
     }
-    console.log('Requesting geolocation permission...')
-    navigator.geolocation.getCurrentPosition(async pos => {
-      const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude, ts: Date.now(), source: 'geo' }
-      console.log('Geolocation success:', coords)
-      await localforage.setItem(GEO_KEY, coords)
-      resolve(coords)
-    }, async err => {
-      console.error('Geolocation error:', err.code, err.message)
-      // Graceful fallback: if user denies, keep previous location if exists
-      const prev = await localforage.getItem(GEO_KEY)
-      if(prev){
-        console.warn('Using previously stored location as fallback.')
-        resolve(prev)
-        return
-      }
-      reject(err)
-    }, { enableHighAccuracy: true, timeout: 10000 })
-  })
+    throw err
+  }
 }
 
 // Postal code centroid lightweight fallback (Canada approximate mapping by first 3 chars)
@@ -77,24 +73,28 @@ const POSTAL_PREFIX = {
 }
 
 export async function setLocationFromPostal(postal){
+  const storage = getStorageProvider()
   if(!postal) return null
   const prefix = String(postal).toUpperCase().replace(/\s+/g,'').slice(0,2)
   const entry = POSTAL_PREFIX[prefix]
   if(!entry) return null
   const coords = { lat: entry.lat, lon: entry.lon, ts: Date.now(), source: 'postal' }
-  await localforage.setItem(GEO_KEY, coords)
+  await storage.setItem(GEO_KEY, coords)
   return coords
 }
 
 export async function getStoredLocation(){
-  return await localforage.getItem(GEO_KEY)
+  const storage = getStorageProvider()
+  return await storage.getItem(GEO_KEY)
 }
 
 export async function setRadiusKm(km){
-  await localforage.setItem(RADIUS_KEY, Number(km))
+  const storage = getStorageProvider()
+  await storage.setItem(RADIUS_KEY, Number(km))
 }
 export async function getRadiusKm(){
-  return (await localforage.getItem(RADIUS_KEY)) || 5
+  const storage = getStorageProvider()
+  return (await storage.getItem(RADIUS_KEY)) || 5
 }
 
 async function loadStores(){
@@ -120,7 +120,8 @@ export async function listNearbyStores(){
   }
   const radius = await getRadiusKm()
   const stores = await loadStores()
-  console.log('Loaded stores:', stores.length, 'User location:', loc, 'Radius:', radius)
+  console.log('[geolocation] Loaded stores:', stores.length, 'Sample:', stores[0])
+  console.log('[geolocation] User location:', loc, 'Radius:', radius)
   const nearby = stores
     .filter(s => s.lat != null && s.lon != null)
     .map(s => ({
@@ -129,6 +130,20 @@ export async function listNearbyStores(){
     }))
     .filter(s => s.distanceKm <= radius)
     .sort((a,b) => a.distanceKm - b.distanceKm)
-  console.log('Nearby stores:', nearby.length)
+  console.log('[geolocation] Nearby stores:', nearby.length, 'Sample:', nearby[0])
   return nearby
+}
+
+// Return all stores with computed distance (ignores radius), sorted ascending.
+export async function listStoresWithDistance(){
+  const loc = await getStoredLocation()
+  if(!loc){ return [] }
+  const stores = await loadStores()
+  return stores
+    .filter(s => s.lat != null && s.lon != null)
+    .map(s => ({
+      ...s,
+      distanceKm: haversine(loc.lat, loc.lon, s.lat, s.lon)
+    }))
+    .sort((a,b) => a.distanceKm - b.distanceKm)
 }

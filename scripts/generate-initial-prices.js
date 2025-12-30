@@ -1,7 +1,10 @@
 // Generate enriched public/prices.initial.json from curated STORE_MAPPING
-// CommonJS script to avoid ESM interop issues with edge files
-const fs = require('fs')
-const path = require('path')
+// ES Module version
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Minimal duplication of the curated dataset used by the edge function
 const STORE_MAPPING = {
@@ -365,6 +368,6 @@ function main(){
   console.log(`Wrote ${items.length} items to ${outFile}`)
 }
 
-if (require.main === module){
+if (import.meta.url === `file://${process.argv[1]}`) {
   main()
 }

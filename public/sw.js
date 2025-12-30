@@ -1,5 +1,5 @@
 // Simple service worker: app shell cache + offline navigation fallback
-const CACHE_NAME = 'panier-cache-v1'
+const CACHE_NAME = 'panier-cache-v2-nov23'
 const APP_SHELL = [
   '/',
   '/index.html',

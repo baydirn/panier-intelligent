@@ -39,6 +39,7 @@ export async function syncPricesFromScraper(storeName, scraperFn) {
     // Convertir les produits du scraper au format de la base de données
     const productsForDB = result.products.map(p => ({
       name: p.name,
+      brand: p.brand || '',
       price: p.price,
       volume: p.volume || '',
       image: p.image || '',
@@ -50,11 +51,14 @@ export async function syncPricesFromScraper(storeName, scraperFn) {
       scrapedAt: new Date().toISOString()
     }))
 
-    // Injecter dans la base de prix hebdomadaires
-    const ingestionResult = await ingestOcrProducts(storeName, productsForDB, {
-      source: 'web-scraper',
-      confidence: 1.0, // 100% de confiance (données structurées)
-      method: result.method || 'scraper'
+    // Injecter dans la base de prix hebdomadaires (en utilisant l'API d'ingestion attendue)
+    const todayIso = new Date().toISOString().split('T')[0]
+    const nextWeekIso = getNextWeekDate()
+    const ingestionResult = await ingestOcrProducts({
+      products: productsForDB,
+      store: storeName,
+      period: { from: todayIso, to: nextWeekIso },
+      ocrConfidence: 1.0
     })
 
     // Sauvegarder le timestamp de dernière sync

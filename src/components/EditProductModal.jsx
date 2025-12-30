@@ -10,12 +10,16 @@ import {
 } from '../data/productsDatabase'
 import { getPriceAlert, setPriceAlert } from '../services/db'
 
+const STORES = ['IGA', 'Maxi', 'Metro', 'Walmart', 'Super C', 'Costco']
+
 export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   const [nom, setNom] = useState('')
   const [marque, setMarque] = useState('')
   const [taille, setTaille] = useState('')
   const [quantite, setQuantite] = useState('x1')
-  
+  const [magasin, setMagasin] = useState('')
+  const [prix, setPrix] = useState('')
+
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [availableBrands, setAvailableBrands] = useState([])
   const [availableFormats, setAvailableFormats] = useState([])
@@ -89,7 +93,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         setNom(fullName)
         setMarque('')
         setTaille('')
-        
+
         // Essayer d'extraire la quantité
         const quantityMatch = fullName.match(/x(\d+)/i)
         if (quantityMatch) {
@@ -98,6 +102,11 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           setQuantite('x1')
         }
       }
+
+      // Initialiser magasin et prix depuis le produit
+      setMagasin(product.magasin || '')
+      setPrix(product.prix != null ? String(product.prix) : '')
+
       // Charger alerte de prix existante
       getPriceAlert(fullName).then(alert => {
         if(alert && alert.targetPrice != null){
@@ -118,26 +127,46 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   
   const handleSave = () => {
     let newName = nom.trim()
-    
+
     if (selectedProduct) {
       // Reconstruire le nom avec les sélections
       newName = selectedProduct.key
       if (marque) newName += ` ${marque}`
       if (taille) newName += ` ${taille}`
     }
-    
+
     // Ajouter la quantité si différente de x1
     if (quantite && quantite !== 'x1') {
       newName += ` ${quantite}`
     }
-    
-    onSave({
-      ...product,
+
+    // Préparer les données à sauvegarder
+    const updates = {
+      id: product?.id,
       nom: newName,
-      marque: marque,
-      taille: taille,
       quantite: parseInt(quantite.replace('x', '')) || 1
-    })
+    }
+
+    // Ajouter magasin si sélectionné (ou null si vide pour effacer)
+    if (magasin && magasin.trim()) {
+      updates.magasin = magasin
+    } else if (product?.magasin) {
+      // Si le produit avait un magasin et qu'on l'a effacé, mettre null
+      updates.magasin = null
+    }
+
+    // Ajouter prix si fourni (ou null si vide pour effacer)
+    const parsedPrice = parseFloat(prix)
+    if (!isNaN(parsedPrice) && parsedPrice > 0) {
+      updates.prix = parsedPrice
+      updates.prixSource = 'manuel'
+    } else if (product?.prix != null && (!prix || prix.trim() === '')) {
+      // Si le produit avait un prix et qu'on l'a effacé, mettre null
+      updates.prix = null
+      updates.prixSource = null
+    }
+
+    onSave(updates)
 
     // Enregistrer alerte de prix si fournie
     const target = parseFloat(alertPrice)
@@ -146,7 +175,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
     } else {
       setPriceAlert(newName, null)
     }
-    
+
     handleClose()
   }
   
@@ -155,6 +184,9 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
     setMarque('')
     setTaille('')
     setQuantite('x1')
+    setMagasin('')
+    setPrix('')
+    setAlertPrice('')
     setSelectedProduct(null)
     setAvailableBrands([])
     setAvailableFormats([])
@@ -262,12 +294,44 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           </select>
         </div>
 
+        {/* Magasin */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Magasin (optionnel)
+          </label>
+          <select
+            value={magasin}
+            onChange={(e) => setMagasin(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Aucun magasin sélectionné</option>
+            {STORES.map((store) => (
+              <option key={store} value={store}>
+                {store}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Prix manuel */}
+        <Input
+          label="Prix (optionnel)"
+          value={prix}
+          onChange={(e) => setPrix(e.target.value)}
+          placeholder="Ex: 4.99"
+          type="number"
+          step="0.01"
+          className="mb-4"
+        />
+
         {/* Alerte de prix */}
         <Input
           label="Alerte prix (déclenche si ≤)"
           value={alertPrice}
           onChange={(e) => setAlertPrice(e.target.value)}
           placeholder="Ex: 4.99"
+          type="number"
+          step="0.01"
           className="mb-4"
         />
         

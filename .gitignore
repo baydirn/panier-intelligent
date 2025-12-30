@@ -22,6 +22,9 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Firebase credentials (SECURITY - Never commit)
+serviceAccountKey.json
+
 # Misc
 coverage/
 .vercel/

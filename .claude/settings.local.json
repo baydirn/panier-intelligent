@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(Test-Path serviceAccountKey.json)",
+      "Bash(firebase init:*)",
+      "Bash(firebase emulators:start:*)",
+      "Bash(cat:*)",
+      "Bash(del \"c:\\\\Dev\\\\panier-intelligent\\\\scripts\\\\generate-mock-data.js\")",
+      "Bash(npm run dev:*)",
+      "Bash(test:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

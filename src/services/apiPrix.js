@@ -1,66 +1,145 @@
-// Mock API for prices. For now returns random prices for products.
-import axios from 'axios'
+/**
+ * API Prix - Récupère les prix depuis le backend
+ * Retourne les prix réalistes du scraper Flipp
+ */
 
-const STORES = ['IGA', 'Maxi', 'Metro', 'Walmart']
+import { getPricesForOptimization } from './firestore'
 
-// Deterministic-ish pseudo-random generator from string
-function seedFromString(s){
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+const STORES = ['IGA', 'Maxi', 'Metro', 'Walmart', 'Super C', 'Costco']
+
+// Deterministic pseudo-random generator from string (for mock prices)
+function seedFromString(s) {
   let h = 2166136261 >>> 0
-  for(let i=0;i<s.length;i++){
+  for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i)
     h = Math.imul(h, 16777619)
   }
   return h >>> 0
 }
 
-// Return prices per product per store in the shape {
-//   "lait": { "IGA": 3.29, "Maxi": 2.99, ... }
-// }
-// PRIORITY: If product has stored prix + magasin, use that first (fixes Liste/Analyse inconsistency)
-// Also returns metadata: { prices: {...}, meta: { productName: { store: { isStored: bool } } } }
-export async function getPrixProduits(products){
-  // simulate latency
-  await new Promise(r => setTimeout(r, 200))
+/**
+ * Récupère tous les prix depuis le backend
+ * Retourne: { nomProduit: { magasin: prix }, ... }
+ */
+async function getAllPrices() {
+  // Skip backend call if explicitly disabled or in development without backend
+  const skipBackend = import.meta.env.VITE_SKIP_BACKEND === 'true'
+  if (skipBackend) {
+    return {}
+  }
+
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/prices`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Backend returned ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data.prices || {}
+  } catch (error) {
+    console.warn('[apiPrix] Backend non disponible (normal en dev sans backend) - utilisation du fallback mock')
+    // Fallback vide - les prix mock seront générés
+    return {}
+  }
+}
+
+// Cache des prix (rechargé une fois par session)
+let pricesCache = null
+let pricesCacheTime = 0
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+
+/**
+ * Retourne les prix pour les produits donnés
+ * Format: { nomProduit: { magasin: prix }, ... }
+ * PRIORITY:
+ * 1. Prix manuel (p.prix + magasin)
+ * 2. Prix Firestore (storePrices collection)
+ * 3. Prix backend/Flipp API
+ * 4. Prix mock générés (fallback)
+ */
+export async function getPrixProduits(products) {
+  // Récupérer ou rafraîchir le cache des prix backend
+  const now = Date.now()
+  if (!pricesCache || (now - pricesCacheTime) > CACHE_DURATION) {
+    pricesCache = await getAllPrices()
+    pricesCacheTime = now
+  }
+
   const result = {}
-  const meta = {} // Track price source
-  
+  const meta = {}
+
+  // PRIORITY 2: Récupérer les prix Firestore pour tous les produits
+  let firestorePrices = {}
+  try {
+    firestorePrices = await getPricesForOptimization(products)
+  } catch (error) {
+    console.warn('[apiPrix] Erreur lors de la récupération des prix Firestore:', error)
+    firestorePrices = { __meta: {} }
+  }
+
   products.forEach((p, idx) => {
-    const nom = p.nom || p.id || `produit-${idx}`
-    const seed = seedFromString(String(nom))
+    const nom = (p.nom || p.id || `produit-${idx}`).toLowerCase()
     const map = {}
     meta[nom] = {}
-    
-    STORES.forEach((store, i) => {
-      // PRIORITY 1: Use stored product.prix if magasin matches
-      if(p.prix != null && p.magasin && String(p.magasin).toLowerCase() === String(store).toLowerCase()){
-        map[store] = Number(p.prix)
-        meta[nom][store] = { isStored: true, source: 'manuel' }
-        return
-      }
-      
-      // PRIORITY 2: If product has prix but no magasin, apply to all stores
-      if(p.prix != null && !p.magasin){
-        map[store] = Number(p.prix)
-        meta[nom][store] = { isStored: true, source: 'manuel' }
-        return
-      }
-      
-      // PRIORITY 3: Generate mock price (fallback for products without stored prices)
-      const r = ((seed >> (i*3)) % 850) / 100.0 // 0..8.5
-      const price = 1.5 + r
-      map[store] = Math.round(price * 100) / 100
-      meta[nom][store] = { isStored: false, source: 'estime' }
-    })
+
+    // PRIORITY 1: Si le produit a un prix manuel avec magasin, l'utiliser
+    if (p.prix != null && p.magasin) {
+      const magasin = p.magasin.toLowerCase()
+      map[magasin] = Number(p.prix)
+      meta[nom][magasin] = { isStored: true, source: 'manuel' }
+    }
+
+    // PRIORITY 2: Ajouter les prix Firestore pour ce produit
+    if (firestorePrices[nom]) {
+      Object.entries(firestorePrices[nom]).forEach(([magasin, prix]) => {
+        // Ne pas overwrite si déjà un prix manuel
+        if (!map[magasin]) {
+          map[magasin] = prix
+          meta[nom][magasin] = firestorePrices.__meta?.[nom]?.[magasin] || { isStored: false, source: 'firestore' }
+        }
+      })
+    }
+
+    // PRIORITY 3: Chercher les prix du backend pour ce produit
+    if (pricesCache[nom]) {
+      Object.entries(pricesCache[nom]).forEach(([magasin, prix]) => {
+        // Ne pas overwrite si déjà un prix manuel ou Firestore
+        if (!map[magasin]) {
+          map[magasin] = prix
+          meta[nom][magasin] = { isStored: false, source: 'backend-flipp' }
+        }
+      })
+    }
+
+    // PRIORITY 4: Générer des prix mock si aucun prix disponible (fallback)
+    if (Object.keys(map).length === 0) {
+      const seed = seedFromString(String(nom))
+      STORES.forEach((store, i) => {
+        const r = ((seed >> (i * 3)) % 850) / 100.0 // 0..8.5
+        const price = 1.5 + r
+        map[store.toLowerCase()] = Math.round(price * 100) / 100
+        meta[nom][store.toLowerCase()] = { isStored: false, source: 'estime' }
+      })
+    }
+
     result[nom] = map
   })
-  
-  // Attach metadata for consumers who need it
+
   result.__meta = meta
   return result
 }
 
-// Backwards compatible: fetchPricesForProducts returns array of {id, nom, prices:[{magasin,prix}]}
-export async function fetchPricesForProducts(products){
+/**
+ * Retourne les prix au format légacy (pour compatibilité)
+ */
+export async function fetchPricesForProducts(products) {
   const obj = await getPrixProduits(products)
   return products.map(p => ({
     id: p.id,
@@ -68,3 +147,4 @@ export async function fetchPricesForProducts(products){
     prices: Object.entries(obj[p.nom] || {}).map(([magasin, prix]) => ({ magasin, prix }))
   }))
 }
+

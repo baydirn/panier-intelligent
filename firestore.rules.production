@@ -1,0 +1,211 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ========================================
+    // FONCTIONS HELPER
+    // ========================================
+
+    // Vérifier si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Vérifier si l'utilisateur est le propriétaire du document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Vérifier si l'utilisateur a un rôle spécifique dans une liste
+    function hasRole(listId, role) {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/sharedLists/$(listId)).data.members[request.auth.uid] == role;
+    }
+
+    // Vérifier si l'utilisateur est membre d'une liste (n'importe quel rôle)
+    function isMember(listId) {
+      return isAuthenticated() &&
+             request.auth.uid in get(/databases/$(database)/documents/sharedLists/$(listId)).data.members.keys();
+    }
+
+    // Vérifier si l'utilisateur est admin ou editor d'une liste
+    function canEdit(listId) {
+      let list = get(/databases/$(database)/documents/sharedLists/$(listId)).data;
+      let userRole = list.members[request.auth.uid];
+      return isAuthenticated() && (userRole == 'admin' || userRole == 'editor');
+    }
+
+    // Vérifier si l'utilisateur est premium
+    function isPremium() {
+      return isAuthenticated() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tier == 'premium';
+    }
+
+    // ========================================
+    // USERS
+    // ========================================
+
+    match /users/{userId} {
+      // Lecture: seulement son propre profil
+      allow read: if isOwner(userId);
+
+      // Création: à la première connexion (Firebase Auth)
+      allow create: if isOwner(userId) &&
+                       request.resource.data.tier == 'free'; // Force free tier par défaut
+
+      // Mise à jour: seulement son propre profil
+      // Empêcher l'utilisateur de changer son tier manuellement (seulement via Cloud Function après paiement)
+      allow update: if isOwner(userId) &&
+                       (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['tier']));
+    }
+
+    // ========================================
+    // PRODUCTS (Catalogue universel)
+    // ========================================
+
+    match /products/{productId} {
+      // Lecture: public (tous les utilisateurs peuvent chercher des produits)
+      allow read: if true;
+
+      // Écriture: seulement les admins (via Cloud Function)
+      allow write: if false;
+    }
+
+    // ========================================
+    // STORE PRICES
+    // ========================================
+
+    match /storePrices/{priceId} {
+      // Lecture: public
+      allow read: if true;
+
+      // Écriture: seulement via Cloud Functions (scraping)
+      allow write: if false;
+    }
+
+    // ========================================
+    // STORES
+    // ========================================
+
+    match /stores/{storeId} {
+      // Lecture: public
+      allow read: if true;
+
+      // Écriture: seulement les admins
+      allow write: if false;
+    }
+
+    // ========================================
+    // SHARED LISTS
+    // ========================================
+
+    match /sharedLists/{listId} {
+      // Lecture: owner + tous les membres
+      allow read: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid ||
+        request.auth.uid in resource.data.members.keys()
+      );
+
+      // Création: n'importe quel utilisateur authentifié peut créer une liste
+      // Limites freemium vérifiées côté client + Cloud Function
+      allow create: if isAuthenticated() &&
+                       request.resource.data.ownerId == request.auth.uid &&
+                       request.resource.data.members[request.auth.uid] == 'admin';
+
+      // Mise à jour: owner (admin) ou editors
+      allow update: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid ||
+        canEdit(listId)
+      );
+
+      // Suppression: seulement le owner
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ========================================
+    // COURSE ASSIGNMENTS
+    // ========================================
+
+    match /courseAssignments/{assignmentId} {
+      // Lecture: seulement l'utilisateur assigné ou le owner de la liste
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        get(/databases/$(database)/documents/sharedLists/$(resource.data.listId)).data.ownerId == request.auth.uid
+      );
+
+      // Création: seulement le owner de la liste (admin)
+      allow create: if isAuthenticated() &&
+                       get(/databases/$(database)/documents/sharedLists/$(request.resource.data.listId)).data.ownerId == request.auth.uid;
+
+      // Mise à jour: l'utilisateur assigné peut changer le statut, le owner peut tout modifier
+      allow update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || // User peut update son statut
+        get(/databases/$(database)/documents/sharedLists/$(resource.data.listId)).data.ownerId == request.auth.uid // Owner peut tout modifier
+      );
+
+      // Suppression: seulement le owner de la liste
+      allow delete: if isAuthenticated() &&
+                       get(/databases/$(database)/documents/sharedLists/$(resource.data.listId)).data.ownerId == request.auth.uid;
+    }
+
+    // ========================================
+    // PRICE ALERTS
+    // ========================================
+
+    match /priceAlerts/{alertId} {
+      // Lecture: seulement son propre alert
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Création: utilisateur authentifié (limites freemium vérifiées côté client)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // Mise à jour: seulement son propre alert
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Suppression: seulement son propre alert
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ========================================
+    // PRICE HISTORY
+    // ========================================
+
+    match /priceHistory/{historyId} {
+      // Lecture: public (pour afficher graphiques)
+      allow read: if true;
+
+      // Écriture: seulement via Cloud Functions
+      allow write: if false;
+    }
+
+    // ========================================
+    // NOTIFICATIONS
+    // ========================================
+
+    match /notifications/{notificationId} {
+      // Lecture: seulement ses propres notifications
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+
+      // Création: via Cloud Functions seulement
+      allow create: if false;
+
+      // Mise à jour: peut marquer comme lue
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+
+      // Suppression: peut supprimer ses propres notifications
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    // ========================================
+    // FALLBACK: Bloquer tout le reste
+    // ========================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

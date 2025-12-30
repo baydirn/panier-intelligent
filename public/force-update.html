@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Force Update - Panier Intelligent</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #2563eb;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 10px 5px;
+    }
+    button:hover {
+      background: #1d4ed8;
+    }
+    .success { color: #059669; }
+    .error { color: #dc2626; }
+    .info { color: #0891b2; }
+    pre {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🔄 Force Update Cache</h1>
+    <p>Cette page force la mise à jour complète de l'application en supprimant tous les caches.</p>
+    
+    <button onclick="clearEverything()">🗑️ Tout vider et recharger</button>
+    <button onclick="unregisterServiceWorker()">🔌 Désactiver Service Worker</button>
+    <button onclick="checkStatus()">ℹ️ Vérifier le statut</button>
+    
+    <div id="output" style="margin-top: 20px;"></div>
+  </div>
+
+  <script>
+    const output = document.getElementById('output');
+
+    async function clearEverything() {
+      output.innerHTML = '<p class="info">Nettoyage en cours...</p>';
+      
+      try {
+        // 1. Unregister all service workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+          }
+          output.innerHTML += '<p class="success">✓ Service workers désactivés</p>';
+        }
+
+        // 2. Clear all caches
+        const cacheNames = await caches.keys();
+        for (const cacheName of cacheNames) {
+          await caches.delete(cacheName);
+        }
+        output.innerHTML += `<p class="success">✓ ${cacheNames.length} caches supprimés</p>`;
+
+        // 3. Clear IndexedDB
+        const databases = await indexedDB.databases();
+        for (const db of databases) {
+          indexedDB.deleteDatabase(db.name);
+        }
+        output.innerHTML += `<p class="success">✓ ${databases.length} bases IndexedDB supprimées</p>`;
+
+        // 4. Clear localStorage & sessionStorage
+        localStorage.clear();
+        sessionStorage.clear();
+        output.innerHTML += '<p class="success">✓ localStorage et sessionStorage vidés</p>';
+
+        // 5. Reload
+        output.innerHTML += '<p class="success"><strong>✓ Tout est nettoyé ! Redirection dans 2 secondes...</strong></p>';
+        setTimeout(() => {
+          window.location.href = '/liste';
+        }, 2000);
+
+      } catch (error) {
+        output.innerHTML += `<p class="error">❌ Erreur: ${error.message}</p>`;
+      }
+    }
+
+    async function unregisterServiceWorker() {
+      output.innerHTML = '<p class="info">Désactivation du service worker...</p>';
+      
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+          }
+          output.innerHTML += `<p class="success">✓ ${registrations.length} service worker(s) désactivé(s)</p>`;
+          output.innerHTML += '<p class="info">Rechargez la page avec Ctrl+Shift+R</p>';
+        } else {
+          output.innerHTML += '<p class="error">Service Worker non supporté</p>';
+        }
+      } catch (error) {
+        output.innerHTML += `<p class="error">❌ Erreur: ${error.message}</p>`;
+      }
+    }
+
+    async function checkStatus() {
+      output.innerHTML = '<h3>📊 Statut actuel:</h3>';
+      
+      // Service Workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        output.innerHTML += `<p>Service Workers: <strong>${registrations.length}</strong></p>`;
+        registrations.forEach((reg, i) => {
+          output.innerHTML += `<pre>SW ${i+1}: ${reg.active?.scriptURL || 'inactive'}</pre>`;
+        });
+      }
+
+      // Caches
+      const cacheNames = await caches.keys();
+      output.innerHTML += `<p>Caches: <strong>${cacheNames.length}</strong></p>`;
+      if (cacheNames.length > 0) {
+        output.innerHTML += `<pre>${cacheNames.join('\n')}</pre>`;
+      }
+
+      // IndexedDB
+      const databases = await indexedDB.databases();
+      output.innerHTML += `<p>IndexedDB: <strong>${databases.length}</strong> base(s)</p>`;
+      if (databases.length > 0) {
+        output.innerHTML += `<pre>${databases.map(db => `${db.name} v${db.version}`).join('\n')}</pre>`;
+      }
+
+      // Storage
+      output.innerHTML += `<p>localStorage: <strong>${localStorage.length}</strong> clés</p>`;
+      output.innerHTML += `<p>sessionStorage: <strong>${sessionStorage.length}</strong> clés</p>`;
+    }
+
+    // Auto-check on load
+    window.onload = checkStatus;
+  </script>
+</body>
+</html>

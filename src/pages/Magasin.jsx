@@ -1,23 +1,53 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import ProgressBar from '../components/ProgressBar'
-import useAppStore from '../store/useAppStore'
+import useFirestoreStore from '../store/useFirestoreStore'
 import { loadProgress, saveProgress, clearProgress, addRecurrentProduct } from '../services/db'
 import { useToast } from '../components/ToastProvider'
 import Button from '../components/Button'
 import Badge from '../components/Badge'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Magasin(){
-  const products = useAppStore(s => s.products)
-  const loadProducts = useAppStore(s => s.loadProducts)
-  const updateProduct = useAppStore(s => s.updateProduct)
-  const getCombinaisonOptimale = useAppStore(s => s.getCombinaisonOptimale)
+  const { user } = useAuth()
+  const products = useFirestoreStore(s => s.products || [])
+  const loadProducts = useFirestoreStore(s => s.loadProducts)
+  const subscribeToProducts = useFirestoreStore(s => s.subscribeToProducts)
+  const unsubscribeFromProducts = useFirestoreStore(s => s.unsubscribeFromProducts)
+  const updateProduct = useFirestoreStore(s => s.updateProduct)
+  const selectedCombination = useFirestoreStore(s => s.selectedCombination)
   const { addToast } = useToast()
 
   const [viewMode, setViewMode] = useState('grouped') // 'grouped' or 'list'
   const [restoring, setRestoring] = useState(false)
   const [hideCompleted, setHideCompleted] = useState(false)
+  const [autoApplied, setAutoApplied] = useState(false)
 
-  useEffect(()=>{ loadProducts().catch(()=>{}) }, [])
+  // Debug logging
+  useEffect(() => {
+    console.log('[Magasin] user:', user)
+    console.log('[Magasin] products:', products)
+    console.log('[Magasin] products.length:', products.length)
+  }, [user, products])
+
+  useEffect(() => {
+    if (user?.uid) {
+      loadProducts(user.uid).catch(() => {})
+      subscribeToProducts(user.uid)
+    }
+    
+    // Cleanup: unsubscribe on unmount
+    return () => {
+      unsubscribeFromProducts()
+    }
+  }, [user, loadProducts, subscribeToProducts, unsubscribeFromProducts])
+
+  // Auto-apply selected combination on mount if present
+  useEffect(() => {
+    if(!autoApplied && selectedCombination && selectedCombination.assignment && products.length > 0){
+      applySelectedCombinationManually()
+      setAutoApplied(true)
+    }
+  }, [selectedCombination, products, autoApplied])
 
   const total = products.length
   const purchased = products.filter(p => p.purchased).length
@@ -70,8 +100,31 @@ export default function Magasin(){
   }, [products, hideCompleted])
 
   // Get optimal combination to show suggested order
-  const combination = getCombinaisonOptimale ? getCombinaisonOptimale() : null
+  const combination = selectedCombination
   const storeOrder = combination?.stores || Object.keys(groupedByStore)
+
+  async function applySelectedCombinationManually(){
+    if(!combination || !combination.assignment || !products || products.length === 0){
+      addToast('Pas de combinaison à appliquer', 'error'); return
+    }
+    const nameToInfo = new Map()
+    combination.assignment.forEach(a => {
+      if(!a.product) return
+      nameToInfo.set(String(a.product).toLowerCase(), { store: a.store, price: a.price })
+    })
+    let applied = 0
+    for(const p of products){
+      const key = (p.nom || '').toLowerCase()
+      const info = nameToInfo.get(key)
+      if(info && (p.magasin !== info.store || p.prix !== info.price)){
+        try { await updateProduct(p.id, { magasin: info.store || null, prix: typeof info.price === 'number' ? info.price : null, prixSource: 'optimisation', autoAssigned: true }) } catch {}
+        applied++
+      }
+    }
+    // Force reload to refresh grouping
+    await loadProducts()
+    if(applied){ addToast(`Combinaison appliquée (${applied} produit(s))`, 'success') } else { addToast('Aucun changement à appliquer', 'info') }
+  }
 
   // On mount/when products change, restore saved purchase progress
   useEffect(() => {
@@ -96,30 +149,7 @@ export default function Magasin(){
     return () => { mounted = false }
   }, [listId])
 
-  // Auto-apply combination mapping for missing magasin/prix
-  useEffect(() => {
-    if(!combination || !products || products.length === 0) return
-    const assignMap = new Map()
-    combination.assignment?.forEach(a => {
-      if(!a || !a.product) return
-      assignMap.set(String(a.product).toLowerCase(), { store: a.store, price: a.price })
-    })
-    const toUpdate = []
-    for(const p of products){
-      const key = (p.nom || '').toLowerCase()
-      const mapped = assignMap.get(key)
-      if(mapped && (!p.magasin || p.prix == null)){
-        toUpdate.push({ id: p.id, magasin: mapped.store || p.magasin || null, prix: typeof mapped.price === 'number' ? mapped.price : p.prix, prixSource: 'optimisation', autoAssigned: true })
-      }
-    }
-    if(toUpdate.length){
-      ;(async () => {
-        for(const it of toUpdate){
-          try{ await updateProduct(it.id, { magasin: it.magasin, prix: it.prix, prixSource: it.prixSource, autoAssigned: it.autoAssigned }) }catch{}
-        }
-      })()
-    }
-  }, [combination, products])
+  // Fonction manuelle pour appliquer la combinaison (plus d'auto-apply qui cause des boucles)
 
   // Calculate stats per store
   const storeStats = useMemo(() => {
@@ -239,6 +269,12 @@ export default function Magasin(){
               </React.Fragment>
             ))}
           </div>
+          <button
+            onClick={applySelectedCombinationManually}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm active:scale-95 transition"
+          >
+            Réappliquer la combinaison
+          </button>
         </div>
       )}
 

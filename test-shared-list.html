@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Lien Partage - Panier Intelligent</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .container {
+      background: white;
+      color: #333;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      margin-top: 0;
+    }
+    .step {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f7fafc;
+      border-left: 4px solid #667eea;
+      border-radius: 8px;
+    }
+    .success {
+      border-left-color: #48bb78;
+      background: #f0fff4;
+    }
+    .error {
+      border-left-color: #f56565;
+      background: #fff5f5;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      margin: 5px;
+    }
+    button:hover {
+      background: #5a67d8;
+    }
+    button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    .link-box {
+      background: #edf2f7;
+      padding: 15px;
+      border-radius: 8px;
+      word-break: break-all;
+      font-family: 'Courier New', monospace;
+      margin: 10px 0;
+    }
+    .status {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🛒 Test Partage de Liste</h1>
+
+    <div class="step">
+      <h3>📋 Instructions</h3>
+      <ol>
+        <li>Assurez-vous d'être connecté sur <a href="http://localhost:5176" target="_blank">localhost:5176</a></li>
+        <li>Ajoutez quelques produits à votre liste</li>
+        <li>Cliquez sur "Partager" dans l'interface</li>
+        <li>Copiez le lien généré et ouvrez-le dans un nouvel onglet</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <h3>✅ Vérifications</h3>
+      <p><strong>Authentification:</strong></p>
+      <div id="auth-status" class="status">Vérification en cours...</div>
+
+      <p><strong>Connexion Firestore:</strong></p>
+      <div id="firestore-status" class="status">Vérification en cours...</div>
+
+      <p><strong>Règles de sécurité:</strong></p>
+      <div id="rules-status" class="status">Vérification en cours...</div>
+    </div>
+
+    <div class="step">
+      <h3>🔗 Test Direct</h3>
+      <p>Entrez un shareCode pour tester l'accès direct:</p>
+      <input type="text" id="shareCodeInput" placeholder="Ex: aBcDeFgHiJ">
+      <button onclick="testShareCode()">Tester l'accès</button>
+      <div id="test-result"></div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js'
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js'
+    import { getFirestore, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js'
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPW2AaSmNUeZ0fSZUytZoJnMnbyQF_5ZM",
+      authDomain: "panier-intelligent-d050c.firebaseapp.com",
+      projectId: "panier-intelligent-d050c",
+      storageBucket: "panier-intelligent-d050c.firebasestorage.app",
+      messagingSenderId: "969801019058",
+      appId: "1:969801019058:web:e2c922249980fe8afd63ab"
+    }
+
+    const app = initializeApp(firebaseConfig)
+    const auth = getAuth(app)
+    const db = getFirestore(app)
+
+    // Check auth status
+    onAuthStateChanged(auth, (user) => {
+      const authStatus = document.getElementById('auth-status')
+      if (user) {
+        authStatus.innerHTML = `✅ Connecté: ${user.email}`
+        authStatus.style.background = '#f0fff4'
+        authStatus.style.color = '#22543d'
+      } else {
+        authStatus.innerHTML = `❌ Non connecté - <a href="http://localhost:5176/auth" target="_blank">Se connecter</a>`
+        authStatus.style.background = '#fff5f5'
+        authStatus.style.color = '#742a2a'
+      }
+    })
+
+    // Check Firestore connection
+    try {
+      const productsRef = collection(db, 'products')
+      const snapshot = await getDocs(query(productsRef))
+      const firestoreStatus = document.getElementById('firestore-status')
+      firestoreStatus.innerHTML = `✅ Connecté à Firestore (${snapshot.size} produits)`
+      firestoreStatus.style.background = '#f0fff4'
+      firestoreStatus.style.color = '#22543d'
+    } catch (error) {
+      const firestoreStatus = document.getElementById('firestore-status')
+      firestoreStatus.innerHTML = `❌ Erreur Firestore: ${error.message}`
+      firestoreStatus.style.background = '#fff5f5'
+      firestoreStatus.style.color = '#742a2a'
+    }
+
+    // Check if we can query sharedLists (test rules)
+    try {
+      const listsRef = collection(db, 'sharedLists')
+      const testQuery = query(listsRef, where('isActive', '==', true))
+      const snapshot = await getDocs(testQuery)
+      const rulesStatus = document.getElementById('rules-status')
+      rulesStatus.innerHTML = `✅ Règles OK - Query autorisée (${snapshot.size} listes actives)`
+      rulesStatus.style.background = '#f0fff4'
+      rulesStatus.style.color = '#22543d'
+    } catch (error) {
+      const rulesStatus = document.getElementById('rules-status')
+      rulesStatus.innerHTML = `❌ Erreur règles: ${error.message}`
+      rulesStatus.style.background = '#fff5f5'
+      rulesStatus.style.color = '#742a2a'
+    }
+
+    // Test shareCode access
+    window.testShareCode = async function() {
+      const shareCode = document.getElementById('shareCodeInput').value.trim()
+      const resultDiv = document.getElementById('test-result')
+
+      if (!shareCode) {
+        resultDiv.innerHTML = '<div class="status error">❌ Veuillez entrer un shareCode</div>'
+        return
+      }
+
+      try {
+        resultDiv.innerHTML = '<div class="status">⏳ Recherche en cours...</div>'
+
+        const listsRef = collection(db, 'sharedLists')
+        const q = query(listsRef, where('shareCode', '==', shareCode), where('isActive', '==', true))
+        const snapshot = await getDocs(q)
+
+        if (snapshot.empty) {
+          resultDiv.innerHTML = '<div class="status error">❌ Liste non trouvée ou inactive</div>'
+        } else {
+          const doc = snapshot.docs[0]
+          const data = doc.data()
+          resultDiv.innerHTML = `
+            <div class="status success">
+              ✅ Liste trouvée!<br>
+              <strong>Titre:</strong> ${data.title}<br>
+              <strong>Produits:</strong> ${data.products?.length || 0}<br>
+              <strong>Owner:</strong> ${data.ownerId}<br>
+              <strong>Membres:</strong> ${Object.keys(data.members || {}).length}<br>
+              <div class="link-box">
+                <a href="http://localhost:5176/shared/${shareCode}" target="_blank">
+                  http://localhost:5176/shared/${shareCode}
+                </a>
+              </div>
+            </div>
+          `
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<div class="status error">❌ Erreur: ${error.message}</div>`
+      }
+    }
+  </script>
+</body>
+</html>

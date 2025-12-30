@@ -53,13 +53,35 @@ export function computeBestCombinations(products, priceData, options={}){
 }
 
 // New function as requested: produits is array, prix is { nom: { store: price } }
-// options: { userLat, userLon, favoriteStores, weights }
+// options: { userLat, userLon, favoriteStores, weights, maxRadiusKm }
 export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, topN = 3, options = {}){
-  const { userLat, userLon, favoriteStores = [], weights, debug = false, pruneLargeSearch = false, maxCombos = 5000 } = options
-  // collect all stores
+  const { userLat, userLon, favoriteStores = [], weights, debug = false, pruneLargeSearch = false, maxCombos = 5000, maxRadiusKm, allowedStoreCodes } = options
+  // collect all stores (exclude __meta key which is metadata, not a product)
   const storesSet = new Set()
-  Object.values(prix).forEach(m => Object.keys(m || {}).forEach(s => storesSet.add(s)))
-  const stores = Array.from(storesSet)
+  Object.entries(prix).forEach(([key, m]) => {
+    if(key === '__meta') return // Skip metadata
+    Object.keys(m || {}).forEach(s => storesSet.add(s))
+  })
+  let stores = Array.from(storesSet)
+
+  // Restrict to allowed store codes if provided
+  if(Array.isArray(allowedStoreCodes) && allowedStoreCodes.length > 0){
+    const allow = new Set(allowedStoreCodes.map(s => String(s).trim()))
+    stores = stores.filter(s => allow.has(String(s).trim()))
+    if(debug) console.log(`[optimisation] Restricted to ${stores.length} allowed stores`)
+  }
+  
+  // Filter stores by distance if maxRadiusKm is set and user location available
+  if(maxRadiusKm != null && userLat != null && userLon != null){
+    stores = stores.filter(storeCode => {
+      const coords = getStoreCoords(storeCode)
+      if(!coords) return true // keep if coords unknown
+      const dist = haversineDistance(userLat, userLon, coords.lat, coords.lon)
+      return dist <= maxRadiusKm
+    })
+    if(debug) console.log(`[optimisation] Filtered to ${stores.length} stores within ${maxRadiusKm}km`)
+  }
+  
   if(stores.length === 0) return []
 
   // helper to generate combinations of stores (1..max)
@@ -100,6 +122,25 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
     const assignment = produits.map(p => {
       const nom = p.nom || p.id || 'produit'
       const pr = prix[nom] || {}
+
+      // Check if product is locked to a specific store
+      if (p.lockedStore && p.magasin) {
+        // Normalize store name to lowercase for lookup (price map uses lowercase keys)
+        const normalizedStore = p.magasin.toLowerCase()
+        const lockedPrice = pr[normalizedStore] || null
+        if (lockedPrice === null) unknownCount += 1
+        const qty = Number(p.quantite) || 1
+        const lineTotal = lockedPrice != null ? lockedPrice * qty : null
+        return {
+          product: nom,
+          store: p.magasin,  // Keep original case for display
+          price: lockedPrice,
+          quantity: qty,
+          lineTotal,
+          isLocked: true
+        }
+      }
+
       // choose cheapest store among combo
       let bestStore = null
       let bestPrice = Infinity
@@ -116,7 +157,7 @@ export function trouverCombinaisonsOptimales(produits, prix, maxMagasins = 3, to
       }
       const qty = Number(p.quantite) || 1
       const lineTotal = bestPrice != null ? bestPrice * qty : null
-      return { product: nom, store: bestStore, price: bestPrice, quantity: qty, lineTotal }
+      return { product: nom, store: bestStore, price: bestPrice, quantity: qty, lineTotal, isLocked: false }
     })
     // Sum only known line totals
     const knownPrices = assignment.filter(a => a.lineTotal != null)

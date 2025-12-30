@@ -1,28 +1,56 @@
 /**
  * Wrapper côté client pour le scraping IGA
  * Note: Le scraping Puppeteer doit être exécuté côté serveur
- * Cette version montre comment l'intégrer
+ * Cette version appelle l'API backend
  */
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+
 /**
- * Version client (simulée pour demo)
- * En production, ceci appellerait un endpoint API backend qui exécute Puppeteer
+ * Scraper IGA via backend API
  */
 export async function scrapeIGA(options = {}) {
-  // En production, ceci ferait:
-  // const response = await fetch('/api/scrape/iga', { method: 'POST', body: JSON.stringify(options) })
-  // return await response.json()
-  
-  // Pour l'instant, retourner des données de démonstration
-  console.log('[IGA Scraper Client] Cette fonctionnalité nécessite un backend Node.js')
-  console.log('[IGA Scraper Client] Pour activer: déployer scripts/test-iga-scraper.js sur un serveur')
-  
-  return {
-    success: false,
-    error: 'Le scraping web nécessite un backend Node.js. Utilisez plutôt l\'upload OCR ou déployez un serveur de scraping.',
-    products: [],
-    totalFound: 0,
-    method: 'client-stub'
+  try {
+    const token = localStorage.getItem('adminToken')
+    
+    if (!token) {
+      return {
+        success: false,
+        error: 'Authentification requise. Veuillez vous connecter en tant qu\'admin.',
+        products: [],
+        totalFound: 0
+      }
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/admin/scrape/iga`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ options })
+    })
+
+    if (response.status === 401 || response.status === 403) {
+      return {
+        success: false,
+        error: 'Token expiré ou invalide. Veuillez vous reconnecter.',
+        products: [],
+        totalFound: 0
+      }
+    }
+
+    const data = await response.json()
+    return data
+
+  } catch (error) {
+    console.error('[IGA Scraper Client] Erreur:', error)
+    return {
+      success: false,
+      error: `Erreur de connexion au serveur: ${error.message}`,
+      products: [],
+      totalFound: 0
+    }
   }
 }
 

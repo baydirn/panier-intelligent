@@ -64,12 +64,13 @@ export default function Recurrentes(){
       // Fusionner: addition quantités, conserver magasin existant si défini sinon prendre default_store
       const newQty = (existingProduct.quantite || 1) + (item.default_quantity || 1)
       const newStore = existingProduct.magasin || (item.default_store || null)
-      await useAppStore.getState().updateProduct(existingProduct.id, { quantite: newQty, magasin: newStore })
+      await useAppStore.getState().updateProduct(existingProduct.id, { quantite: newQty, magasin: newStore, recurrent: true })
       addToast(`Quantité fusionnée (+${item.default_quantity || 1})`, 'success')
       return
     }
 
-    await addProduct({ nom: item.name, quantite: item.default_quantity || 1, magasin: item.default_store || null, recurrent: false })
+    // Add with recurrent: true to mark as recurrent product
+    await addProduct({ nom: item.name, quantite: item.default_quantity || 1, magasin: item.default_store || null, recurrent: true })
     addToast('Ajouté à la liste ✅', 'success')
   }
 

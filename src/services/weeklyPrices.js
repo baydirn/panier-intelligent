@@ -19,8 +19,8 @@ export async function getWeeklyPricesMeta(){
 }
 
 // Ingest products extracted via OCR into the weekly price base.
-// Each product: { name, price, confidence? }
-// Store: flyer store name; period: { from, to }
+// Each product: { name, price, brand?, volume?, validFrom?, validTo?, store?, confidence? }
+// Store: flyer store name; period: { from, to } (legacy support)
 // Strategy: if an existing item with same name+store exists, keep the lowest price
 // and update updatedAt if new price chosen.
 export async function ingestOcrProducts({ products = [], store, period, ocrConfidence }) {
@@ -29,22 +29,56 @@ export async function ingestOcrProducts({ products = [], store, period, ocrConfi
   const items = meta.items || []
   const nowIso = new Date().toISOString()
   let added = 0, updated = 0
+  
   for(const p of products){
     const name = String(p.name || '').trim().toLowerCase()
     if(!name || p.price == null) continue
-    const existingIdx = items.findIndex(it => it.name.toLowerCase() === name && (it.store || '').toLowerCase() === String(store).toLowerCase())
+    
+    // Support both validFrom/validTo (new) and period.from/period.to (legacy)
+    const validFrom = p.validFrom || period?.from || nowIso
+    const validTo = p.validTo || period?.to || null
+    
+    const existingIdx = items.findIndex(it => 
+      it.name.toLowerCase() === name && 
+      (it.store || '').toLowerCase() === String(store).toLowerCase()
+    )
+    
     if(existingIdx === -1){
-      items.push({ name, store, price: p.price, updatedAt: nowIso, source: 'ocr', period, ocrConfidence })
+      items.push({ 
+        name, 
+        store, 
+        price: p.price,
+        brand: p.brand || '',
+        volume: p.volume || '',
+        category: p.category || '',
+        validFrom: validFrom,
+        validTo: validTo,
+        updatedAt: nowIso, 
+        source: 'ocr', 
+        ocrConfidence 
+      })
       added++
     } else {
       const existing = items[existingIdx]
       // Choose min price as best reference
       if(p.price < existing.price){
-        items[existingIdx] = { ...existing, price: p.price, updatedAt: nowIso, source: 'ocr', period, ocrConfidence }
+        items[existingIdx] = { 
+          ...existing, 
+          price: p.price,
+          brand: p.brand || existing.brand,
+          volume: p.volume || existing.volume,
+          category: p.category || existing.category,
+          validFrom: validFrom,
+          validTo: validTo,
+          updatedAt: nowIso, 
+          source: 'ocr', 
+          ocrConfidence 
+        }
         updated++
       }
     }
   }
+  
   const payload = { ...meta, items }
   await localforage.setItem(WEEKLY_PRICES_KEY, payload)
   return { added, updated }
@@ -97,13 +131,26 @@ export async function refreshWeeklyPrices({ force = false } = {}){
   }
 }
 
-export async function getBestWeeklyOffers(name){
+export async function getBestWeeklyOffers(name, { includeExpired = false } = {}){
   if(!name) return []
   const meta = await getWeeklyPricesMeta()
   const items = meta.items || []
   const key = String(name).toLowerCase()
-  const offers = items.filter(it => it.name.toLowerCase() === key)
-  // sort by price
+  const now = new Date().toISOString()
+  
+  let offers = items.filter(it => it.name.toLowerCase() === key)
+  
+  // Filtrer par période de validité si includeExpired = false
+  if (!includeExpired) {
+    offers = offers.filter(offer => {
+      // Si pas de validTo, considérer comme valide indéfiniment
+      if (!offer.validTo) return true
+      // Si validTo existe, vérifier qu'on est avant la fin
+      return now <= offer.validTo
+    })
+  }
+  
+  // Trier par prix (du plus bas au plus haut)
   offers.sort((a,b) => a.price - b.price)
   return offers
 }
@@ -118,4 +165,53 @@ function isoWeekId(date){
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1))
   const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1)/7)
   return `${d.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`
+}
+
+/**
+ * Obtenir des statistiques détaillées sur la base de prix
+ */
+export async function getPriceStats() {
+  const meta = await getWeeklyPricesMeta()
+  const items = meta.items || []
+  const now = new Date().toISOString()
+  
+  // Grouper par épicerie
+  const storeStats = {}
+  let activeCount = 0
+  let expiredCount = 0
+  
+  items.forEach(item => {
+    const store = item.store || 'Unknown'
+    if (!storeStats[store]) {
+      storeStats[store] = { total: 0, active: 0, expired: 0, avgPrice: 0, totalPrice: 0 }
+    }
+    storeStats[store].total++
+    storeStats[store].totalPrice += item.price || 0
+    
+    // Vérifier si actif
+    const isActive = !item.validTo || now <= item.validTo
+    if (isActive) {
+      storeStats[store].active++
+      activeCount++
+    } else {
+      storeStats[store].expired++
+      expiredCount++
+    }
+  })
+  
+  // Calculer prix moyens
+  Object.keys(storeStats).forEach(store => {
+    const stats = storeStats[store]
+    stats.avgPrice = stats.total > 0 ? (stats.totalPrice / stats.total).toFixed(2) : 0
+  })
+  
+  return {
+    total: items.length,
+    active: activeCount,
+    expired: expiredCount,
+    stores: Object.keys(storeStats).length,
+    storeStats,
+    lastFetched: meta.lastFetched,
+    generatedAt: meta.generatedAt
+  }
 }

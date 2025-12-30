@@ -1,6 +1,9 @@
 // Generate prices-meta.json summarizing the enriched dataset
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function loadPrices(){
   const file = path.join(__dirname, '..', 'public', 'prices.initial.json')
@@ -29,6 +32,6 @@ function main(){
   console.log(`Wrote meta: ${meta.totalItems} items across ${meta.totalSources} stores -> ${outFile}`)
 }
 
-if(require.main === module){
+if(import.meta.url === `file://${process.argv[1]}`){
   main()
 }

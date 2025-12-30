@@ -1,0 +1,82 @@
+// Prisma schema for Supabase (PostgreSQL)
+// Models: User, SharedList, SharedListMember, PartnerStore, PriceHistory
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(cuid())
+  email       String        @unique
+  displayName String?
+  tier        String?       // 'free' | 'premium'
+  createdAt   DateTime      @default(now())
+
+  sharedLists SharedList[]  @relation("OwnerLists")
+  memberships SharedListMember[]
+}
+
+model SharedList {
+  id          String              @id @default(cuid())
+  ownerId     String
+  title       String
+  shareCode   String              @unique
+  data        Json                // JSON payload of list items
+  isActive    Boolean             @default(true)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  owner       User                @relation("OwnerLists", fields: [ownerId], references: [id])
+  members     SharedListMember[]
+  priceHistory PriceHistory[]
+
+  @@index([ownerId])
+  @@index([shareCode])
+}
+
+model SharedListMember {
+  id        String   @id @default(cuid())
+  listId    String
+  userId    String
+  role      String   // 'view' | 'edit' | 'admin'
+  createdAt DateTime @default(now())
+
+  list      SharedList @relation(fields: [listId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@index([listId])
+  @@index([userId])
+  @@unique([listId, userId])
+}
+
+model PartnerStore {
+  id             Int       @id @default(autoincrement())
+  code           String    @unique
+  name           String
+  commissionRate Float     @default(0.0)
+  priorityBoost  Int       @default(0)
+  createdAt      DateTime  @default(now())
+
+  @@index([code])
+}
+
+model PriceHistory {
+  id         Int       @id @default(autoincrement())
+  productId  String
+  storeCode  String
+  price      Decimal   @db.Decimal(10,2)
+  currency   String    @default("CAD")
+  recordedAt DateTime  @default(now())
+  listId     String?
+
+  list       SharedList? @relation(fields: [listId], references: [id])
+
+  @@index([productId])
+  @@index([storeCode])
+  @@index([listId])
+}

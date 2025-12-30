@@ -700,7 +700,24 @@ export default function Liste(){
               product={p}
               updateProduct={updateProduct}
               onToggle={async (prod) => {
-                await updateProduct(prod.id, { recurrent: !prod.recurrent })
+                const newRecurrentStatus = !prod.recurrent
+                await updateProduct(prod.id, { recurrent: newRecurrentStatus })
+                
+                // Sync with recurrent products database
+                if (newRecurrentStatus) {
+                  // When marking as recurrent, add to recurrent products list
+                  try {
+                    await addRecurrentProduct({
+                      name: prod.nom,
+                      default_quantity: prod.quantite || 1,
+                      default_store: prod.magasin || null,
+                      active: true
+                    })
+                    addToast(`"${prod.nom}" ajouté aux récurrents`, 'success')
+                  } catch (err) {
+                    console.error('[Liste onToggle] Error adding to recurrent:', err)
+                  }
+                }
               }}
               onDelete={async (id) => {
                 console.log('[Liste onDelete] Called with id:', id)
