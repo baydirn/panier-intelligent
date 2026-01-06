@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import useAppStore from '../store/useAppStore'
 import { getAllProducts } from '../services/db'
 import Button from '../components/Button'
@@ -174,8 +175,8 @@ export default function Parametres(){
           </CardHeader>
           <CardBody>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <a 
-                href="/statistiques" 
+              <Link 
+                to="/statistiques" 
                 className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 rounded-lg transition-all active:scale-[0.98]"
               >
                 <span className="text-2xl">📊</span>
@@ -183,9 +184,9 @@ export default function Parametres(){
                   <div className="font-semibold text-gray-900">Statistiques</div>
                   <div className="text-xs text-gray-600">Voir les tendances et économies</div>
                 </div>
-              </a>
-              <a 
-                href="/recurrentes" 
+              </Link>
+              <Link 
+                to="/recurrentes" 
                 className="flex items-center gap-3 p-3 bg-gradient-to-r from-green-50 to-green-100 hover:from-green-100 hover:to-green-200 rounded-lg transition-all active:scale-[0.98]"
               >
                 <span className="text-2xl">🔄</span>
@@ -193,7 +194,7 @@ export default function Parametres(){
                   <div className="font-semibold text-gray-900">Produits récurrents</div>
                   <div className="text-xs text-gray-600">Gérer vos favoris</div>
                 </div>
-              </a>
+              </Link>
             </div>
           </CardBody>
         </Card>

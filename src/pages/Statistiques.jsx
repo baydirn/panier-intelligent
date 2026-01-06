@@ -20,7 +20,7 @@ export default function Statistiques() {
       
       // Calculate basic stats
       const totalProducts = products.length
-      const totalRecurrents = recurrents.filter(r => r.active).length
+      const totalRecurrents = recurrents.filter(r => r.active !== false).length // active unless explicitly false
       const productsWithPrice = products.filter(p => p.prix != null).length
       const totalValue = products.reduce((sum, p) => {
         const price = p.prix ?? 0
@@ -41,9 +41,9 @@ export default function Statistiques() {
         }
       }
 
-      // Get price trends for top recurring products
+      // Get price trends for top recurring products (active unless explicitly false)
       const topRecurring = recurrents
-        .filter(r => r.active)
+        .filter(r => r.active !== false)
         .slice(0, 10)
       
       const productTrends = []
@@ -70,9 +70,30 @@ export default function Statistiques() {
 
       // Calculate potential savings (if we always bought at lowest historical price)
       let potentialSavings = 0
-      for (const trend of productTrends) {
-        if (trend.latestPrice > trend.minPrice) {
-          potentialSavings += (trend.latestPrice - trend.minPrice)
+      for (const rec of topRecurring) {
+        const history = await getPriceHistory(rec.name)
+        if (history.length > 0) {
+          const prices = history.map(h => h.price)
+          const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length
+          const minPrice = Math.min(...prices)
+          const maxPrice = Math.max(...prices)
+          const latestPrice = prices[prices.length - 1]
+          
+          // Calculate savings - multiply by default quantity if available
+          const qty = rec.default_quantity || 1
+          if (latestPrice > minPrice) {
+            potentialSavings += (latestPrice - minPrice) * qty
+          }
+          
+          productTrends.push({
+            name: rec.name,
+            avgPrice,
+            minPrice,
+            maxPrice,
+            latestPrice,
+            historyCount: history.length,
+            trend: latestPrice < avgPrice ? 'down' : latestPrice > avgPrice ? 'up' : 'stable'
+          })
         }
       }
 
