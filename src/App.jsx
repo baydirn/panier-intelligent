@@ -1,5 +1,5 @@
 import React from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { getAllPriceAlerts, getLatestPrice, getSavedLists } from './services/db'
 import { useToast } from './components/ToastProvider'
 import { Routes, Route } from 'react-router-dom'
@@ -17,7 +17,6 @@ import Parametres from './pages/Parametres'
 
 export default function App(){
   const { addToast } = useToast()
-  const [hasCheckedLists, setHasCheckedLists] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -27,7 +26,6 @@ export default function App(){
         // This ensures any "create first list" prompts only show when truly needed
         const savedLists = await getSavedLists()
         if(mounted) {
-          setHasCheckedLists(true)
           // Store the result so other components can check if user has lists
           sessionStorage.setItem('hasSavedLists', savedLists.length > 0 ? 'true' : 'false')
         }

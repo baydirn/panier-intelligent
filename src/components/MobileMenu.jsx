@@ -29,10 +29,16 @@ export default function MobileMenu() {
       
       // Clear IndexedDB
       if (window.indexedDB) {
-        const databases = await window.indexedDB.databases()
-        databases.forEach(db => {
-          window.indexedDB.deleteDatabase(db.name)
-        })
+        try {
+          if (typeof window.indexedDB.databases === 'function') {
+            const databases = await window.indexedDB.databases()
+            databases.forEach(db => {
+              window.indexedDB.deleteDatabase(db.name)
+            })
+          }
+        } catch (error) {
+          console.error('Error clearing IndexedDB:', error)
+        }
       }
       
       addToast('Déconnexion réussie', 'success')
@@ -68,7 +74,7 @@ export default function MobileMenu() {
           />
 
           {/* Slide-out Menu */}
-          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 animate-slide-in-right">
+          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 animate-slide-in">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
