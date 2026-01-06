@@ -47,29 +47,8 @@ export default function Statistiques() {
         .slice(0, 10)
       
       const productTrends = []
-      for (const rec of topRecurring) {
-        const history = await getPriceHistory(rec.name)
-        if (history.length > 0) {
-          const prices = history.map(h => h.price)
-          const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length
-          const minPrice = Math.min(...prices)
-          const maxPrice = Math.max(...prices)
-          const latestPrice = prices[prices.length - 1]
-          
-          productTrends.push({
-            name: rec.name,
-            avgPrice,
-            minPrice,
-            maxPrice,
-            latestPrice,
-            historyCount: history.length,
-            trend: latestPrice < avgPrice ? 'down' : latestPrice > avgPrice ? 'up' : 'stable'
-          })
-        }
-      }
-
-      // Calculate potential savings (if we always bought at lowest historical price)
       let potentialSavings = 0
+      
       for (const rec of topRecurring) {
         const history = await getPriceHistory(rec.name)
         if (history.length > 0) {
