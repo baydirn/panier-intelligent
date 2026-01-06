@@ -1,10 +1,11 @@
 import React from 'react'
-import { useEffect } from 'react'
-import { getAllPriceAlerts, getLatestPrice } from './services/db'
+import { useEffect, useState } from 'react'
+import { getAllPriceAlerts, getLatestPrice, getSavedLists } from './services/db'
 import { useToast } from './components/ToastProvider'
 import { Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
 import BottomNav from './components/BottomNav'
+import MobileMenu from './components/MobileMenu'
 import InstallPWAButton from './components/InstallPWAButton'
 import IOSInstallPrompt from './components/IOSInstallPrompt'
 import Liste from './pages/Liste'
@@ -16,11 +17,21 @@ import Parametres from './pages/Parametres'
 
 export default function App(){
   const { addToast } = useToast()
+  const [hasCheckedLists, setHasCheckedLists] = useState(false)
 
   useEffect(() => {
     let mounted = true
     ;(async () => {
       try{
+        // Check for saved lists on app initialization
+        // This ensures any "create first list" prompts only show when truly needed
+        const savedLists = await getSavedLists()
+        if(mounted) {
+          setHasCheckedLists(true)
+          // Store the result so other components can check if user has lists
+          sessionStorage.setItem('hasSavedLists', savedLists.length > 0 ? 'true' : 'false')
+        }
+
         const alerts = await getAllPriceAlerts()
         const entries = Object.entries(alerts || {})
         for(const [name, cfg] of entries){
@@ -40,6 +51,7 @@ export default function App(){
     <div className="min-h-screen">
       <InstallPWAButton variant="banner" />
       <IOSInstallPrompt />
+      <MobileMenu />
       <Header />
   <main className="container pb-20 animate-fade-in">
         <Routes>
