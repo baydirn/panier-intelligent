@@ -51,27 +51,24 @@ export default function MobileMenu() {
     <>
       {/* Hamburger Button - Only visible on mobile */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen(true)}
         className="md:hidden fixed top-4 right-4 z-50 p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors"
         aria-label="Menu"
       >
         <span className="text-2xl">☰</span>
       </button>
 
-      {/* Overlay */}
+      {/* Menu and Overlay - Only render when open */}
       {isOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+        <>
+          {/* Overlay */}
+          <div
+            className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setIsOpen(false)}
+          />
 
-      {/* Slide-out Menu */}
-      <div
-        className={`md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
+          {/* Slide-out Menu */}
+          <div className="md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 animate-slide-in-right">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
@@ -119,7 +116,9 @@ export default function MobileMenu() {
             </button>
           </div>
         </div>
-      </div>
+          </div>
+        </>
+      )}
     </>
   )
 }
