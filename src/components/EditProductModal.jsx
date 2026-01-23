@@ -13,8 +13,10 @@ import { getPriceAlert, setPriceAlert } from '../services/db'
 export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   const [nom, setNom] = useState('')
   const [marque, setMarque] = useState('')
-  const [taille, setTaille] = useState('')
+  const [volume, setVolume] = useState('')
   const [quantite, setQuantite] = useState('x1')
+  const [categorie, setCategorie] = useState('')
+  const [tags, setTags] = useState('')
   
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [availableBrands, setAvailableBrands] = useState([])
@@ -29,6 +31,12 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       const fullName = product.nom || ''
       setNom(fullName)
       
+      // Set fields from product data
+      setMarque(product.marque || '')
+      setVolume(product.volume || '')
+      setCategorie(product.categorie || '')
+      setTags(Array.isArray(product.tags) ? product.tags.join(', ') : '')
+      
       // Essayer de trouver le produit dans la base de données
       const parts = fullName.toLowerCase().split(' ')
       let foundProduct = null
@@ -39,28 +47,30 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
         if (foundProduct) {
           setSelectedProduct(foundProduct)
           
-          // Extraire marque et taille du reste du nom
+          // Extraire marque et volume du reste du nom
           const remaining = parts.slice(i).join(' ')
           const brands = getBrandsForProduct(foundProduct.key)
           setAvailableBrands(brands)
           
           // Chercher la marque dans le nom
-          let detectedBrand = ''
-          let detectedFormat = ''
+          let detectedBrand = product.marque || ''
+          let detectedFormat = product.volume || ''
           let detectedQuantity = 'x1'
           
           for (const brand of brands) {
             if (remaining.toLowerCase().includes(brand.name.toLowerCase())) {
-              detectedBrand = brand.name
+              detectedBrand = detectedBrand || brand.name
               setSelectedProduct(foundProduct)
               break
             }
           }
           
-          // Extraire format et quantité du nom
-          const formatMatch = remaining.match(/(\d+\.?\d*)(ml|l|g|kg|unités?)/i)
-          if (formatMatch) {
-            detectedFormat = formatMatch[0]
+          // Extraire format et quantité du nom si pas déjà dans le produit
+          if (!detectedFormat) {
+            const formatMatch = remaining.match(/(\d+\.?\d*)(ml|l|g|kg|unités?)/i)
+            if (formatMatch) {
+              detectedFormat = formatMatch[0]
+            }
           }
           
           const quantityMatch = fullName.match(/x(\d+)/i)
@@ -69,7 +79,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           }
           
           setMarque(detectedBrand)
-          setTaille(detectedFormat)
+          setVolume(detectedFormat)
           setQuantite(detectedQuantity)
           
           if (detectedBrand) {
@@ -87,8 +97,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       if (!foundProduct) {
         // Produit non trouvé dans la base - mode manuel
         setNom(fullName)
-        setMarque('')
-        setTaille('')
+        // marque, volume, categorie, tags already set from product
         
         // Essayer d'extraire la quantité
         const quantityMatch = fullName.match(/x(\d+)/i)
@@ -123,7 +132,7 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       // Reconstruire le nom avec les sélections
       newName = selectedProduct.key
       if (marque) newName += ` ${marque}`
-      if (taille) newName += ` ${taille}`
+      if (volume) newName += ` ${volume}`
     }
     
     // Ajouter la quantité si différente de x1
@@ -131,11 +140,16 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
       newName += ` ${quantite}`
     }
     
+    // Parse tags from comma-separated string
+    const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean)
+    
     onSave({
       ...product,
       nom: newName,
-      marque: marque,
-      taille: taille,
+      marque: marque || null,
+      volume: volume || null,
+      categorie: categorie || null,
+      tags: tagArray,
       quantite: parseInt(quantite.replace('x', '')) || 1
     })
 
@@ -153,8 +167,10 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
   const handleClose = () => {
     setNom('')
     setMarque('')
-    setTaille('')
+    setVolume('')
     setQuantite('x1')
+    setCategorie('')
+    setTags('')
     setSelectedProduct(null)
     setAvailableBrands([])
     setAvailableFormats([])
@@ -215,15 +231,15 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           />
         )}
         
-        {/* Format */}
+        {/* Format/Volume */}
         {availableFormats.length > 0 ? (
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Format
+              Format/Volume
             </label>
             <select
-              value={taille}
-              onChange={(e) => setTaille(e.target.value)}
+              value={volume}
+              onChange={(e) => setVolume(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">Sélectionner...</option>
@@ -236,10 +252,10 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           </div>
         ) : (
           <Input
-            label="Format (optionnel)"
-            value={taille}
-            onChange={(e) => setTaille(e.target.value)}
-            placeholder="Ex: 2L"
+            label="Format/Volume (optionnel)"
+            value={volume}
+            onChange={(e) => setVolume(e.target.value)}
+            placeholder="Ex: 2L, 500g, 1kg"
             className="mb-4"
           />
         )}
@@ -262,6 +278,39 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           </select>
         </div>
 
+        {/* Catégorie */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Catégorie (optionnel)
+          </label>
+          <select
+            value={categorie}
+            onChange={(e) => setCategorie(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">Aucune</option>
+            <option value="Fruits et légumes">Fruits et légumes</option>
+            <option value="Viandes et poissons">Viandes et poissons</option>
+            <option value="Produits laitiers">Produits laitiers</option>
+            <option value="Boulangerie">Boulangerie</option>
+            <option value="Épicerie">Épicerie</option>
+            <option value="Surgelés">Surgelés</option>
+            <option value="Boissons">Boissons</option>
+            <option value="Hygiène et beauté">Hygiène et beauté</option>
+            <option value="Entretien">Entretien</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </div>
+
+        {/* Tags */}
+        <Input
+          label="Étiquettes (optionnel, séparées par virgule)"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          placeholder="Ex: bio, sans gluten, vegan"
+          className="mb-4"
+        />
+
         {/* Alerte de prix */}
         <Input
           label="Alerte prix (déclenche si ≤)"
@@ -277,9 +326,17 @@ export default function EditProductModal({ isOpen, onClose, product, onSave }) {
           <div className="font-semibold text-lg">
             {selectedProduct ? selectedProduct.key : nom}
             {marque && ` ${marque}`}
-            {taille && ` ${taille}`}
+            {volume && ` ${volume}`}
             {quantite !== 'x1' && ` ${quantite}`}
           </div>
+          {(categorie || tags) && (
+            <div className="text-sm text-gray-600 mt-2">
+              {categorie && <span className="inline-block bg-blue-100 text-blue-800 rounded px-2 py-0.5 mr-1 text-xs">{categorie}</span>}
+              {tags && tags.split(',').map((tag, i) => (
+                <span key={i} className="inline-block bg-green-100 text-green-800 rounded px-2 py-0.5 mr-1 text-xs">{tag.trim()}</span>
+              ))}
+            </div>
+          )}
         </div>
         
         {/* Boutons */}
