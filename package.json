@@ -7,8 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "NODE_OPTIONS='--max-old-space-size=4096' vitest run",
+    "test:watch": "NODE_OPTIONS='--max-old-space-size=4096' vitest",
     "generate:prices": "node scripts/generate-initial-prices.js",
     "generate:meta": "node scripts/generate-prices-meta.js",
     "prebuild": "npm run generate:prices && npm run generate:meta"
