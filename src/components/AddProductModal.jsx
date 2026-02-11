@@ -6,31 +6,33 @@ import Button from './Button'
 export default function AddProductModal({ isOpen, onClose, onAdd }) {
   const [nom, setNom] = useState('')
   const [marque, setMarque] = useState('')
-  const [taille, setTaille] = useState('')
+  const [volume, setVolume] = useState('')
   const [quantite, setQuantite] = useState(1)
   const [scanning, setScanning] = useState(false)
 
   const handleSubmit = () => {
     if (!nom.trim()) return
     
-    // Construire le nom complet avec marque et taille
+    // Construire le nom complet avec marque et volume
     let fullName = nom.trim()
     if (marque.trim()) {
       fullName += ` ${marque.trim()}`
     }
-    if (taille.trim()) {
-      fullName += ` ${taille.trim()}`
+    if (volume.trim()) {
+      fullName += ` ${volume.trim()}`
     }
     
     onAdd({
       nom: fullName,
+      marque: marque.trim() || null,
+      volume: volume.trim() || null,
       quantite: parseInt(quantite) || 1
     })
     
     // Reset form
     setNom('')
     setMarque('')
-    setTaille('')
+    setVolume('')
     setQuantite(1)
   }
 
@@ -132,10 +134,10 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
           />
           
           <Input
-            label="Taille / Format"
-            value={taille}
-            onChange={(e) => setTaille(e.target.value)}
-            placeholder="Ex: 2 litres"
+            label="Volume / Format"
+            value={volume}
+            onChange={(e) => setVolume(e.target.value)}
+            placeholder="Ex: 2L, 500g"
           />
           
           <Input
@@ -151,7 +153,7 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
             <p className="font-medium">
               {nom.trim() || 'Nom'}
               {marque.trim() && ` ${marque.trim()}`}
-              {taille.trim() && ` ${taille.trim()}`}
+              {volume.trim() && ` ${volume.trim()}`}
               {quantite > 1 && ` ×${quantite}`}
             </p>
           </div>
