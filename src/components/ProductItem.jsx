@@ -39,7 +39,19 @@ export default function ProductItem({ product, onToggle, onDelete, onEdit, onPri
             {product.recurrent && <span className="ml-2 text-xs text-green-600">récurrent</span>}
             <DuplicateBadge product={product} />
           </div>
-          <div className="text-sm text-gray-500">{product.magasin || '—'}</div>
+          <div className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
+            <span>{product.magasin || '—'}</span>
+            {product.marque && <span className="text-xs bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded">Marque: {product.marque}</span>}
+            {product.volume && <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">{product.volume}</span>}
+          </div>
+          {(product.categorie || (product.tags && product.tags.length > 0)) && (
+            <div className="text-xs text-gray-600 mt-1 flex items-center gap-1 flex-wrap">
+              {product.categorie && <span className="bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded">{product.categorie}</span>}
+              {product.tags && product.tags.map((tag, i) => (
+                <span key={i} className="bg-green-50 text-green-700 px-1.5 py-0.5 rounded">{tag}</span>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {duplicateInfo && duplicateInfo.count > 1 && (
