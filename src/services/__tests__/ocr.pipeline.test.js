@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Mock tesseract worker to avoid heavy OCR
 vi.mock('tesseract.js', () => ({
   createWorker: vi.fn(async (_lang, _oem, opts) => ({
+    setParameters: vi.fn(async (_params) => {}),
     recognize: vi.fn(async (_img) => {
       // Simulate progress updates if logger provided (handled in service)
       return { data: { text: "Lait 2% 2L\n$3.99\nPâtes 500g 2$ 49", confidence: 87, words: [] } }
