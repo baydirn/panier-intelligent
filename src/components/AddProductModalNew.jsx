@@ -279,8 +279,8 @@ export default function AddProductModal({ isOpen, onClose, onAdd }) {
     
     onAdd({
       nom: productName,
-      marque: selectedBrand,
-      taille: selectedFormat,
+      marque: selectedBrand || null,
+      volume: selectedFormat || null,
       quantite: selectedQuantity
     })
     
