@@ -588,6 +588,11 @@ export default function Parametres(){
             </div>
           </div>
         </div>
+
+        {/* Version info */}
+        <div className="text-center text-sm text-gray-500 mt-4">
+          Version {typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.1.0'}
+        </div>
       </div>
       {showUploadModal && (
         <UploadFlyerModal
