@@ -12,5 +12,19 @@ export default defineConfig({
   optimizeDeps: {
     include: ['react', 'react-dom'],
     force: true
+  },
+  test: {
+    globals: false,
+    environment: 'node',
+    pool: 'forks',
+    poolOptions: {
+      forks: {
+        singleFork: true,
+        maxForks: 1,
+        minForks: 1
+      }
+    },
+    testTimeout: 10000,
+    hookTimeout: 10000
   }
 })
