@@ -13,6 +13,7 @@ import Magasin from './pages/Magasin'
 import Recurrentes from './pages/Recurrentes'
 import MesListes from './pages/MesListes'
 import Parametres from './pages/Parametres'
+import Statistiques from './pages/Statistiques'
 
 export default function App(){
   const { addToast } = useToast()
@@ -50,6 +51,7 @@ export default function App(){
           <Route path="/recurrentes" element={<Recurrentes/>} />
           <Route path="/mes-listes" element={<MesListes/>} />
           <Route path="/parametres" element={<Parametres/>} />
+          <Route path="/statistiques" element={<Statistiques/>} />
         </Routes>
       </main>
       <BottomNav />
